@@ -1,0 +1,30 @@
+set(SINGLEPLAYER_SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/auction_bot.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/auction_bot.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/auction_http.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/auction_http.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/char_http.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/char_http.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/op_registry.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/op_registry.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/bot_sessions.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/bot_sessions.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/bot_state_cache.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/bot_state_cache.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/config_cache.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/config_cache.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/config_http_server.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/config_http_server.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/lifecycle_hooks.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/lifecycle_hooks.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/login_hooks.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/login_hooks.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/post_tick.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/post_tick.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/job_change.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/packet_registry.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/packet_registry.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/lua_hooks.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/lua_bindings.cpp
+    PARENT_SCOPE
+)

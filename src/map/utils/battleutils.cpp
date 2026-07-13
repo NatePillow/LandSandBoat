@@ -2491,9 +2491,9 @@ uint8 GetHitRateEx(CBattleEntity* PAttacker, CBattleEntity* PDefender, uint8 att
 
     bool hasSneakAttack      = PAttacker->StatusEffectContainer->HasStatusEffect(EFFECT_SNEAK_ATTACK);
     bool hasTrickAttack      = PAttacker->StatusEffectContainer->HasStatusEffect(EFFECT_TRICK_ATTACK);
-    bool isBehind            = behind(PAttacker->loc.p, PDefender->loc.p, 64);
+    //bool isBehind            = behind(PAttacker->loc.p, PDefender->loc.p, 64);
     bool hasAssassin         = PAttacker->hasTrait(TRAIT_ASSASSIN);
-    bool hasValidSneakAttack = hasSneakAttack && isBehind;
+    bool hasValidSneakAttack = hasSneakAttack;// && isBehind;
     bool hasValidTrickAttack = hasTrickAttack && hasAssassin;
 
     if (hasValidSneakAttack || (hasValidTrickAttack && getAvailableTrickAttackChar(PAttacker, PDefender)))
@@ -2537,10 +2537,7 @@ uint8 GetCritHitRate(CBattleEntity* PAttacker, CBattleEntity* PDefender, bool ig
     }
     else if (PAttacker->objtype == TYPE_PC && (!ignoreSneakTrickAttack) && PAttacker->StatusEffectContainer->HasStatusEffect(EFFECT_SNEAK_ATTACK))
     {
-        if (behind(PAttacker->loc.p, PDefender->loc.p, 64) || PAttacker->StatusEffectContainer->HasStatusEffect(EFFECT_HIDE))
-        {
-            critHitRate = 100;
-        }
+        critHitRate = 100;
     }
     else if (PAttacker->objtype == TYPE_PC && PAttacker->GetMJob() == JOB_THF && charutils::hasTrait((CCharEntity*)PAttacker, TRAIT_ASSASSIN) &&
              (!ignoreSneakTrickAttack) && PAttacker->StatusEffectContainer->HasStatusEffect(EFFECT_TRICK_ATTACK))

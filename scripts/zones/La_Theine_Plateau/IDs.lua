@@ -71,6 +71,7 @@ zones[xi.zone.LA_THEINE_PLATEAU] =
         BLOODTEAR         = GetFirstID('Bloodtear_Baldurf'),
         BATTERING_RAM     = GetTableOfIDs('Battering_Ram'),
         NIHNIKNOOVI       = GetFirstID('Nihniknoovi'),
+        SLUMBERING_SAMWELL= GetFirstID('Slumbering_Samwell'),
 
         VOIDWALKER =
         {

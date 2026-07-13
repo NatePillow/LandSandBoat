@@ -1704,6 +1704,12 @@ end
 function CBaseEntity:setRank(rank)
 end
 
+---@param nation integer  -- 0=Sandoria, 1=Bastok, 2=Windurst
+---@param rank integer
+---@return nil
+function CBaseEntity:setRankByNation(nation, rank)
+end
+
 ---@nodiscard
 ---@return integer
 function CBaseEntity:getRankPoints()

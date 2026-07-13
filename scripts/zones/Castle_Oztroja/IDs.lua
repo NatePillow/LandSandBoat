@@ -62,6 +62,7 @@ zones[xi.zone.CASTLE_OZTROJA] =
         MOO_OUZI_THE_SWIFTBLADE = GetFirstID('Moo_Ouzi_the_Swiftblade'),
         QUU_DOMI_THE_GALLANT    = GetFirstID('Quu_Domi_the_Gallant'),
         YAA_HAQA_THE_PROFANE    = GetFirstID('Yaa_Haqa_the_Profane'),
+        LII_JIXA_THE_SOMNOLIST  = GetFirstID('Lii_Jixa_the_Somnolist'),
         YAGUDO_AVATAR           = GetFirstID('Yagudo_Avatar'),
         HUU_XALMO_THE_SAVAGE    = GetFirstID('Huu_Xalmo_the_Savage'),
         MIMIC                   = GetFirstID('Mimic'),

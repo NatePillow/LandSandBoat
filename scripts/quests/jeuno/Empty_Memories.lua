@@ -27,11 +27,20 @@ local rewardItems =
 local memoriesOnEventFinish = function(player, csid, option, npc)
     local rewardItem = quest:getLocalVar(player, 'rewardItem')
 
+    -- Singleplayer over-grant: deliver ALL 6 reward items at once regardless
+    -- of which the player traded. Original gil-cost + trade-confirm apply only
+    -- to the picked item; other 5 are extras.
     if npcUtil.giveItem(player, rewardItem) then
         player:confirmTrade()
 
         if rewardItems[rewardItem].gil then
             player:delGil(rewardItems[rewardItem].gil)
+        end
+
+        for otherRewardItem, _ in pairs(rewardItems) do
+            if otherRewardItem ~= rewardItem then
+                npcUtil.giveItem(player, otherRewardItem)
+            end
         end
 
         if player:getQuestStatus(quest.areaId, quest.questId) == xi.questStatus.QUEST_ACCEPTED then

@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<ashitacast>
+	<settings>
+		<blockresends>false</blockresends>
+		<predictivepet>true</predictivepet>
+		<buffupdate>true</buffupdate>
+		<statusupdate>true</statusupdate>
+		<hpupdate>true</hpupdate>
+		<autoupdate>true</autoupdate>
+	</settings>
+	<sets>
+		<set baseset="Engaged" name="Idle">
+			<head>Emperor Hairpin</head>
+			<ear1>Dodge Earring</ear1>
+			<ear2>Dodge Earring</ear2>
+			<ring1>Warp Ring</ring1>
+			<ring2>Vigor Ring +1</ring2>
+			<back>Nomad's Mantle +1</back>
+			<waist>Warrior's Belt +1</waist>
+			<feet>Strider Boots</feet>
+		</set>
+		<set name="Engaged">
+			<ammo>Acid Bolt</ammo>
+			<head>Voyager Sallet</head>
+			<neck>Peacock Charm</neck>
+			<ear1>Spike Earring</ear1>
+			<ear2>Spike Earring</ear2>
+			<body>Scp. Harness +1</body>
+			<hands>Combat Mittens +1</hands>
+			<ring1>Sniper's Ring +1</ring1>
+			<ring2>Sniper's Ring +1</ring2>
+			<back>Amemet Mantle +1</back>
+			<waist>Speed Belt</waist>
+			<legs>Bravo's Subligar</legs>
+			<feet>Leaping Boots</feet>
+		</set>
+		<set baseset="Engaged" name="DEX">
+			<neck>Spike Necklace</neck>
+			<ear1>Harvest Earring</ear1>
+			<ear2>Heims Earring</ear2>
+			<body>Brigandine +1</body>
+			<ring1>Grace Ring</ring1>
+			<ring2>Grace Ring</ring2>
+			<waist>Mrc.Cpt. Belt</waist>
+		</set>
+		<set baseset="Engaged" name="Ranged">
+			<ammo>Acid Bolt</ammo>
+			<head>Emperor Hairpin</head>
+			<ear1>Drone Earring</ear1>
+			<ear2>Genin Earring</ear2>
+			<body>Noct Doublet +1</body>
+			<hands>Noct Gloves +1</hands>
+			<ring1>Bowyer Ring</ring1>
+			<back>Nomad's Mantle +1</back>
+			<waist>Volant Belt</waist>
+		</set>
+		<set baseset="Engaged" name="AGI">
+			<head>Emperor Hairpin</head>
+			<neck>Rabbit Charm</neck>
+			<ear1>Drone Earring</ear1>
+			<ear2>Genin Earring</ear2>
+			<body>Brigandine +1</body>
+			<ring1>Celerity Ring</ring1>
+			<ring2>Celerity Ring</ring2>
+			<back>Nomad's Mantle +1</back>
+			<waist>Volant Belt</waist>
+		</set>
+		<set name="DEX_20">
+			<neck>Spike Necklace</neck>
+			<body>Garrison Tunica</body>
+			<ring1>Balance Ring +1</ring1>
+			<ring2>Balance Ring +1</ring2>
+			<legs>Garrison Hose</legs>
+			<feet>Leaping Boots</feet>
+		</set>
+		<set baseset="DEX_20" name="DEX_30">
+			<body>Mrc.Cpt. Doublet</body>
+			<legs>Noct Brais +1</legs>
+			<waist>Mrc.Cpt. Belt</waist>
+			<head>Emperor Hairpin</head>
+		</set>
+		<set baseset="DEX_30" name="DEX_40">
+			<ring1>Deft Ring +1</ring1>
+			<ring2>Deft Ring +1</ring2>
+		</set>
+		<set baseset="DEX_40" name="DEX_50">
+			<body>Brigandine +1</body>
+			<ear1>Harvest Earring</ear1>
+		</set>
+		<set baseset="DEX_50" name="DEX_60">
+			<ring1>Grace Ring</ring1>
+			<ring2>Grace Ring</ring2>
+		</set>
+		<set name="AGI_20">
+			<neck>Rabbit Charm</neck>
+			<ring1>Reflex Ring +1</ring1>
+			<ring2>Reflex Ring +1</ring2>
+			<back>Nomad's Mantle +1</back>
+			<feet>Leaping Boots</feet>
+		</set>
+		<set baseset="AGI_20" name="AGI_30">
+			<body>Mrc.Cpt. Doublet</body>
+			<ear2>Genin Earring</ear2>
+			<waist>Mrc.Cpt. Belt</waist>
+			<back>Nomad's Mantle +1</back>
+			<head>Emperor Hairpin</head>
+		</set>
+		<set baseset="AGI_30" name="AGI_40">
+			<ear1>Drone Earring</ear1>
+			<neck>Agile Gorget</neck>
+			<ring1>Alacrity Ring +1</ring1>
+			<ring2>Alacrity Ring +1</ring2>
+		</set>
+		<set baseset="AGI_40" name="AGI_50">
+			<body>Brigandine +1</body>
+			<waist>Volant Belt</waist>
+		</set>
+		<set baseset="AGI_50" name="AGI_60">
+			<ring1>Celerity Ring</ring1>
+			<ring2>Celerity Ring</ring2>
+		</set>
+		<set name="Engaged_20">
+			<neck>Rabbit Charm</neck>
+			<ear1>Bone Earring +1</ear1>
+			<ear2>Bone Earring +1</ear2>
+			<body>Garrison Tunica</body>
+			<hands>Guerilla Gloves</hands>
+			<ring1>Deft Ring +1</ring1>
+			<ring2>Deft Ring +1</ring2>
+			<back>Besieger Mantle</back>
+			<waist>Brave Belt</waist>
+			<feet>Mtt. Leggings +1</feet>
+		</set>
+		<set baseset="Engaged_20" name="Engaged_30">
+			<head>Emperor Hairpin</head>
+			<neck>Spike Necklace</neck>
+			<ear1>Beetle Earring +1</ear1>
+			<ear2>Beetle Earring +1</ear2>
+			<hands>Combat Mittens +1</hands>
+			<back>Exact. Mantle +1</back>
+			<waist>Mrc.Cpt. Belt</waist>
+		</set>
+		<set baseset="Engaged_30" name="Engaged_40">
+			<neck>Peacock Charm</neck>
+			<ring1>Sniper's Ring +1</ring1>
+			<ring2>Sniper's Ring +1</ring2>
+		</set>
+		<set baseset="Engaged_40" name="Engaged_50">
+			<ear1>Tor. Earring +1</ear1>
+			<ear2>Tor. Earring +1</ear2>
+			<body>Brigandine +1</body>
+			<waist>Headlong Belt</waist>
+			<legs>Bravo's Subligar</legs>
+		</set>
+		<set baseset="Engaged_50" name="Engaged_60">
+			<ear1>Spike Earring</ear1>
+			<ear2>Spike Earring</ear2>
+			<body>Scp. Harness +1</body>
+			<waist>Speed Belt</waist>
+		</set>
+		<set name="RACC_20"/>
+		<set baseset="RACC_20" name="RACC_30">
+			<head>Emperor Hairpin</head>
+			<ear1>Drone Earring</ear1>
+			<ear2>Genin Earring</ear2>
+			<body>Noct Doublet +1</body>
+			<hands>Noct Gloves +1</hands>
+			<ring1>Bowyer Ring</ring1>
+			<back>Nomad's Mantle +1</back>
+			<waist>Mrc.Cpt. Belt</waist>
+		</set>
+		<set baseset="RACC_30" name="RACC_40">
+			<neck>Peacock Charm</neck>
+			<ring1>Sniper's Ring +1</ring1>
+			<ring2>Sniper's Ring +1</ring2>
+		</set>
+		<set baseset="RACC_40" name="RACC_50">
+			<waist>Volant Belt</waist>
+		</set>
+		<set baseset="RACC_50" name="RACC_60"/>
+		<set baseset="Idle" name="Gearlock">
+			<head>Emperor Hairpin</head>
+			<body>Scp. Harness +1</body>
+			<hands>Scentless Armlets</hands>
+			<legs>Bravo's Subligar</legs>
+			<feet>Leaping Boots</feet>
+		</set>
+	</sets>
+	<gearlock>
+		<equip set="Gearlock"/>
+	</gearlock>
+	<variables>
+		<var name="autows">0</var>
+	</variables>
+	<inputcommands>
+		<cmd input="/wson">
+			<setvar name="autows" values="1"/>
+			<addtochat colo="50">Auto WS enabled!</addtochat>
+		</cmd>
+		<cmd input="/wsoff">
+			<setvar name="autows" values="0"/>
+			<addtochat colo="50">Auto WS disabled!</addtochat>
+		</cmd>
+	</inputcommands>
+	<idlegear>
+		<if p_status="engaged">
+			<equip set="Engaged"/>
+		</if>
+		<else>
+			<equip set="Idle"/>
+		</else>
+	</idlegear>
+	<weaponskill>
+		<equip set="DEX"/>
+	</weaponskill>
+	<preranged/>
+	<midranged>
+		<equip set="Ranged"/>
+	</midranged>
+</ashitacast>

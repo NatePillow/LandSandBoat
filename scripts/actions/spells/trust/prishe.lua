@@ -13,6 +13,10 @@ spellObject.onSpellCast = function(caster, target, spell)
 end
 
 spellObject.onMobSpawn = function(mob)
+    -- SINGLEPLAYER BEGIN
+    if xi.singleplayer and xi.singleplayer.trust
+       and xi.singleplayer.trust.maybeOverrideSpawn(mob, 'PRISHE') then return end
+    -- SINGLEPLAYER END
     xi.trust.teamworkMessage(mob, {
         [xi.magic.spell.ULMIA] = xi.trust.messageOffset.TEAMWORK_1,
         [xi.magic.spell.CHERUKIKI] = xi.trust.messageOffset.TEAMWORK_2,

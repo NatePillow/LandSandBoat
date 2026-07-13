@@ -34,6 +34,7 @@ zones[xi.zone.PALBOROUGH_MINES] =
         ZI_GHI_BONEEATER  = GetFirstID('ZiGhi_Boneeater'),
         BEHYA_HUNDREDWALL = GetFirstID('BeHya_Hundredwall'),
         NI_GHU_NESTFENDER = GetFirstID('NiGhu_Nestfender'),
+        QUVHO_DEATHHURLER = GetFirstID('QuVho_Deathhurler'),
     },
     npc =
     {

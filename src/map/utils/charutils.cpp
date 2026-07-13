@@ -36,6 +36,8 @@
 #include "ai/states/item_state.h"
 #include "ai/states/range_state.h"
 
+#include "singleplayer/lifecycle_hooks.h" // SINGLEPLAYER
+
 #include "packets/char_status.h"
 #include "packets/char_sync.h"
 #include "packets/s2c/0x009_message.h"
@@ -2667,10 +2669,20 @@ auto hasValidStyle(CCharEntity* PChar, const CItemEquipment* PItem, const CItemE
 {
     if (AItem && PItem)
     {
+        // SINGLEPLAYER: the HasItem(PChar, AItem->getID()) gate that lived
+        // on every return below was retail's "you can only lockstyle to
+        // items you own" rule. In the singleplayer fork the autoequip
+        // <gearlock> section drives the lock, and the user expects their
+        // intended look regardless of which gearlock items happen to be
+        // in the active char's inventory at the moment of /load. Dropping
+        // the HasItem check lets the lock land for any valid equipment
+        // model; canEquipItemOnAnyJob still gates job legality so we
+        // don't render wholly impossible looks.
+
         // Shield special case
         if (AItem->IsShield() && PItem->IsShield())
         {
-            return HasItem(PChar, AItem->getID()) && canEquipItemOnAnyJob(PChar, AItem);
+            return canEquipItemOnAnyJob(PChar, AItem);
         }
 
         const auto* PWeapon = dynamic_cast<const CItemWeapon*>(PItem);
@@ -2680,12 +2692,12 @@ auto hasValidStyle(CCharEntity* PChar, const CItemEquipment* PItem, const CItemE
         // It is not technically a Wind Instrument, but it can lockstyle one.
         if (PWeapon && AItem->getID() == MARVELOUS_CHEER && PWeapon->getSkillType() == SKILL_WIND_INSTRUMENT)
         {
-            return HasItem(PChar, AItem->getID());
+            return true;
         }
 
         if (PWeapon && AWeapon && PWeapon->getSkillType() == AWeapon->getSkillType())
         {
-            return HasItem(PChar, AItem->getID()) && canEquipItemOnAnyJob(PChar, AItem);
+            return canEquipItemOnAnyJob(PChar, AItem);
         }
     }
     return false;
@@ -2693,6 +2705,18 @@ auto hasValidStyle(CCharEntity* PChar, const CItemEquipment* PItem, const CItemE
 
 void SetStyleLock(CCharEntity* PChar, bool isStyleLocked)
 {
+    // DIAGNOSTIC (gearlock investigation, 2026-06-21): log every call
+    // so we can see WHO is flipping style lock off on login. Remove this
+    // block once we've identified the trigger and decided whether it's
+    // worth suppressing for the gearlock workflow. Prints char name,
+    // current → new state, and uses ShowInfo so it lands in normal logs.
+    if (PChar != nullptr)
+    {
+        ShowInfo(fmt::format("[STYLELOCK] SetStyleLock({}, was={}, becoming={})",
+                              PChar->getName(),
+                              PChar->getStyleLocked() ? "true" : "false",
+                              isStyleLocked ? "true" : "false"));
+    }
     if (isStyleLocked)
     {
         for (uint8 i = 0; i < SLOT_LINK1; i++)
@@ -2806,7 +2830,13 @@ void UpdateArmorStyle(CCharEntity* PChar, uint8 equipSlotID)
     const CItemEquipment* appearance      = xi::items::lookup<CItemEquipment>(itemID);
     uint16                appearanceModel = 0;
 
-    if (appearance && HasItem(PChar, itemID))
+    // SINGLEPLAYER: dropped the HasItem(PChar, itemID) gate. See the
+    // matching comment in hasValidStyle above — autoequip's gearlock is
+    // the source of truth for the locked look here, and requiring the
+    // item be physically in inventory broke headless bots whose gearlock
+    // set names items they don't own and primaries who don't keep their
+    // fashion set in their bag.
+    if (appearance)
     {
         appearanceModel = appearance->getModelId();
     }
@@ -3818,6 +3848,22 @@ int16 ArtsBonusSkill(CCharEntity* PChar, SKILLTYPE SkillID)
  *                                                                       *
  ************************************************************************/
 
+// SINGLEPLAYER (#199): max job level across JOB_WAR..JOB_RUN. Used to derive
+// crafting skill caps from combat progression. Iterates jobs.job[] which is
+// the stored per-job level (loaded from DB columns war/mnk/whm/.../run), so
+// the result is "highest job ever leveled" — independent of currently
+// equipped main/sub. JOB_MON (23) is excluded; it's not a full job.
+uint8 getHighestJobLevel(const CCharEntity* PChar)
+{
+    if (PChar == nullptr) { return 1; }
+    uint8 maxLvl = 1;
+    for (uint8 j = JOB_WAR; j <= JOB_RUN; ++j)
+    {
+        if (PChar->jobs.job[j] > maxLvl) { maxLvl = PChar->jobs.job[j]; }
+    }
+    return maxLvl;
+}
+
 // TODO: This whole thing should eventually get a refactored to be less dependent on arbitrary ordering of modifier IDs and conditionals on skill ranges.
 void BuildingCharSkillsTable(CCharEntity* PChar)
 {
@@ -3989,11 +4035,28 @@ void BuildingCharSkillsTable(CCharEntity* PChar)
         }
     }
 
+    // SINGLEPLAYER (#199): augment the per-rank cap with two singleplayer-fork
+    // caps for crafting skills (49-56):
+    //   - 2x highest job level (CRAFT_CAP_2X_HIGHEST_JOB)
+    //   - hard cap by display value (CRAFT_SKILL_HARD_CAP)
+    // Fishing (48) and synergy (57) are intentionally unaffected.
+    const bool   craftCap2x      = settings::get<bool>("singleplayer.CRAFT_CAP_2X_HIGHEST_JOB");
+    const uint16 craftHardCapDsp = settings::get<uint16>("singleplayer.CRAFT_SKILL_HARD_CAP");
+    const uint16 craftHardCap    = craftHardCapDsp * 10; // settings is display unit; storage is ×10
+    const uint16 craftJobCap     = static_cast<uint16>(getHighestJobLevel(PChar) * 20);
+
     for (int32 i = 48; i < 58; ++i)
     {
         PChar->WorkingSkills.skill[i] = (PChar->RealSkills.skill[i] / 10) * 0x20 + PChar->RealSkills.rank[i];
 
-        if ((PChar->RealSkills.rank[i] + 1) * 100 <= PChar->RealSkills.skill[i])
+        uint16 maxSkill = (PChar->RealSkills.rank[i] + 1) * 100;
+        if (i >= SKILL_WOODWORKING && i <= SKILL_COOKING)
+        {
+            if (craftCap2x)               { maxSkill = std::min(maxSkill, craftJobCap); }
+            if (craftHardCapDsp > 0)      { maxSkill = std::min(maxSkill, craftHardCap); }
+        }
+
+        if (maxSkill <= PChar->RealSkills.skill[i])
         {
             PChar->WorkingSkills.skill[i] += 0x8000;
         }
@@ -8073,6 +8136,8 @@ void removeCharFromZone(CCharEntity* PChar)
 
     if (PChar->status == STATUS_TYPE::SHUTDOWN)
     {
+        singleplayer::onPrimaryRemovingFromZone(PChar); // SINGLEPLAYER
+
         if (PChar->PParty != nullptr)
         {
             if (PChar->PParty->m_PAlliance != nullptr)

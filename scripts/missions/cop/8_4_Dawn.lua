@@ -33,12 +33,17 @@ local ringOnEventUpdate = function(player, csid, option, npc)
 end
 
 local ringOnEventFinish = function(player, csid, option, npc)
-    if
-        option >= 5 and
-        option <= 7 and
-        npcUtil.giveItem(player, ringItems[option - 4])
-    then
-        mission:setVar(player, 'firstRing', 0)
+    if option >= 5 and option <= 7 then
+        -- Singleplayer over-grant: deliver ALL 3 rings at once.
+        local ok = true
+        for _, ringId in ipairs(ringItems) do
+            if not npcUtil.giveItem(player, ringId) then
+                ok = false
+            end
+        end
+        if ok then
+            mission:setVar(player, 'firstRing', 0)
+        end
     end
 end
 

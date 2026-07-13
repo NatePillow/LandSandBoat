@@ -93,6 +93,17 @@ CMagicState::CMagicState(CBattleEntity* PEntity, uint16 targid, SpellID spellid,
         throw CStateInitException(std::make_unique<GP_SERV_COMMAND_BATTLE_MESSAGE>(m_PEntity, PTarget, static_cast<uint16>(m_PSpell->getID()), 0, errorMsg == 1 ? MsgBasic::CannotCastSpell : static_cast<MsgBasic>(errorMsg)));
     }
 
+    // SINGLEPLAYER BEGIN
+    // Fire MAGIC_STATE_ENTER BEFORE CalculateSpellCastTime so listeners (e.g.
+    // ai_equip_swap.lua) can swap to premagic gear and have Fast Cast / Cast
+    // Time Reduction mods take effect on THIS cast's cast time. The Lua call
+    // is synchronous (charutils::EquipItem applies mods in-line), so when
+    // this returns, the entity's mod table reflects the premagic gear and
+    // the cast time math below picks up the reduced value. MAGIC_START fires
+    // later (line below) for the midmagic swap on the damage/effect calc.
+    m_PEntity->PAI->EventHandler.triggerListener("MAGIC_STATE_ENTER", m_PEntity, PTarget, m_PSpell.get());
+    // SINGLEPLAYER END
+
     m_castTime = battleutils::CalculateSpellCastTime(m_PEntity, this);
     m_startPos = m_PEntity->loc.p;
 
@@ -403,7 +414,14 @@ bool CMagicState::CanCastSpell(CBattleEntity* PTarget, bool isEndOfCast)
         }
     }
 
-    if (!isEndOfCast && m_PEntity->objtype == TYPE_PC && m_PEntity->loc.zone->CanUseMisc(MISC_LOS_PLAYER_BLOCK) && !m_PEntity->CanSeeTarget(PTarget))
+    // SINGLEPLAYER: headless bots skip the LoS gate. Range alone is the
+    // authoritative check for them. The intent of MISC_LOS_PLAYER_BLOCK is
+    // to prevent retail cheese (casting from inside terrain, etc.) which
+    // headless can't abuse — they're just bots fighting whatever the
+    // primary told them to. Bypassing here smooths over rough-edge cases
+    // where a bot's slot-ring position has them slightly clipped into
+    // geometry but they're well within spell range.
+    if (!isEndOfCast && m_PEntity->objtype == TYPE_PC && !static_cast<CCharEntity*>(m_PEntity)->isHeadless() && m_PEntity->loc.zone->CanUseMisc(MISC_LOS_PLAYER_BLOCK) && !m_PEntity->CanSeeTarget(PTarget))
     {
         m_errorMsg = std::make_unique<GP_SERV_COMMAND_BATTLE_MESSAGE>(m_PEntity, PTarget, static_cast<uint16>(m_PSpell->getID()), 0, MsgBasic::CannotPerformAction);
         return false;

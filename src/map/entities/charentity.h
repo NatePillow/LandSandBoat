@@ -244,6 +244,24 @@ enum class CharSize : uint8
     Large  = 2,
 };
 
+// SINGLEPLAYER BEGIN
+// Server-side bot AI activation level.
+// Headless chars are always Full. Main chars default to Off and can be set
+// via 0x176 SET_BOT_MODE to:
+//   Off          — AI completely paused (no combat, no movement)
+//   CombatOnly   — combat AI on, movement off ("Stop Movement" button)
+//   Full         — combat + movement on ("Start Actions" button)
+//   MovementOnly — combat AI off, movement on ("Stop Actions" button)
+// Player input still wins via the yield window in Full / MovementOnly.
+enum class BotMode : uint8
+{
+    Off          = 0,
+    CombatOnly   = 1,
+    Full         = 2,
+    MovementOnly = 3,
+};
+// SINGLEPLAYER END
+
 enum class CharFace : uint8
 {
     Face1A = 0,
@@ -284,16 +302,28 @@ typedef std::map<uint32, CBaseEntity*> SpawnIDList_t;
 typedef std::vector<EntityID_t>        BazaarList_t;
 
 struct ItemLocation
-{
-    CONTAINER_ID Container{};
-    uint8        Slot{};
-};
+  { 
+      CONTAINER_ID Container{};
+      uint8        Slot{};
+  };
 
-constexpr uint8 EquipSlotCount = 18;
+  constexpr uint8 EquipSlotCount = 18;
+  
+  // SINGLEPLAYER BEGIN
+  // Forward-declared helper that needs access to CCharEntity's private state
+  // (dataToPersist, m_nextHeadlessPersist, m_botMode). Friend declaration below
+  // preserves encapsulation for upstream code while letting the extracted
+  // singleplayer::onCharPostTick body live outside this file.
+  namespace singleplayer { void onCharPostTick(class CCharEntity*, timer::time_point); }
+  // SINGLEPLAYER END
+  
+  class CCharEntity : public CBattleEntity
+  {
+      friend class CBattleEntity;
+      // SINGLEPLAYER BEGIN
+      friend void singleplayer::onCharPostTick(CCharEntity*, timer::time_point);
+      // SINGLEPLAYER END
 
-class CCharEntity : public CBattleEntity
-{
-    friend class CBattleEntity;
 
 public:
     uint32 accid{}; // Account ID associated with the character.
@@ -609,6 +639,46 @@ public:
     timer::time_point m_AHHistoryTimestamp;
     timer::time_point m_DeathTimestamp;
     timer::time_point m_deathSyncTime{}; // Timer used for sending an update packet at a regular interval while the character is dead
+    // SINGLEPLAYER BEGIN
+    // Bot AI activation level. Defaults to Off for normal chars; createHeadlessSession
+    // sets headless chars to Full. PostTick gates the OnBotTick Lua callback on this.
+    BotMode m_botMode = BotMode::Off;
+
+    // Headless mob-aggro toggle. 0 = Off (trust-like: mobs ignore this char for
+    // proximity aggro decisions — read by singleplayer::shouldSkipMobAggro).
+    // 1 = Full (mobs aggro headless like real players). 2 = Engaged (invisible
+    // to aggro/link until this char has a battle target, then vanilla rules).
+    // Cascaded from the alliance-level addon UI control via 0x176
+    // SET_AGGRO_MODE; replaces the old static singleplayer.HEADLESS_MOB_AGGRO
+    // setting so users can flip mode at runtime. New values can be added
+    // (sight-only, sound-only, magic-only, etc.) without breaking wire compat
+    // — just expand the enum here, the addon picker, and shouldSkipMobAggro's
+    // read.
+    uint8 m_aggroMode = 0;
+
+    // Stamped by the 0x015 position heartbeat handler when the player's position
+    // actually changes (vs same-position heartbeat). Used by Full-mode AI movement
+    // to yield to player input — the AI only walks main char when this is stale.
+    timer::time_point m_lastClientMoveInput{};
+
+    // Headless chars have no incoming packets to dirty dataToPersist, so PersistData()
+    // is a no-op for them on the standard timer. PostTick forces a save at this cadence
+    // when PSession->parentCharId != 0. Staggered per-spawn to avoid simultaneous DB writes.
+    timer::time_point m_nextHeadlessPersist{};
+
+    // Set true at the very end of createHeadlessSession, after the session is
+    // installed and the AI container is fully wired. PostTick's bot-AI branch
+    // gates on this so the Lua-side bot tick can't run against a partially-
+    // initialized entity. Multi-bot spawns (autospawn.lua / formAllianceFromSpec)
+    // create and tick bots in tight succession; without the gate the first
+    // zone tick after IncreaseZoneCounter would invoke OnBotTick → Lua →
+    // bot:isEngaged() against an AI container whose backpointer hasn't been
+    // settled yet, segfaulting on PEntity->animation.
+    //
+    // Defaults to true for normal chars: the gate is only meaningful for
+    // headless. Real-client chars never go through createHeadlessSession.
+    bool m_spawnFinalized = true;
+    // SINGLEPLAYER END
 
     uint8      m_hasTractor;        // checks if player has tractor already
     uint8      m_hasRaise;          // checks if player has raise already
@@ -728,6 +798,28 @@ public:
     void clearTriggerAreas();
 
     auto isInEvent() const -> bool;
+
+    // SINGLEPLAYER BEGIN
+    // True iff this CCharEntity is a singleplayer-fork headless bot — i.e.,
+    // it has a session and that session is owned by a primary char. Used by
+    // anything that wants to mirror trust-like behavior (e.g., suppressing
+    // proximity mob aggro when m_aggroMode == 0).
+    auto isHeadless() const -> bool;
+
+    // Change main job. Mirrors retail moogle / Monstrosity job-change: unlocks
+    // the requested job, switches to it, rebuilds equip mods + skills + abilities
+    // + traits + recasts, refills HP/MP, persists to DB, and pushes the standard
+    // S2C update set to the session. Used by CLuaBaseEntity::changeJob and the
+    // AutoMog 0x19C handler. Caller is responsible for any "is this allowed"
+    // gating (engaged in combat, job locked, etc.).
+    void changeMJob(uint8 newJob);
+
+    // Change subjob. Lighter than changeMJob: unlocks, sets, refreshes BLU
+    // spell state + automaton, calls charutils::UpdateSubJob. Used by
+    // CLuaBaseEntity::changesJob and the AutoMog 0x19C handler.
+    void changeSJob(uint8 newJob);
+    // SINGLEPLAYER END
+
     bool isNpcLocked();
     void queueEvent(EventInfo* eventToQueue);
     void endCurrentEvent();

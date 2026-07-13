@@ -270,3 +270,6 @@ clang_tidy_summary.md
 # YAML codegen
 *.codegen.json
 *.codegen.lua
+
+
+tools/*

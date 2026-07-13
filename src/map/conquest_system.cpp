@@ -542,7 +542,8 @@ uint8 GetBalance(uint8 sandoria, uint8 bastok, uint8 windurst, uint8 sandoria_pr
         }
     }
 
-    return ranking;
+    //return ranking;
+    return 21;
 }
 
 uint8 GetBalance()

@@ -1,0 +1,17 @@
+{
+    "alliance": [
+        {
+            "ptLeader": "Brutus",
+            "members": ["Minerva", "Zariah"]
+        }
+    ],
+    "roles": {
+        "tank":   ["Brutus"],
+        "rdm":    ["Minerva"],
+        "melee":  ["Zariah"]
+    },
+    "solo": {
+        "Brutus": "Seraph Blade",
+        "Zariah": "Dancing Edge"
+    }
+}

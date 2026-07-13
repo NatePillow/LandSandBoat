@@ -57,7 +57,15 @@ CWeaponSkillState::CWeaponSkillState(CBattleEntity* PEntity, uint16 targid, uint
         }
     }
 
-    if (!m_PEntity->CanSeeTarget(PTarget))
+    // SINGLEPLAYER: headless bots skip the LoS gate. The WS LoS check is
+    // engine-wide (no MISC_LOS_PLAYER_BLOCK zone gate), so without this
+    // bypass any bot slightly clipped into geometry gets their WS silently
+    // rejected — which is exactly what was biting Malfina in the
+    // "stuck between mob and wall, WS not firing" log. Range alone is
+    // sufficient gating for headless; primary PCs still get the LoS check.
+    const auto* PCharCaster = dynamic_cast<const CCharEntity*>(m_PEntity);
+    const bool  isHeadlessBot = PCharCaster != nullptr && PCharCaster->isHeadless();
+    if (!isHeadlessBot && !m_PEntity->CanSeeTarget(PTarget))
     {
         throw CStateInitException(std::make_unique<GP_SERV_COMMAND_BATTLE_MESSAGE>(m_PEntity, PTarget, 0, 0, MsgBasic::CannotPerformAction));
     }
@@ -82,6 +90,17 @@ CWeaponSkillState::CWeaponSkillState(CBattleEntity* PEntity, uint16 targid, uint
     };
 
     m_PEntity->loc.zone->PushPacket(m_PEntity, CHAR_INRANGE_SELF, std::make_unique<GP_SERV_COMMAND_BATTLE2>(action));
+
+    // SINGLEPLAYER BEGIN
+    // Fire WEAPONSKILL_STATE_ENTER so listeners (e.g. ai_equip_swap.lua) can
+    // hook the start of the WS — mirrors the mob/pet WS path which emits this
+    // in the same place. Without this, Lua-side gear swap for manual player
+    // WSes (clicked from the menu, not driven by bot AI) has no pre-WS event
+    // to attach to and damage resolves in whatever gear they were standing
+    // in. The bot-AI path swaps via ai_ability.use_ws → equip_weaponskill
+    // before calling bot:weaponSkill(), so this is the manual-play fix.
+    m_PEntity->PAI->EventHandler.triggerListener("WEAPONSKILL_STATE_ENTER", m_PEntity, m_PSkill->getID());
+    // SINGLEPLAYER END
 }
 
 CWeaponSkill* CWeaponSkillState::GetSkill()

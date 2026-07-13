@@ -34,8 +34,9 @@
 #include "utils/charutils.h"
 #include "utils/petutils.h"
 
-MapSessionContainer::MapSessionContainer(Scheduler& scheduler)
+MapSessionContainer::MapSessionContainer(Scheduler& scheduler, MapConfig config)
 : scheduler_(scheduler)
+, config_(config)
 {
 }
 
@@ -210,6 +211,52 @@ void MapSessionContainer::cleanupSessions(IPP mapIPP)
 
         auto* PChar = map_session_data->PChar.get();
         auto  now   = timer::now();
+
+        // SINGLEPLAYER BEGIN: headless sessions cascade off their parent — substitute
+        // parent's last_update for the timeout check, skip the linkdead intermediate
+        // (no socket), erase immediately on parent loss. Lives inline because it
+        // consumes the iterator.
+        if (map_session_data->parentCharId != 0)
+        {
+            MapSession* parent       = getSessionByCharId(map_session_data->parentCharId);
+            const bool  parentGone   = (parent == nullptr);
+            const bool  parentStale  = !parentGone && (now > parent->last_update + std::chrono::seconds(timeoutSetting));
+
+            if (parentGone || parentStale)
+            {
+                if (PChar != nullptr)
+                {
+                    ShowDebug(fmt::format("Clearing headless session for: '{}' (parent charId {} {})",
+                                          PChar->name,
+                                          map_session_data->parentCharId,
+                                          parentGone ? "missing" : "stale"));
+
+                    if (PChar->PPet != nullptr && PChar->PPet->objtype == TYPE_MOB)
+                    {
+                        petutils::DespawnPet(PChar);
+                    }
+
+                    PChar->status = STATUS_TYPE::SHUTDOWN;
+                    charutils::removeCharFromZone(PChar);
+
+                    // Drop the synthetic accounts_sessions row written by
+                    // createHeadlessSession. ON DELETE CASCADE on
+                    // accounts_parties.charid pulls the party row too.
+                    db::preparedStmt("DELETE FROM accounts_sessions WHERE charid = ?",
+                                     map_session_data->charID);
+
+                    map_session_data->PChar.reset();
+                }
+
+                sessions_.erase(it++);
+                continue;
+            }
+
+            // Parent still healthy — headless ticks on.
+            ++it;
+            continue;
+        }
+        // SINGLEPLAYER END
 
         if (now > map_session_data->last_update + 5s)
         {
@@ -394,3 +441,7 @@ void MapSessionContainer::destroyPendingSession(uint32 charId)
         pending_sessions_.erase(charId);
     }
 }
+
+// SINGLEPLAYER: destroyHeadlessForParent, destroyHeadlessByCharId,
+// moveHeadlessToPrimaryZone, forEachOwnedHeadless, setBotModeForOwnedBots
+// definitions live in src/map/singleplayer/bot_sessions.cpp.

@@ -858,6 +858,13 @@ void handleSynthSuccess(CCharEntity* PChar)
     RoeDatagramList roeSynthResult({ roeItemId, roeSkillType });
 
     roeutils::event(ROE_EVENT::ROE_SYNTHSUCCESS, PChar, roeSynthResult);
+
+    // SINGLEPLAYER: notify Lua of the finished synth so the bot AI can react
+    // (alliance-wide HQ-clap emote via bots_emote.onSynthFinish). craftState.result()
+    // carries the original SYNTHESIS_* tier (1=success, 2=HQ, 3=HQ2, 4=HQ3) —
+    // the Lua side decides whether HQ tier is interesting. (Was m_synthResult
+    // pre-rebase; upstream moved synth result tracking into CraftState.)
+    luautils::OnSynthFinish(PChar, craftState.result());
 }
 
 // Used in: sendSynthDone
@@ -912,6 +919,19 @@ void doSynthSkillUp(CCharEntity* PChar)
         }
 
         uint16 maxSkill  = (PChar->RealSkills.rank[skillID] + 1) * 100; // Skill cap, depending on rank
+        // SINGLEPLAYER (#199): augment with 2x-highest-job cap and hard cap.
+        // Loop is already scoped to skillID in [SKILL_WOODWORKING..SKILL_COOKING]
+        // (line 967), so no need to gate by id here. Lowering maxSkill makes
+        // the existing `charSkill >= maxSkill` skip below trip earlier, and
+        // makes the skillUpAmount clamp at line 1114 honor the tighter cap.
+        if (settings::get<bool>("singleplayer.CRAFT_CAP_2X_HIGHEST_JOB"))
+        {
+            maxSkill = std::min<uint16>(maxSkill, charutils::getHighestJobLevel(PChar) * 20);
+        }
+        if (const uint16 hardCapDsp = settings::get<uint16>("singleplayer.CRAFT_SKILL_HARD_CAP"); hardCapDsp > 0)
+        {
+            maxSkill = std::min<uint16>(maxSkill, static_cast<uint16>(hardCapDsp * 10));
+        }
         uint16 charSkill = PChar->RealSkills.skill[skillID];            // Compare against real character skill, without image support, gear or moghancements
 
         // We don't skill Up if the involved skill is caped (As a fail-safe measure, we also check if a naughty GM has set its skill over cap aswell)
@@ -1188,6 +1208,58 @@ void sendSynthDone(CCharEntity* PChar)
     PChar->animation = ANIMATION_NONE;
     PChar->updatemask |= UPDATE_HP;
     PChar->pushPacket<CCharStatusPacket>(PChar);
+}
+
+// Bypasses startSynth's animation/state-machine path: resolves the recipe,
+// claims ingredients, rolls success/fail, and commits the transaction inline
+// so the caller's bag updates within the same packet response. Used by
+// 0x19A AUTOMOG_SYNTH for headless-bot crafting. Cooldown is short (200ms)
+// since there's no animation to wait on; bag-state and SynthTransaction
+// idempotency protect against rapid-fire dupe attempts beyond that.
+void doInstantSynth(CCharEntity* PChar, const SynthOffer& offer)
+{
+    if (PChar->m_LastSynthTime + 200ms > timer::now())
+    {
+        PChar->pushPacket<GP_SERV_COMMAND_BATTLE_MESSAGE>(PChar, PChar, 0, 0, MsgBasic::WaitLonger);
+        return;
+    }
+
+    PChar->m_LastSynthTime = timer::now();
+
+    if (!resolveRecipe(PChar, offer))
+    {
+        return;
+    }
+
+    auto synthTransaction = SynthTransaction::start(PChar, offer);
+    if (!synthTransaction)
+    {
+        ShowWarningFmt("doInstantSynth: failed to claim ingredients for {}", PChar->getName());
+        PChar->pushPacket<GP_SERV_COMMAND_COMBINE_ANS>(PChar, SynthesisResult::CancelBadRecipe);
+        return;
+    }
+
+    PChar->addTransaction(std::move(synthTransaction))->consumeCrystal();
+
+    handleSynthResult(PChar);
+
+    if (PChar->craftState().result() == SYNTHESIS_FAIL)
+    {
+        handleSynthFail(PChar);
+    }
+    else
+    {
+        handleSynthSuccess(PChar);
+    }
+
+    doSynthSkillUp(PChar);
+
+    auto* tx = PChar->activeTransaction<SynthTransaction>();
+    if (tx)
+    {
+        std::ignore = tx->commit();
+        PChar->removeTransaction(tx);
+    }
 }
 
 void doSynthCriticalFail(CCharEntity* PChar)

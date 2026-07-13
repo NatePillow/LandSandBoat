@@ -33,7 +33,7 @@ zones[xi.zone.PSOXJA] =
     },
     mob =
     {
-        GYRE_CARLIN             = GetFirstID('Gyre-Carlin'),
+        GYRE_CARLIN             = 16814331,--GetFirstID('Gyre-Carlin'),
         GARGOYLE_OFFSET         = GetFirstID('Gargoyle'),
         NUNYUNUWI               = GetFirstID('Nunyunuwi'),
         GOLDEN_TONGUED_CULBERRY = GetFirstID('Golden-Tongued_Culberry'),

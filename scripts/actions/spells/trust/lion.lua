@@ -13,6 +13,10 @@ spellObject.onSpellCast = function(caster, target, spell)
 end
 
 spellObject.onMobSpawn = function(mob)
+    -- SINGLEPLAYER BEGIN
+    if xi.singleplayer and xi.singleplayer.trust
+       and xi.singleplayer.trust.maybeOverrideSpawn(mob, 'LION') then return end
+    -- SINGLEPLAYER END
     -- TODO: Trust Synergy (Aldo/Lion/Zeid)
     -- https://www.bg-wiki.com/ffxi/Cipher:_Lion
 

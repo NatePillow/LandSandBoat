@@ -71,6 +71,13 @@ zones[xi.zone.THE_ELDIEME_NECROPOLIS] =
         MIMIC               = GetFirstID('Mimic'),
         APPARATUS_ELEMENTAL = 17576271,
         NAMORODO            = GetFirstID('Namorodo'),
+        SKULL_OF_ENVY      = GetFirstID('Skull_of_Envy'),
+        SKULL_OF_GLUTTONY  = GetFirstID('Skull_of_Gluttony'),
+        SKULL_OF_GREED     = GetFirstID('Skull_of_Greed'),
+        SKULL_OF_LUST      = GetFirstID('Skull_of_Lust'),
+        SKULL_OF_PRIDE     = GetFirstID('Skull_of_Pride'),
+        SKULL_OF_SLOTH     = GetFirstID('Skull_of_Sloth'),
+        SKULL_OF_WRATH     = GetFirstID('Skull_of_Wrath'),
     },
 
     npc =

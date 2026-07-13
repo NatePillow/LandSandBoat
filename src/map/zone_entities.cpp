@@ -21,6 +21,7 @@
 
 #include "zone_entities.h"
 #include "common/utils.h"
+#include "singleplayer/lifecycle_hooks.h" // SINGLEPLAYER
 #include "enmity_container.h"
 #include "instance.h"
 #include "latent_effect_container.h"
@@ -794,6 +795,8 @@ void CZoneEntities::SpawnMOBs(CCharEntity* PChar)
             {
                 return;
             }
+
+            if (singleplayer::shouldSkipMobAggro(PChar)) { return; } // SINGLEPLAYER
 
             // checking monsters night/daytime sleep is already taken into account in the CurrentAction check, because monsters don't move in their sleep
             const EMobDifficulty mobCheck = charutils::CheckMob(PChar->GetMLevel(), PCurrentMob);

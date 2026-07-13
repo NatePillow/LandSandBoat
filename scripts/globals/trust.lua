@@ -292,9 +292,9 @@ xi.trust.canCast = function(caster, spell, notAllowedTrustIds)
     end
 
     -- Trusts not allowed in an alliance
-    if caster:checkSoloPartyAlliance() == 2 then
-        return xi.msg.basic.TRUST_NO_CAST_TRUST
-    end
+    --if caster:checkSoloPartyAlliance() == 2 then
+    --    return xi.msg.basic.TRUST_NO_CAST_TRUST
+    --end
 
     -- Trusts only allowed in certain zones (Remove this for trusts everywhere)
     if not caster:canUseMisc(xi.zoneMisc.TRUST) then
@@ -315,17 +315,17 @@ xi.trust.canCast = function(caster, spell, notAllowedTrustIds)
     end
 
     -- Block summoning trusts if someone recently joined party (120s)
-    local lastPartyMemberAddedTime = caster:getPartyLastMemberJoinedTime()
-    if GetSystemTime() - lastPartyMemberAddedTime < 120 then
-        caster:messageSystem(xi.msg.system.TRUST_DELAY_NEW_PARTY_MEMBER)
-        return -1
-    end
+    --local lastPartyMemberAddedTime = caster:getPartyLastMemberJoinedTime()
+    --if GetSystemTime() - lastPartyMemberAddedTime < 120 then
+    --    caster:messageSystem(xi.msg.system.TRUST_DELAY_NEW_PARTY_MEMBER)
+    --    return -1
+    --end
 
     -- Trusts cannot be summoned if you have hate
-    if caster:hasEnmity() then
-        caster:messageSystem(xi.msg.system.TRUST_NO_ENMITY)
-        return -1
-    end
+    --if caster:hasEnmity() then
+    --    caster:messageSystem(xi.msg.system.TRUST_NO_ENMITY)
+    --    return -1
+    --end
 
     -- Check party for trusts
     local numPt     = 0
@@ -383,13 +383,13 @@ xi.trust.canCast = function(caster, spell, notAllowedTrustIds)
     end
 
     -- Limits set by ROV Key Items
-    if numTrusts >= 3 and not caster:hasKeyItem(xi.ki.RHAPSODY_IN_WHITE) then
-        caster:messageSystem(xi.msg.system.TRUST_MAXIMUM_NUMBER)
-        return -1
-    elseif numTrusts >= 4 and not caster:hasKeyItem(xi.ki.RHAPSODY_IN_CRIMSON) then
-        caster:messageSystem(xi.msg.system.TRUST_MAXIMUM_NUMBER)
-        return -1
-    end
+    --if numTrusts >= 3 and not caster:hasKeyItem(xi.ki.RHAPSODY_IN_WHITE) then
+    --    caster:messageSystem(xi.msg.system.TRUST_MAXIMUM_NUMBER)
+    --    return -1
+    --elseif numTrusts >= 4 and not caster:hasKeyItem(xi.ki.RHAPSODY_IN_CRIMSON) then
+    --    caster:messageSystem(xi.msg.system.TRUST_MAXIMUM_NUMBER)
+    --    return -1
+    --end
 
     if not xi.trust.checkBattlefieldTrustCount(caster) then
         return xi.msg.basic.TRUST_NO_CAST_TRUST

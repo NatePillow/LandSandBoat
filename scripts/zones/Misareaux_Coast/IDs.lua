@@ -64,6 +64,7 @@ zones[xi.zone.MISAREAUX_COAST] =
         GIGASS_SHEEP      = GetTableOfIDs('Gigass_Sheep'),
         GRATION           = GetFirstID('Gration'),
         ODQAN             = GetTableOfIDs('Odqan'),
+        UPYRI             = GetFirstID('Upyri'),
         OKYUPETE          = GetFirstID('Okyupete'),
         PM6_2_MOB_OFFSET  = GetFirstID('Warder_Aglaia'),
         ZIPHIUS           = GetFirstID('Ziphius'),

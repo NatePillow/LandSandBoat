@@ -73,7 +73,6 @@ auto time_server(Scheduler& scheduler, MapConfig config) -> Task<void>
                 roeutils::CycleUnityRankings();
             }
             roeutils::CycleDailyRecords();
-            guildutils::UpdateGuildPointsPattern();
             luautils::OnJSTMidnight();
             luautils::UpdateSanrakusMobs();
         }
@@ -140,6 +139,8 @@ auto time_server(Scheduler& scheduler, MapConfig config) -> Task<void>
             TracyZoneScoped;
 
             ShowDebugFmt("Vana'diel day tick... (current tick: {})", tickNum);
+
+            guildutils::UpdateGuildPointsPattern();
 
             zoneutils::ForEachZone(
                 [](CZone* PZone)

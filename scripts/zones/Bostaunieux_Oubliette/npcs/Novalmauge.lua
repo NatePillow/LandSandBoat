@@ -21,8 +21,8 @@ local pathNodes =
 
 entity.onSpawn = function(npc)
     npc:initNpcAi()
-    npc:setPos(xi.path.first(pathNodes))
-    npc:pathThrough(pathNodes, xi.path.flag.PATROL)
+    npc:setPos(-28.005514, 0.045098, 13.022397)
+    --npc:pathThrough(pathNodes, xi.path.flag.PATROL)
 end
 
 entity.onTrigger = function(player, npc)

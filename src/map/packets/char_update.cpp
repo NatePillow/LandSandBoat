@@ -23,6 +23,8 @@
 
 #include "char_update.h"
 
+#include "ai/ai_container.h"
+#include "ai/helpers/pathfind.h"
 #include "entities/charentity.h"
 #include "items/item_linkshell.h"
 #include "status_effect_container.h"
@@ -259,7 +261,25 @@ void CCharUpdatePacket::updateWith(CCharEntity* PChar, ENTITYUPDATE type, uint8 
         packet->y   = PChar->loc.p.z; // Intentionally Swapped, apparently internal x/y/z is not FFXI x/y/z
         packet->z   = PChar->loc.p.y; // Intentionally Swapped
 
-        packet->Speed     = PChar->UpdateSpeed();
+        // SINGLEPLAYER: headless bots are server-stepped through CPathFind
+        // (see ai_container.cpp:430). When they're on a PATHFLAG_RUN path,
+        // their actual server-side stepping speed is computed via
+        // UpdateSpeed(true) — which applies MOB_RUN_SPEED_MULTIPLIER and
+        // (for headless) inherits the primary's speed. If we broadcast
+        // UpdateSpeed() (run=false) here, the client gets a walk-speed
+        // byte (~60) while the server is actually stepping at run-speed
+        // (~150), and the client renders the bot at walk velocity even
+        // though their position is moving faster — visible as "headless
+        // is slower than primary."
+        //
+        // Real PCs keep run=false: their client drives their own movement,
+        // and the broadcast speed byte is the stored walk value as it has
+        // always been.
+        const bool headlessRunning = PChar->isHeadless()
+                                  && PChar->PAI
+                                  && PChar->PAI->PathFind
+                                  && PChar->PAI->PathFind->IsRunningPath();
+        packet->Speed     = PChar->UpdateSpeed(headlessRunning);
         packet->SpeedBase = PChar->animationSpeed;
 
         packet->Flags0.MovTime     = PChar->loc.p.moving;

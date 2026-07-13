@@ -61,6 +61,13 @@ struct MapSession
     GP_GAME_LOGOUT_STATE zone_type = GP_GAME_LOGOUT_STATE::NONE;
     IPP                  zone_ipp  = {};
 
+    // SINGLEPLAYER BEGIN
+    // Headless session linkage: 0 = normal client session; non-zero = headless char
+    // owned by the primary char with this charId. The watchdog cascades cleanup from
+    // the parent session to all headless sessions linked to it.
+    uint32 parentCharId = 0;
+    // SINGLEPLAYER END
+
     void incrementBlowfish();
     void initBlowfish();
 

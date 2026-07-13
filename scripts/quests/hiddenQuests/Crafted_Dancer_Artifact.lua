@@ -139,12 +139,14 @@ quest.sections =
                     local artifactItemID = dncArtifactOptions[questOption][1] - player:getGender()
 
                     if npcUtil.giveItem(player, artifactItemID) then
-                        if utils.mask.countBits(quest:getVar(player, 'Status'), 3) == 1 then
-                            quest:complete(player)
-                        else
-                            quest:unsetVarBit(player, 'Status', questOption - 1)
-                            quest:setVar(player, 'Prog', 3)
+                        -- Singleplayer over-grant: deliver ALL 3 DNC AF pieces
+                        -- (gender-adjusted for player) at once.
+                        for optIdx, optData in ipairs(dncArtifactOptions) do
+                            if optIdx ~= questOption then
+                                npcUtil.giveItem(player, optData[1] - player:getGender())
+                            end
                         end
+                        quest:complete(player)
                     end
                 end,
             },

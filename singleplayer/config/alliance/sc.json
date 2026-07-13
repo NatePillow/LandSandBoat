@@ -1,0 +1,44 @@
+{
+    "alliance": [
+        {
+            "ptLeader": "Brutus",
+            "members": ["Penelope", "Minerva", "Ruby", "Ollie", "Astrid"]
+        },
+        {
+            "ptLeader": "Varunius",
+            "members": ["Zariah"],
+            "trusts": ["Shantotto", "Ulmia", "Joachim", "Karaha-Baruha"]
+        },
+        {
+            "ptLeader": "Malfina",
+            "members": ["Freya"],
+            "trusts": ["Shantotto", "Ulmia", "Joachim", "Karaha-Baruha"]
+        }
+    ],
+    "roles": {
+        "tank":   ["Brutus"],
+        "heal":   ["Penelope"],
+        "rdm":    ["Minerva"],
+        "nuke":   ["Ruby", "Ollie", "Astrid"],
+        "melee":  ["Freya", "Zariah", "Varunius", "Malfina"]
+    },
+    "sc": [
+        {
+            "priority":  1,
+            "openName":  "Freya",
+            "openWS":    "Vorpal Thrust",
+            "closeName": "Zariah",
+            "closeWS":   "Dancing Edge"
+        },
+        {
+            "priority":  2,
+            "openName":  "Varunius",
+            "openWS":    "Raging Rush",
+            "closeName": "Malfina",
+            "closeWS":   "Raging Fists"
+        }
+    ],
+    "solo": {
+        "Brutus":   "Seraph Blade"
+    }
+}

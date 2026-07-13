@@ -46,6 +46,7 @@
 #include "packets/entity_update.h"
 #include "packets/pet_sync.h"
 #include "packets/s2c/0x029_battle_message.h"
+#include "packets/s2c/0x167_enmity.h"
 #include "recast_container.h"
 #include "roe.h"
 #include "spawn_slot.h"
@@ -596,6 +597,11 @@ void CMobEntity::PostTick()
         m_nextUpdateTimer = now + 250ms;
         loc.zone->UpdateEntityPacket(this, ENTITY_UPDATE, updatemask);
 
+        if (!PEnmityContainer->GetEnmityList()->empty())
+        {
+            loc.zone->PushPacket(this, CHAR_INRANGE, std::make_unique<GP_SERV_COMMAND_ENMITY>(this));
+        }
+
         // If this mob is charmed, it should sync with its master
         if (PMaster && PMaster->PPet == this && PMaster->objtype == TYPE_PC)
         {
@@ -926,7 +932,7 @@ void CMobEntity::DropItems(CCharEntity* PChar)
 
         if (!PParty || !PChar->PTreasurePool)
         {
-            return !PChar->PRecastContainer->HasLootRecast(id);
+            //return !PChar->PRecastContainer->HasLootRecast(id);
         }
 
         for (const auto& member : PChar->PTreasurePool->getMembers())
@@ -935,7 +941,7 @@ void CMobEntity::DropItems(CCharEntity* PChar)
             {
                 if (member->PRecastContainer->HasLootRecast(id))
                 {
-                    return false;
+                    //return false;
                 }
             }
         }
@@ -955,7 +961,7 @@ void CMobEntity::DropItems(CCharEntity* PChar)
 
         if (!PParty || !PChar->PTreasurePool)
         {
-            PChar->PRecastContainer->AddLootRecast(id, SPECIAL_DROP_COOLDOWN);
+            //PChar->PRecastContainer->AddLootRecast(id, SPECIAL_DROP_COOLDOWN);
             return;
         }
 
@@ -963,7 +969,7 @@ void CMobEntity::DropItems(CCharEntity* PChar)
         {
             if (member->PParty == PParty)
             {
-                member->PRecastContainer->AddLootRecast(id, SPECIAL_DROP_COOLDOWN);
+                //member->PRecastContainer->AddLootRecast(id, SPECIAL_DROP_COOLDOWN);
             }
         }
     };
@@ -996,21 +1002,23 @@ void CMobEntity::DropItems(CCharEntity* PChar)
             }
 
             // Determine if this group should drop an item.
-            if (groupDropRate > 0 && (1 + xirand::GetRandomNumber(10000)) <= groupDropRate * settings::get<float>("map.DROP_RATE_MULTIPLIER"))
+            const auto  groupThreshold = static_cast<uint32_t>(groupDropRate * settings::get<float>("map.DROP_RATE_MULTIPLIER"));
+            const auto  groupRoll      = 1 + xirand::GetRandomNumber(10000);
+            const bool  groupPassed    = groupDropRate > 0 && groupRoll <= groupThreshold;
+            ShowWarning("Group drop chance: " + std::to_string(groupDropRate) + " roll: " + std::to_string(groupRoll) + " passed: " + (groupPassed ? "yes" : "no"));
+            if (groupPassed)
             {
-                // Each item in the group is given its own weight range which is the previous value to the previous value + item.DropRate
-                // Such as 2 items with drop rates of 200 and 800 would be 0-199 and 200-999 respectively
-                uint16 previousRateValue = 0;
-                uint16 itemRoll          = xirand::GetRandomNumber(total);
                 for (const DropItem_t& item : group.Items)
                 {
-                    if (itemRoll < previousRateValue + item.DropRate)
+                    const auto itemThreshold = static_cast<uint32_t>(item.DropRate * 10);
+                    const auto itemRoll      = 1 + xirand::GetRandomNumber(10000);
+                    const bool itemPassed    = itemRoll <= itemThreshold;
+                    ShowWarning("Group item " + std::to_string(item.ItemID) + " drop chance: " + std::to_string(itemThreshold) + " roll: " + std::to_string(itemRoll) + " passed: " + (itemPassed ? "yes" : "no"));
+                    // TODO how to put in module? this rolls each item in the group individually
+                    if (itemPassed)
                     {
                         AddItemToPool(item.ItemID);
-
-                        break;
                     }
-                    previousRateValue += item.DropRate;
                 }
             }
         });
@@ -1025,7 +1033,11 @@ void CMobEntity::DropItems(CCharEntity* PChar)
                 itemDropRate = thDropRateFunction(m_THLvl, itemDropRate);
             }
 
-            if (itemDropRate > 0 && (1 + xirand::GetRandomNumber(10000)) <= itemDropRate * settings::get<float>("map.DROP_RATE_MULTIPLIER"))
+            const auto itemThreshold = static_cast<uint32_t>(itemDropRate * settings::get<float>("map.DROP_RATE_MULTIPLIER"));
+            const auto itemRoll      = 1 + xirand::GetRandomNumber(10000);
+            const bool itemPassed    = itemDropRate > 0 && itemRoll <= itemThreshold;
+            ShowWarning("Ungrouped item " + std::to_string(item.ItemID) + " drop chance: " + std::to_string(itemDropRate) + " roll: " + std::to_string(itemRoll) + " passed: " + (itemPassed ? "yes" : "no"));
+            if (itemPassed)
             {
                 AddItemToPool(item.ItemID);
             }
@@ -1041,7 +1053,7 @@ void CMobEntity::DropItems(CCharEntity* PChar)
     {
         // Check for seal drops
         // Only one type of seal can drop per mob
-        if (xirand::GetRandomNumber(100) < 20 && CanAddSpecial(LootRecastID::Seal))
+        if (xirand::GetRandomNumber(100) < 60 && CanAddSpecial(LootRecastID::Seal))
         {
             const auto seals = GetEligibleSeals();
             AddItemToPool(seals[xirand::GetRandomNumber(seals.size())]);
@@ -1050,7 +1062,7 @@ void CMobEntity::DropItems(CCharEntity* PChar)
 
         // Check for geode/avatarites drops
         // Only one type of geode can drop per mob
-        if (xirand::GetRandomNumber(100) < 20 && CanAddSpecial(LootRecastID::Geode))
+        if (xirand::GetRandomNumber(100) < 60 && CanAddSpecial(LootRecastID::Geode))
         {
             if (const auto geodes = GetEligibleGeodes(); !geodes.empty())
             {

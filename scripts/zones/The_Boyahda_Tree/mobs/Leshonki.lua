@@ -43,7 +43,7 @@ entity.onMobRoam = function(mob)
     mobRegen(mob)
 
     local totd = VanadielTOTD()
-    if totd == xi.time.NIGHT and totd == xi.time.MIDNIGHT then
+    if totd == xi.time.NIGHT or totd == xi.time.MIDNIGHT then
         mob:setLocalVar('doNotInvokeCooldown', 1)
         DespawnMob(mob:getID())
     end

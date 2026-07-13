@@ -96,17 +96,12 @@ quest.sections =
             onEventFinish =
             {
                 [55] = function(player, csid, option, npc)
-                    local selectedReward = earringRewards[option]
-
-                    if
-                        selectedReward and
-                        npcUtil.giveItem(player, selectedReward)
-                    then
-                        quest:complete(player)
-
-                        -- TODO: Find a way to prevent the need for using a forever charVar here.
-                        player:setCharVar('DM_Earring', selectedReward)
+                    -- Singleplayer over-grant: deliver ALL 5 earrings at once.
+                    for _, itemId in pairs(earringRewards) do
+                        npcUtil.giveItem(player, itemId)
                     end
+                    quest:complete(player)
+                    player:setCharVar('DM_Earring', earringRewards[option] or earringRewards[1])
                 end,
             },
         },

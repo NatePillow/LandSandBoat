@@ -81,6 +81,16 @@ uint32 CLuaStatusEffect::getStartTime()
     return earth_time::timestamp(timer::to_utc(m_PLuaStatusEffect->GetStartTime()));
 }
 
+// Same start time as getStartTime(), but in epoch milliseconds. Use for
+// sub-second windowing (e.g. skillchain close-window timing) where the
+// 1-second quantization of getStartTime()'s earth_time::timestamp would be
+// too coarse.
+uint64 CLuaStatusEffect::getStartTimeMs()
+{
+    return static_cast<uint64>(std::chrono::duration_cast<std::chrono::milliseconds>(
+        timer::to_utc(m_PLuaStatusEffect->GetStartTime()).time_since_epoch()).count());
+}
+
 /************************************************************************
  *                                                                       *
  * Returns remaining ticks until expiry                                  *
@@ -288,6 +298,7 @@ void CLuaStatusEffect::Register()
     SOL_REGISTER("getDuration", CLuaStatusEffect::getDuration);
     SOL_REGISTER("setDuration", CLuaStatusEffect::setDuration);
     SOL_REGISTER("getStartTime", CLuaStatusEffect::getStartTime);
+    SOL_REGISTER("getStartTimeMs", CLuaStatusEffect::getStartTimeMs);
     SOL_REGISTER("getLastTick", CLuaStatusEffect::getLastTick);
     SOL_REGISTER("getTimeRemaining", CLuaStatusEffect::getTimeRemaining);
     SOL_REGISTER("getTickCount", CLuaStatusEffect::getTickCount);

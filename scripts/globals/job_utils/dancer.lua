@@ -385,7 +385,7 @@ xi.job_utils.dancer.useDesperateFlourishAbility = function(player, target, abili
 
     if
         math.random() <= xi.weaponskills.getHitRate(player, target, player:getJobPointLevel(xi.jp.FLOURISH_I_EFFECT), xi.attackAnimation.LEFT_ATTACK) or
-        (player:hasStatusEffect(xi.effect.SNEAK_ATTACK) and player:isBehind(target))
+        (player:hasStatusEffect(xi.effect.SNEAK_ATTACK))
     then
         infoValue = actionInfo[ability:getID()][2]
         local resistRate = xi.combat.magicHitRate.calculateResistRate(player, target, 0, 0, xi.skillRank.A_PLUS, xi.element.WIND, xi.mod.INT, xi.effect.WEIGHT, 0)
@@ -423,7 +423,7 @@ xi.job_utils.dancer.useViolentFlourishAbility = function(player, target, ability
 
     if
         math.random() <= hitRate or
-        (player:hasStatusEffect(xi.effect.SNEAK_ATTACK) and player:isBehind(target))
+        (player:hasStatusEffect(xi.effect.SNEAK_ATTACK))
     then
         infoValue          = actionInfo[ability:getID()][2]
         local weaponDamage = player:getWeaponDmg()

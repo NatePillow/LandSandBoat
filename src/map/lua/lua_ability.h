@@ -45,6 +45,7 @@ public:
     auto   getMsg() -> MsgBasic;
     uint16 getRecast();
     auto   getRecastID() const -> Recast;
+    uint32 getCastTime(); // BP cast time in ms; used by SMN bot AI for MB-window budgeting.
     auto   getRange() -> uint16;
     auto   getRadius() const -> uint8;
     auto   getAOE() const -> uint8;

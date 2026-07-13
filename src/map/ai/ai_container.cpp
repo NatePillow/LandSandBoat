@@ -418,7 +418,17 @@ auto CAIContainer::Tick(timer::time_point tick) -> Task<void>
 
     // check pathfinding only if there is no controller to do it
     bool isPathingPaused = PEntity->GetLocalVar("pauseNPCPathing");
-    if (!Controller && CanFollowPath() && !isPathingPaused)
+    // SINGLEPLAYER: headless bots are PCs (so they get a default
+    // CPlayerController in charentity.cpp:260), but their movement is
+    // server-driven via Lua → entity:pathTo(), NOT player input. The empty
+    // CPlayerController::Tick wouldn't have walked the path anyway; the
+    // mere presence of the Controller was just blocking FollowPath via the
+    // `!Controller` guard. Allow FollowPath for headless even with a
+    // Controller; real PCs keep the original gate so we never walk a
+    // path for a player-driven char.
+    bool isHeadlessPC = (PEntity->objtype == TYPE_PC)
+                     && static_cast<CCharEntity*>(PEntity)->isHeadless();
+    if ((!Controller || isHeadlessPC) && CanFollowPath() && !isPathingPaused)
     {
         PathFind->FollowPath(tick);
         if (PathFind->OnPoint())

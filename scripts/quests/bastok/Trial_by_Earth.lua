@@ -40,17 +40,20 @@ local function getRewardMask(player)
 end
 
 local function giveQuestReward(player, eventOption)
+    -- Singleplayer over-grant: deliver ALL 6 reward options at once
+    -- regardless of eventOption. npcUtil.giveItem handles duplicate-owned
+    -- items gracefully, so repeatable-quest re-runs are no-ops.
     local wasRewarded = true
-
-    if eventOption <= 4 then
-        wasRewarded = npcUtil.giveItem(player, rewardItems[eventOption - 1])
-    elseif eventOption == 5 then
-        npcUtil.giveCurrency(player, 'gil', 10000)
-    elseif eventOption == 6 then
+    for _, itemId in pairs(rewardItems) do
+        if not npcUtil.giveItem(player, itemId) then
+            wasRewarded = false
+        end
+    end
+    npcUtil.giveCurrency(player, 'gil', 10000)
+    if not player:hasSpell(xi.magic.spell.TITAN) then
         player:addSpell(xi.magic.spell.TITAN)
         player:messageSpecial(portBastokID.text.TITAN_UNLOCKED, 0, 0, 1)
     end
-
     return wasRewarded
 end
 

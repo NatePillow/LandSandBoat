@@ -57,6 +57,10 @@
 #include "items/item_puppet.h"
 
 #include "packets/s2c/0x017_chat_std.h"
+#include "packets/s2c/0x178_headless_state.h"
+#include "packets/s2c/0x179_headless_event.h"
+#include "packets/s2c/0x17c_dps_update.h"
+#include "packets/s2c/0x192_autoskill_state.h"
 #include "packets/s2c/0x05a_motionmes.h"
 #include "packets/s2c/0x0f9_res.h"
 
@@ -100,6 +104,7 @@
 #include <array>
 #include <cctype>
 #include <filesystem>
+#include <fstream>
 #include <numeric>
 #include <ranges>
 #include <string>
@@ -276,6 +281,15 @@ void init(IPP mapIPP, bool isRunningInCI)
     lua.set_function("GetPlayerByName", &luautils::GetPlayerByName);
     lua.set_function("GetPlayerByID", &luautils::GetPlayerByID);
     lua.set_function("PlayerHasValidSession", &luautils::PlayerHasValidSession);
+    lua.set_function("GetServerConfig", &luautils::GetServerConfig); // SINGLEPLAYER
+    lua.set_function("BotPushLog", &luautils::BotPushLog);
+    lua.set_function("BotPushState", &luautils::BotPushState);
+    lua.set_function("BotPushDps", &luautils::BotPushDps);
+    lua.set_function("PushPartyStatus", &luautils::PushPartyStatus);
+    lua.set_function("GetWeaponskillByName", &luautils::GetWeaponskillByName);
+    lua.set_function("GetWeaponskillNameByID", &luautils::GetWeaponskillNameByID);
+    lua.set_function("GetWeaponskillProperties", &luautils::GetWeaponskillProperties);
+    lua.set_function("GetSpellMetaByID", &luautils::GetSpellMetaByID);
     lua.set_function("GetPlayerIDByName", &charutils::getCharIdFromName);
     lua.set_function("SendToJailOffline", &luautils::SendToJailOffline);
     lua.set_function("DrawIn", &luautils::DrawIn);
@@ -1442,6 +1456,67 @@ CBaseEntity* GetMobByID(uint32 mobid, const sol::object& instanceObj)
     return PMob;
 }
 
+uint16 GetWeaponskillByName(const std::string& name)
+{
+    if (name.empty())
+    {
+        return 0;
+    }
+    for (uint16 id = 0; id < MAX_WEAPONSKILL_ID; ++id)
+    {
+        auto* PWS = battleutils::GetWeaponSkill(id);
+        if (PWS != nullptr && PWS->getName() == name)
+        {
+            return id;
+        }
+    }
+    return 0;
+}
+
+std::string GetWeaponskillNameByID(uint16 id)
+{
+    if (id >= MAX_WEAPONSKILL_ID)
+    {
+        return std::string();
+    }
+    auto* PWS = battleutils::GetWeaponSkill(id);
+    return PWS != nullptr ? PWS->getName() : std::string();
+}
+
+auto GetWeaponskillProperties(uint16 id) -> sol::table
+{
+    if (id >= MAX_WEAPONSKILL_ID)
+    {
+        return sol::lua_nil;
+    }
+    auto* PWS = battleutils::GetWeaponSkill(id);
+    if (PWS == nullptr)
+    {
+        return sol::lua_nil;
+    }
+    auto t        = lua.create_table();
+    t["primary"]   = PWS->getPrimarySkillchain();
+    t["secondary"] = PWS->getSecondarySkillchain();
+    t["tertiary"]  = PWS->getTertiarySkillchain();
+    return t;
+}
+
+auto GetSpellMetaByID(uint16 spellId) -> sol::table
+{
+    CSpell* PSpell = spell::GetSpell(static_cast<SpellID>(spellId));
+    if (PSpell == nullptr)
+    {
+        return sol::lua_nil;
+    }
+    auto t = lua.create_table();
+    t["id"]      = static_cast<uint16>(PSpell->getID());
+    t["name"]    = PSpell->getName();
+    t["element"] = PSpell->getElement();
+    t["skill"]   = PSpell->getSkillType();
+    t["mpcost"]  = PSpell->getMPCost();
+    return t;
+}
+
 CBaseEntity* GetEntityByID(uint32 entityid, const sol::object& instanceObj, const sol::object& arg3)
 {
     TracyZoneScoped;
@@ -2181,6 +2256,8 @@ void OnZoneTick(CZone* PZone)
         ShowError("luautils::onZoneTick: %s", err.what());
     }
 }
+
+// SINGLEPLAYER: OnBotTick / OnBotCommand / OnBotFinish / OnBotSummonTrusts / OnBotSetHealMode / OnBotSetNmMode / OnBotFireAllWs / OnBotSetScThreshold / OnBotIssueCommand / OnBotSetSataMode / OnBotSetCasualNukeRotation / OnBotSetCasualNukeMbMode / OnBotTankNudge / OnBotSetPuller / OnBotSetPullerRange / OnBotSetPullerConRange / OnBotSetPullerResumeMpp / OnBotRequestPullerNames / OnBotSetPullerNameFilter / OnBotScPause / OnSetAutoskill / OnListAutoskill / OnBotSetRole / OnBotSpawnFromConfig / OnUseFoodFromConfig / GetServerConfig / OnLotListAdd / OnLotListRemove / OnLotListClear / BotPushLog / BotPushState / OnActionResult / BotPushDps / PushPartyStatus / OnBotDespawn definitions live in src/map/singleplayer/lua_hooks.cpp. (Config CRUD moved to loopback HTTP — see config_http_server.cpp.)
 
 void OnGameIn(CCharEntity* PChar, bool zoning)
 {
@@ -5360,6 +5437,20 @@ void OnPlayerLevelUp(CCharEntity* PChar)
     TracyZoneScoped;
 
     callGlobal<void>("xi.player.onPlayerLevelUp", PChar);
+}
+
+void OnPlayerRaise(CCharEntity* PChar)
+{
+    TracyZoneScoped;
+
+    callGlobal<void>("xi.player.onPlayerRaise", PChar);
+}
+
+void OnSynthFinish(CCharEntity* PChar, uint8 synthResult)
+{
+    TracyZoneScoped;
+
+    callGlobal<void>("xi.player.onSynthFinish", PChar, synthResult);
 }
 
 void OnPlayerLevelDown(CCharEntity* PChar)

@@ -1,0 +1,89 @@
+<ashitacast>
+	<settings>
+        <blockresends>false</blockresends>
+        <predictivepet>true</predictivepet>
+		<buffupdate>true</buffupdate>
+		<statusupdate>true</statusupdate>
+		<hpupdate>true</hpupdate> 
+		<autoupdate>true</autoupdate> 
+	</settings>
+	<sets>
+		<set name="Idle" baseset="Engaged">
+			<ring1>Warp Ring</ring1>
+			<!--<head>Emperor Hairpin</head>
+			<neck>Armiger's Lace</neck>
+			<ear1>Dodge Earring</ear1>
+			<ear2>Dodge Earring</ear2>
+			<ring1>Warp Ring</ring1>
+			<back>Nomad's Mantle +1</back>
+			<waist>Survival Belt</waist>
+			<legs>Noct Brais +1</legs>
+			<legs>Martial Slacks</legs>
+			<feet>Leaping Boots</feet>-->
+		</set>
+		
+		<set name="Engaged">
+			<ammo>Scorpion Arrow</ammo>
+			<head>Emperor Hairpin</head>
+			<neck>Peacock Charm</neck>
+			<ear1>Drone Earring</ear1>
+			<ear2>Genin Earring</ear2>
+			<body>Noct Doublet +1</body>
+			<hands>Noct Gloves +1</hands>
+			<ring1>Bowyer Ring</ring1>
+			<ring2>Sniper's Ring +1</ring2>
+			<back>Exact. Mantle +1</back>
+			<waist>Headlong Belt</waist>
+			<legs>Noct Brais +1</legs>
+			<feet>Leaping Boots</feet>
+		</set>
+		
+		<set name="AGI_STR" baseset="Idle">
+			<ammo>Scorpion Arrow</ammo>
+			<head>Emperor Hairpin</head>
+			<neck>Ranger's Necklace</neck>
+			<ear1>Drone Earring</ear1>
+			<ear2>Genin Earring</ear2>
+			<body>Brigandine +1</body>
+			<ring1>Alacrity Ring +1</ring1>
+			<ring2>Alacrity Ring +1</ring2>
+			<back>Nomad's Mantle +1</back>
+			<waist>Mrc.Cpt. Belt</waist>
+			<legs>Martial Slacks</legs>
+			<feet>Leaping Boots</feet>
+		</set>
+	</sets>
+		
+	<variables>
+		<var name="autows">0</var>
+	</variables>
+	
+	<inputcommands>
+		<cmd input="/wson">
+			<setvar name="autows" values="1"/>
+			<addtochat colo="50">Auto WS enabled!</addtochat>
+		</cmd>
+		<cmd input="/wsoff">
+			<setvar name="autows" values="0"/>
+			<addtochat colo="50">Auto WS disabled!</addtochat>
+		</cmd>
+	</inputcommands>
+
+	<idlegear>
+		<if p_status="engaged">
+			<equip set="Engaged" />
+			<if p_tp=">999">
+				<if advanced="$autows=1">
+					<command>/ws "Piercing Arrow" &lt;t&gt;</command>
+				</if>
+			</if>
+		</if>
+		<else>
+			<equip set="Idle" />
+		</else>
+	</idlegear>
+	
+	<weaponskill>
+		<equip set="STR" />
+	</weaponskill>
+</ashitacast>

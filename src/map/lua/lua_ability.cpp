@@ -46,6 +46,11 @@ uint16 CLuaAbility::getRecast()
     return static_cast<uint16>(timer::count_seconds(m_PLuaAbility->getRecastTime()));
 }
 
+uint32 CLuaAbility::getCastTime()
+{
+    return static_cast<uint32>(timer::count_milliseconds(m_PLuaAbility->getCastTime()));
+}
+
 auto CLuaAbility::getRecastID() const -> Recast
 {
     return m_PLuaAbility->getRecastId();
@@ -135,6 +140,7 @@ void CLuaAbility::Register()
     SOL_REGISTER("getMsg", CLuaAbility::getMsg);
     SOL_REGISTER("getRecast", CLuaAbility::getRecast);
     SOL_REGISTER("getRecastID", CLuaAbility::getRecastID);
+    SOL_REGISTER("getCastTime", CLuaAbility::getCastTime);
     SOL_REGISTER("getRange", CLuaAbility::getRange);
     SOL_REGISTER("getRadius", CLuaAbility::getRadius);
     SOL_REGISTER("getAOE", CLuaAbility::getAOE);

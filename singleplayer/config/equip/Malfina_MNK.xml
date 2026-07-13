@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<ashitacast>
+	<settings>
+		<blockresends>false</blockresends>
+		<predictivepet>true</predictivepet>
+		<buffupdate>true</buffupdate>
+		<statusupdate>true</statusupdate>
+		<hpupdate>true</hpupdate>
+		<autoupdate>true</autoupdate>
+	</settings>
+	<sets>
+		<set baseset="Engaged" name="Idle">
+			<head>Emperor Hairpin</head>
+			<ear1>Dodge Earring</ear1>
+			<ear2>Dodge Earring</ear2>
+			<ring1>Vigor Ring +1</ring1>
+			<ring2>Vigor Ring +1</ring2>
+			<back>Nomad's Mantle +1</back>
+			<waist>Warrior's Belt +1</waist>
+		</set>
+		<set name="Engaged">
+			<ammo>Tiphia Sting</ammo>
+			<head>Super Ribbon</head>
+			<neck>Peacock Charm</neck>
+			<ear1>Spike Earring</ear1>
+			<ear2>Spike Earring</ear2>
+			<body>Scp. Harness +1</body>
+			<hands>Ochiudo's Kote</hands>
+			<lring>Sniper's Ring +1</lring>
+			<rring>Sniper's Ring +1</rring>
+			<back>Amemet Mantle +1</back>
+			<waist>Brown Belt</waist>
+			<legs>Jujitsu Sitabaki</legs>
+			<feet>Fuma Kyahan</feet>
+		</set>
+		<set baseset="Idle" name="STR">
+			<head>Voyager Sallet</head>
+			<neck>Spike Necklace</neck>
+			<ear1>Heims Earring</ear1>
+			<ear2>Giant's Earring</ear2>
+			<body>Scp. Harness +1</body>
+			<hands>Enkelados's Brc.</hands>
+			<ring1>Victory Ring</ring1>
+			<ring2>Victory Ring</ring2>
+			<back>Besieger Mantle</back>
+			<legs>Garrison Hose</legs>
+			<feet>Mtt. Leggings +1</feet>
+		</set>
+		<set baseset="Idle" name="MND">
+			<head>Circe's Hat</head>
+			<neck>Promise Badge</neck>
+			<ear1>Harvest Earring</ear1>
+			<body>Bishop's Robe +1</body>
+			<hands>Dvt. Mitts +1</hands>
+			<ring1>Serenity Ring</ring1>
+			<ring2>Serenity Ring</ring2>
+			<waist>Mrc.Cpt. Belt</waist>
+			<feet>Garrison Boots</feet>
+		</set>
+		<set name="STR_20">
+			<body>Power Gi</body>
+			<ring1>Courage Ring +1</ring1>
+			<ring2>Courage Ring +1</ring2>
+			<waist>Purple Belt</waist>
+			<feet>Mtt. Leggings +1</feet>
+		</set>
+		<set baseset="STR_20" name="STR_30">
+			<neck>Spike Necklace</neck>
+			<hands>Gigas Bracelets</hands>
+			<ear1>Giant's Earring</ear1>
+			<legs>Garrison Hose</legs>
+		</set>
+		<set baseset="STR_30" name="STR_40">
+			<hands>Ogygos's Brc.</hands>
+			<ring1>Puissance Ring</ring1>
+			<ring2>Puissance Ring</ring2>
+			<waist>Brown Belt</waist>
+		</set>
+		<set baseset="STR_40" name="STR_50">
+			<ear2>Heims Earring</ear2>
+			<hands>Enkelados's Brc.</hands>
+		</set>
+		<set baseset="STR_50" name="STR_60">
+			<head>Super Ribbon</head>
+			<ring1>Victory Ring</ring1>
+			<ring2>Victory Ring</ring2>
+			<body>Scp. Harness +1</body>
+		</set>
+		<set name="Engaged_20">
+			<ammo>Tiny Tathlum</ammo>
+			<ear1>Bone Earring +1</ear1>
+			<ear2>Bone Earring +1</ear2>
+			<hands>Battle Gloves</hands>
+			<ring1>Courage Ring +1</ring1>
+			<ring2>Courage Ring +1</ring2>
+			<back>Traveler's Mantle</back>
+			<waist>Purple Belt</waist>
+			<feet>Mtt. Leggings +1</feet>
+		</set>
+		<set baseset="Engaged_20" name="Engaged_30">
+			<head>Emperor Hairpin</head>
+			<neck>Spike Necklace</neck>
+			<ear1>Beetle Earring +1</ear1>
+			<ear2>Beetle Earring +1</ear2>
+			<body>Mrc.Cpt. Doublet</body>
+			<hands>Combat Mittens +1</hands>
+			<back>Exact. Mantle +1</back>
+		</set>
+		<set baseset="Engaged_30" name="Engaged_40">
+			<neck>Peacock Charm</neck>
+			<body>Jujitsu Gi</body>
+			<hands>Ochiudo's Kote</hands>
+			<ring1>Sniper's Ring +1</ring1>
+			<ring2>Sniper's Ring +1</ring2>
+			<waist>Brown Belt</waist>
+			<legs>Jujitsu Sitabaki</legs>
+			<feet>Fuma Kyahan</feet>
+		</set>
+		<set baseset="Engaged_40" name="Engaged_50">
+			<ear1>Tor. Earring +1</ear1>
+			<ear2>Tor. Earring +1</ear2>
+		</set>
+		<set baseset="Engaged_50" name="Engaged_60">
+			<ammo>Tiphia Sting</ammo>
+			<ear1>Spike Earring</ear1>
+			<ear2>Spike Earring</ear2>
+			<body>Scp. Harness +1</body>
+		</set>
+		<set name="MND_20">
+			<head>Garrison Sallet</head>
+			<neck>Justice Badge</neck>
+			<hands>Zealot's Mitts</hands>
+			<ring1>Saintly Ring +1</ring1>
+			<ring2>Saintly Ring +1</ring2>
+			<back>Mist Silk Cape</back>
+			<waist>Friar's Rope</waist>
+			<feet>Garrison Boots</feet>
+		</set>
+		<set baseset="MND_20" name="MND_30">
+			<head>Circe's Hat</head>
+			<hands>Dvt. Mitts +1</hands>
+		</set>
+		<set baseset="MND_30" name="MND_40">
+			<body>Bishop's Robe +1</body>
+			<back>White Cape +1</back>
+		</set>
+		<set baseset="MND_40" name="MND_50">
+			<neck>Promise Badge</neck>
+			<ear1>Harvest Earring</ear1>
+		</set>
+		<set baseset="MND_50" name="MND_60"/>
+		<set baseset="Idle" name="Gearlock">
+			<head>Super Ribbon</head>
+			<body>Scp. Harness +1</body>
+			<hands>Ochiudo's Kote</hands>
+			<legs>Garrison Hose</legs>
+			<feet>Fuma Kyahan</feet>
+		</set>
+	</sets>
+	<gearlock>
+		<equip set="Gearlock"/>
+	</gearlock>
+	<variables>
+		<var name="autows">0</var>
+	</variables>
+	<inputcommands>
+		<cmd input="/wson">
+			<setvar name="autows" values="1"/>
+			<addtochat colo="50">Auto WS enabled!</addtochat>
+		</cmd>
+		<cmd input="/wsoff">
+			<setvar name="autows" values="0"/>
+			<addtochat colo="50">Auto WS disabled!</addtochat>
+		</cmd>
+	</inputcommands>
+	<idlegear>
+		<if p_status="engaged">
+			<equip set="Engaged"/>
+			<if p_tp=">999">
+				<if advanced="$autows=1">
+					<command>/ws "Combo" &lt;t&gt;</command>
+				</if>
+			</if>
+		</if>
+		<else>
+			<equip set="Idle"/>
+		</else>
+	</idlegear>
+	<jobability>
+		<if ad_name="Chi Blast">
+			<equip set="MND"/>
+		</if>
+	</jobability>
+	<weaponskill>
+		<equip set="STR"/>
+	</weaponskill>
+</ashitacast>

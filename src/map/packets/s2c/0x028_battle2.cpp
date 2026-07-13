@@ -23,6 +23,8 @@
 
 #include "action/action.h"
 #include "common/lua.h"
+// SINGLEPLAYER: include required for OnActionResult dispatch in the ctor below.
+#include "lua/luautils.h"
 
 // Packs the action into the format expected by the FFXI client
 // Use 'actionparse' by atom0s as reference when making changes.
@@ -211,4 +213,10 @@ auto GP_SERV_COMMAND_BATTLE2::unpack() -> sol::table
 GP_SERV_COMMAND_BATTLE2::GP_SERV_COMMAND_BATTLE2(action_t& action)
 {
     pack(action);
+    // SINGLEPLAYER BEGIN
+    // Universal action chokepoint — fires xi.singleplayer.bots.onActionResult on the Lua
+    // side for bot_dps and any future damage trackers. Fast-paths out if no
+    // dispatcher is registered.
+    luautils::OnActionResult(action);
+    // SINGLEPLAYER END
 }

@@ -1,0 +1,3248 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-06-10T00:00:00Z",
+  "source_commit": "2e374ed5710cd89820c6a88ea1ecffd56235070f",
+  "scope": "scripts/quests/jeuno/ (dry-run, single-directory)",
+  "quests": {
+    "3:0": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 0,
+      "quest_name": "CREST_OF_DAVOI",
+      "source_path": "scripts/quests/jeuno/Crest_of_Davoi.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [],
+        "keyItems": [
+          21
+        ],
+        "fame": 30,
+        "fameArea": "JEUNO",
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": ""
+    },
+    "3:1": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 1,
+      "quest_name": "SAVE_MY_SISTER",
+      "source_path": "scripts/quests/jeuno/Save_My_Sister.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [
+          {
+            "id": 17041,
+            "qty": 1
+          }
+        ],
+        "keyItems": [],
+        "fame": null,
+        "fameArea": null,
+        "gil": 3000,
+        "bayld": 0,
+        "title": "EXORCIST_IN_TRAINING",
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": ""
+    },
+    "3:2": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 2,
+      "quest_name": "A_CLOCK_MOST_DELICATE",
+      "source_path": "scripts/quests/jeuno/A_Clock_Most_Delicate.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [
+          {
+            "id": 12727,
+            "qty": 1
+          }
+        ],
+        "keyItems": [],
+        "fame": 30,
+        "fameArea": "JEUNO",
+        "gil": 1200,
+        "bayld": 0,
+        "title": "PROFESSIONAL_LOAFER",
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": ""
+    },
+    "3:3": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 3,
+      "quest_name": "SAVE_THE_CLOCK_TOWER",
+      "source_path": "scripts/quests/jeuno/Save_the_Clock_Tower.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [],
+        "keyItems": [],
+        "fame": 30,
+        "fameArea": "JEUNO",
+        "gil": 0,
+        "bayld": 0,
+        "title": "CLOCK_TOWER_PRESERVATIONIST",
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": ""
+    },
+    "3:4": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 4,
+      "quest_name": "CHOCOBOS_WOUNDS",
+      "source_path": "scripts/quests/jeuno/Chocobos_Wounds.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [],
+        "keyItems": [
+          138
+        ],
+        "fame": 30,
+        "fameArea": "JEUNO",
+        "gil": 0,
+        "bayld": 0,
+        "title": "CHOCOBO_TRAINER",
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": ""
+    },
+    "3:5": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 5,
+      "quest_name": "SAVE_MY_SON",
+      "source_path": "scripts/quests/jeuno/Save_My_Son.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [
+          {
+            "id": 13110,
+            "qty": 1
+          }
+        ],
+        "keyItems": [],
+        "fame": 30,
+        "fameArea": "JEUNO",
+        "gil": 2100,
+        "bayld": 0,
+        "title": "LIFE_SAVER",
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": ""
+    },
+    "3:6": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 6,
+      "quest_name": "A_CANDLELIGHT_VIGIL",
+      "source_path": "scripts/quests/jeuno/A_Candlelight_Vigil.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [
+          {
+            "id": 13094,
+            "qty": 1
+          }
+        ],
+        "keyItems": [],
+        "fame": 30,
+        "fameArea": "JEUNO",
+        "gil": 0,
+        "bayld": 0,
+        "title": "ACTIVIST_FOR_KINDNESS",
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": ""
+    },
+    "3:9": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 9,
+      "quest_name": "YOUR_CRYSTAL_BALL",
+      "source_path": "scripts/quests/jeuno/Your_Crystal_Ball.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [],
+        "keyItems": [],
+        "fame": 30,
+        "fameArea": "JEUNO",
+        "gil": 0,
+        "bayld": 0,
+        "title": "FORTUNE_TELLER_IN_TRAINING",
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": ""
+    },
+    "3:11": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 11,
+      "quest_name": "THE_OLD_MONUMENT",
+      "source_path": "scripts/quests/jeuno/The_Old_Monument.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [
+          {
+            "id": 634,
+            "qty": 1
+          }
+        ],
+        "keyItems": [],
+        "fame": null,
+        "fameArea": null,
+        "gil": 0,
+        "bayld": 0,
+        "title": "RESEARCHER_OF_CLASSICS",
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": ""
+    },
+    "3:12": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 12,
+      "quest_name": "A_MINSTREL_IN_DESPAIR",
+      "source_path": "scripts/quests/jeuno/A_Minstrel_In_Despair.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [],
+        "keyItems": [],
+        "fame": 30,
+        "fameArea": "JEUNO",
+        "gil": 2100,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": ""
+    },
+    "3:15": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 15,
+      "quest_name": "COMMUNITY_SERVICE",
+      "source_path": "scripts/quests/jeuno/Community_Service.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [],
+        "keyItems": [],
+        "fame": 30,
+        "fameArea": "JEUNO",
+        "gil": 0,
+        "bayld": 0,
+        "title": "TORCHBEARER",
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "Optional post-complete KI LAMP_LIGHTERS_MEMBERSHIP_CARD (option-gated, outside quest.reward)."
+    },
+    "3:17": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 17,
+      "quest_name": "TENSHODO_MEMBERSHIP",
+      "source_path": "scripts/quests/jeuno/Tenshodo_Membership.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [
+          {
+            "id": 548,
+            "qty": 1
+          }
+        ],
+        "keyItems": [
+          118
+        ],
+        "fame": null,
+        "fameArea": null,
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": ""
+    },
+    "3:19": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 19,
+      "quest_name": "PATH_OF_THE_BEASTMASTER",
+      "source_path": "scripts/quests/jeuno/Path_of_the_Beastmaster.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [],
+        "keyItems": [
+          1746
+        ],
+        "fame": 30,
+        "fameArea": "JEUNO",
+        "gil": 0,
+        "bayld": 0,
+        "title": "ANIMAL_TRAINER",
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": "BST",
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": ""
+    },
+    "3:20": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 20,
+      "quest_name": "PATH_OF_THE_BARD",
+      "source_path": "scripts/quests/jeuno/Path_of_the_Bard.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [],
+        "keyItems": [
+          1747
+        ],
+        "fame": 30,
+        "fameArea": "JEUNO",
+        "gil": 3000,
+        "bayld": 0,
+        "title": "WANDERING_MINSTREL",
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": "BRD",
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": ""
+    },
+    "3:21": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 21,
+      "quest_name": "THE_CLOCKMASTER",
+      "source_path": "scripts/quests/jeuno/The_Clockmaster.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [
+          {
+            "id": 17083,
+            "qty": 1
+          }
+        ],
+        "keyItems": [],
+        "fame": 30,
+        "fameArea": "JEUNO",
+        "gil": 0,
+        "bayld": 0,
+        "title": "TIMEKEEPER",
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": ""
+    },
+    "3:22": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 22,
+      "quest_name": "CANDLE_MAKING",
+      "source_path": "scripts/quests/jeuno/Candle_Making.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [],
+        "keyItems": [
+          50
+        ],
+        "fame": 30,
+        "fameArea": "JEUNO",
+        "gil": 0,
+        "bayld": 0,
+        "title": "BELIEVER_OF_ALTANA",
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": ""
+    },
+    "3:23": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 23,
+      "quest_name": "CHILDS_PLAY",
+      "source_path": "scripts/quests/jeuno/Childs_Play.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [],
+        "keyItems": [
+          113
+        ],
+        "fame": 30,
+        "fameArea": "JEUNO",
+        "gil": 0,
+        "bayld": 0,
+        "title": "TRADER_OF_MYSTERIES",
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": ""
+    },
+    "3:24": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 24,
+      "quest_name": "NORTHWARD",
+      "source_path": "scripts/quests/jeuno/Northward.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [],
+        "keyItems": [
+          412
+        ],
+        "fame": 30,
+        "fameArea": "JEUNO",
+        "gil": 2000,
+        "bayld": 0,
+        "title": "ENVOY_TO_THE_NORTH",
+        "var": {},
+        "exp": 2000
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": ""
+    },
+    "3:25": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 25,
+      "quest_name": "THE_ANTIQUE_COLLECTOR",
+      "source_path": "scripts/quests/jeuno/The_Antique_Collector.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [],
+        "keyItems": [
+          410
+        ],
+        "fame": 30,
+        "fameArea": "JEUNO",
+        "gil": 2000,
+        "bayld": 0,
+        "title": "TRADER_OF_ANTIQUITIES",
+        "var": {},
+        "exp": 2000
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "In-code TODO questions whether XP/gil are granted without the KI."
+    },
+    "3:26": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 26,
+      "quest_name": "DEAL_WITH_TENSHODO",
+      "source_path": "scripts/quests/jeuno/Deal_with_Tenshodo.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [],
+        "keyItems": [
+          19
+        ],
+        "fame": 30,
+        "fameArea": "JEUNO",
+        "gil": 0,
+        "bayld": 0,
+        "title": "TRADER_OF_RENOWN",
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": ""
+    },
+    "3:27": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 27,
+      "quest_name": "THE_GOBBIEBAG_PART_I",
+      "source_path": "scripts/quests/jeuno/The_Gobbiebag_Part_I.lua",
+      "helper_base": "xi.jeuno.helpers.GobbiebagQuest",
+      "rewards": {
+        "items": [],
+        "keyItems": [],
+        "fame": 30,
+        "fameArea": "JEUNO",
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": 5,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "GobbiebagQuest helper. Reward = fame/title only; bag expansion is player:changeContainerSize(INVENTORY,+5) (and MOGSATCHEL) in quest:complete \u2014 recorded as expandInventory."
+    },
+    "3:28": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 28,
+      "quest_name": "THE_GOBBIEBAG_PART_II",
+      "source_path": "scripts/quests/jeuno/The_Gobbiebag_Part_II.lua",
+      "helper_base": "xi.jeuno.helpers.GobbiebagQuest",
+      "rewards": {
+        "items": [],
+        "keyItems": [],
+        "fame": 30,
+        "fameArea": "JEUNO",
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": 5,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "GobbiebagQuest helper. Reward = fame/title only; bag expansion is player:changeContainerSize(INVENTORY,+5) (and MOGSATCHEL) in quest:complete \u2014 recorded as expandInventory."
+    },
+    "3:29": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 29,
+      "quest_name": "THE_GOBBIEBAG_PART_III",
+      "source_path": "scripts/quests/jeuno/The_Gobbiebag_Part_III.lua",
+      "helper_base": "xi.jeuno.helpers.GobbiebagQuest",
+      "rewards": {
+        "items": [],
+        "keyItems": [],
+        "fame": 30,
+        "fameArea": "JEUNO",
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": 5,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "GobbiebagQuest helper. Reward = fame/title only; bag expansion is player:changeContainerSize(INVENTORY,+5) (and MOGSATCHEL) in quest:complete \u2014 recorded as expandInventory."
+    },
+    "3:30": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 30,
+      "quest_name": "THE_GOBBIEBAG_PART_IV",
+      "source_path": "scripts/quests/jeuno/The_Gobbiebag_Part_IV.lua",
+      "helper_base": "xi.jeuno.helpers.GobbiebagQuest",
+      "rewards": {
+        "items": [],
+        "keyItems": [],
+        "fame": 30,
+        "fameArea": "JEUNO",
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": 5,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "GobbiebagQuest helper. Reward = fame/title only; bag expansion is player:changeContainerSize(INVENTORY,+5) (and MOGSATCHEL) in quest:complete \u2014 recorded as expandInventory."
+    },
+    "3:31": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 31,
+      "quest_name": "MYSTERIES_OF_BEADEAUX_I",
+      "source_path": "scripts/quests/jeuno/Mysteries_of_Beadeaux_I.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [],
+        "keyItems": [
+          46
+        ],
+        "fame": 30,
+        "fameArea": "JEUNO",
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "On begin also addQuest MYSTERIES_OF_BEADEAUX_II."
+    },
+    "3:32": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 32,
+      "quest_name": "MYSTERIES_OF_BEADEAUX_II",
+      "source_path": "scripts/quests/jeuno/Mysteries_of_Beadeaux_II.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [],
+        "keyItems": [
+          47
+        ],
+        "fame": 30,
+        "fameArea": "JEUNO",
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": ""
+    },
+    "3:42": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 42,
+      "quest_name": "THE_GOBLIN_TAILOR",
+      "source_path": "scripts/quests/jeuno/The_Goblin_Tailor.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [
+          {
+            "id": 12654,
+            "qty": 1
+          },
+          {
+            "id": 12761,
+            "qty": 1
+          },
+          {
+            "id": 12871,
+            "qty": 1
+          },
+          {
+            "id": 13015,
+            "qty": 1
+          },
+          {
+            "id": 12655,
+            "qty": 1
+          },
+          {
+            "id": 12762,
+            "qty": 1
+          },
+          {
+            "id": 12872,
+            "qty": 1
+          },
+          {
+            "id": 13016,
+            "qty": 1
+          },
+          {
+            "id": 12656,
+            "qty": 1
+          },
+          {
+            "id": 12763,
+            "qty": 1
+          },
+          {
+            "id": 12873,
+            "qty": 1
+          },
+          {
+            "id": 13017,
+            "qty": 1
+          },
+          {
+            "id": 12657,
+            "qty": 1
+          },
+          {
+            "id": 12764,
+            "qty": 1
+          },
+          {
+            "id": 12874,
+            "qty": 1
+          },
+          {
+            "id": 13018,
+            "qty": 1
+          },
+          {
+            "id": 12658,
+            "qty": 1
+          },
+          {
+            "id": 12765,
+            "qty": 1
+          },
+          {
+            "id": 12875,
+            "qty": 1
+          },
+          {
+            "id": 13019,
+            "qty": 1
+          },
+          {
+            "id": 12659,
+            "qty": 1
+          },
+          {
+            "id": 12766,
+            "qty": 1
+          },
+          {
+            "id": 12876,
+            "qty": 1
+          },
+          {
+            "id": 13020,
+            "qty": 1
+          },
+          {
+            "id": 12660,
+            "qty": 1
+          },
+          {
+            "id": 12767,
+            "qty": 1
+          },
+          {
+            "id": 12877,
+            "qty": 1
+          },
+          {
+            "id": 13021,
+            "qty": 1
+          }
+        ],
+        "keyItems": [],
+        "fame": 30,
+        "fameArea": "JEUNO",
+        "gil": 0,
+        "bayld": 0,
+        "title": "GOBLINS_EXCLUSIVE_FASHION_MANNEQUIN",
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": {
+        "type": "race_and_choice_variant",
+        "options": [
+          "RSE: 7 races x 4 pieces (body/hands/legs/feet) \u2014 player picks one for their race"
+        ]
+      },
+      "notes": "Reward is a single race/gender-appropriate RSE piece granted via npcUtil.giveItem at completion, NOT in quest.reward. All 28 flattened (over-grants across races, acceptable in singleplayer)."
+    },
+    "3:43": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 43,
+      "quest_name": "PRETTY_LITTLE_THINGS",
+      "source_path": "scripts/quests/jeuno/Pretty_Little_Things.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [],
+        "keyItems": [],
+        "fame": 30,
+        "fameArea": "JEUNO",
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "On complete sets Mog House exit flag (setMoghouseFlag 0x0008) \u2014 out of cascade scope."
+    },
+    "3:44": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 44,
+      "quest_name": "BORGHERTZS_WARRING_HANDS",
+      "source_path": "scripts/quests/jeuno/Borghertzs_Warring_Hands.lua",
+      "helper_base": "xi.jeuno.helpers.BorghertzQuests",
+      "rewards": {
+        "items": [
+          {
+            "id": 13961,
+            "qty": 1
+          }
+        ],
+        "keyItems": [],
+        "fame": null,
+        "fameArea": null,
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "BorghertzQuests helper. quest.reward.item = handAFId (AF gloves). The 2 optional AF pieces per job come from Treasure Coffers (xi.treasure.onTrade), not quest.reward \u2014 not captured."
+    },
+    "3:45": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 45,
+      "quest_name": "BORGHERTZS_STRIKING_HANDS",
+      "source_path": "scripts/quests/jeuno/Borghertzs_Striking_Hands.lua",
+      "helper_base": "xi.jeuno.helpers.BorghertzQuests",
+      "rewards": {
+        "items": [
+          {
+            "id": 13962,
+            "qty": 1
+          }
+        ],
+        "keyItems": [],
+        "fame": null,
+        "fameArea": null,
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "BorghertzQuests helper. quest.reward.item = handAFId (AF gloves). The 2 optional AF pieces per job come from Treasure Coffers (xi.treasure.onTrade), not quest.reward \u2014 not captured."
+    },
+    "3:46": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 46,
+      "quest_name": "BORGHERTZS_HEALING_HANDS",
+      "source_path": "scripts/quests/jeuno/Borghertzs_Healing_Hands.lua",
+      "helper_base": "xi.jeuno.helpers.BorghertzQuests",
+      "rewards": {
+        "items": [
+          {
+            "id": 13963,
+            "qty": 1
+          }
+        ],
+        "keyItems": [],
+        "fame": null,
+        "fameArea": null,
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "BorghertzQuests helper. quest.reward.item = handAFId (AF gloves). The 2 optional AF pieces per job come from Treasure Coffers (xi.treasure.onTrade), not quest.reward \u2014 not captured."
+    },
+    "3:47": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 47,
+      "quest_name": "BORGHERTZS_SORCEROUS_HANDS",
+      "source_path": "scripts/quests/jeuno/Borghertzs_Sorcerous_Hands.lua",
+      "helper_base": "xi.jeuno.helpers.BorghertzQuests",
+      "rewards": {
+        "items": [
+          {
+            "id": 13964,
+            "qty": 1
+          }
+        ],
+        "keyItems": [],
+        "fame": null,
+        "fameArea": null,
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "BorghertzQuests helper. quest.reward.item = handAFId (AF gloves). The 2 optional AF pieces per job come from Treasure Coffers (xi.treasure.onTrade), not quest.reward \u2014 not captured."
+    },
+    "3:48": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 48,
+      "quest_name": "BORGHERTZS_VERMILLION_HANDS",
+      "source_path": "scripts/quests/jeuno/Borghertzs_Vermillion_Hands.lua",
+      "helper_base": "xi.jeuno.helpers.BorghertzQuests",
+      "rewards": {
+        "items": [
+          {
+            "id": 13965,
+            "qty": 1
+          }
+        ],
+        "keyItems": [],
+        "fame": null,
+        "fameArea": null,
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "BorghertzQuests helper. quest.reward.item = handAFId (AF gloves). The 2 optional AF pieces per job come from Treasure Coffers (xi.treasure.onTrade), not quest.reward \u2014 not captured."
+    },
+    "3:49": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 49,
+      "quest_name": "BORGHERTZS_SNEAKY_HANDS",
+      "source_path": "scripts/quests/jeuno/Borghertzs_Sneaky_Hands.lua",
+      "helper_base": "xi.jeuno.helpers.BorghertzQuests",
+      "rewards": {
+        "items": [
+          {
+            "id": 13966,
+            "qty": 1
+          }
+        ],
+        "keyItems": [],
+        "fame": null,
+        "fameArea": null,
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "BorghertzQuests helper. quest.reward.item = handAFId (AF gloves). The 2 optional AF pieces per job come from Treasure Coffers (xi.treasure.onTrade), not quest.reward \u2014 not captured."
+    },
+    "3:50": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 50,
+      "quest_name": "BORGHERTZS_STALWART_HANDS",
+      "source_path": "scripts/quests/jeuno/Borghertzs_Stalwart_Hands.lua",
+      "helper_base": "xi.jeuno.helpers.BorghertzQuests",
+      "rewards": {
+        "items": [
+          {
+            "id": 13967,
+            "qty": 1
+          }
+        ],
+        "keyItems": [],
+        "fame": null,
+        "fameArea": null,
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "BorghertzQuests helper. quest.reward.item = handAFId (AF gloves). The 2 optional AF pieces per job come from Treasure Coffers (xi.treasure.onTrade), not quest.reward \u2014 not captured."
+    },
+    "3:51": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 51,
+      "quest_name": "BORGHERTZS_SHADOWY_HANDS",
+      "source_path": "scripts/quests/jeuno/Borghertzs_Shadowy_Hands.lua",
+      "helper_base": "xi.jeuno.helpers.BorghertzQuests",
+      "rewards": {
+        "items": [
+          {
+            "id": 13968,
+            "qty": 1
+          }
+        ],
+        "keyItems": [],
+        "fame": null,
+        "fameArea": null,
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "BorghertzQuests helper. quest.reward.item = handAFId (AF gloves). The 2 optional AF pieces per job come from Treasure Coffers (xi.treasure.onTrade), not quest.reward \u2014 not captured."
+    },
+    "3:52": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 52,
+      "quest_name": "BORGHERTZS_WILD_HANDS",
+      "source_path": "scripts/quests/jeuno/Borghertzs_Wild_Hands.lua",
+      "helper_base": "xi.jeuno.helpers.BorghertzQuests",
+      "rewards": {
+        "items": [
+          {
+            "id": 13969,
+            "qty": 1
+          }
+        ],
+        "keyItems": [],
+        "fame": null,
+        "fameArea": null,
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "BorghertzQuests helper. quest.reward.item = handAFId (AF gloves). The 2 optional AF pieces per job come from Treasure Coffers (xi.treasure.onTrade), not quest.reward \u2014 not captured."
+    },
+    "3:53": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 53,
+      "quest_name": "BORGHERTZS_HARMONIOUS_HANDS",
+      "source_path": "scripts/quests/jeuno/Borghertzs_Harmonious_Hands.lua",
+      "helper_base": "xi.jeuno.helpers.BorghertzQuests",
+      "rewards": {
+        "items": [
+          {
+            "id": 13970,
+            "qty": 1
+          }
+        ],
+        "keyItems": [],
+        "fame": null,
+        "fameArea": null,
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "BorghertzQuests helper. quest.reward.item = handAFId (AF gloves). The 2 optional AF pieces per job come from Treasure Coffers (xi.treasure.onTrade), not quest.reward \u2014 not captured."
+    },
+    "3:54": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 54,
+      "quest_name": "BORGHERTZS_CHASING_HANDS",
+      "source_path": "scripts/quests/jeuno/Borghertzs_Chasing_Hands.lua",
+      "helper_base": "xi.jeuno.helpers.BorghertzQuests",
+      "rewards": {
+        "items": [
+          {
+            "id": 13971,
+            "qty": 1
+          }
+        ],
+        "keyItems": [],
+        "fame": null,
+        "fameArea": null,
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "BorghertzQuests helper. quest.reward.item = handAFId (AF gloves). The 2 optional AF pieces per job come from Treasure Coffers (xi.treasure.onTrade), not quest.reward \u2014 not captured."
+    },
+    "3:55": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 55,
+      "quest_name": "BORGHERTZS_LOYAL_HANDS",
+      "source_path": "scripts/quests/jeuno/Borghertzs_Loyal_Hands.lua",
+      "helper_base": "xi.jeuno.helpers.BorghertzQuests",
+      "rewards": {
+        "items": [
+          {
+            "id": 13972,
+            "qty": 1
+          }
+        ],
+        "keyItems": [],
+        "fame": null,
+        "fameArea": null,
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "BorghertzQuests helper. quest.reward.item = handAFId (AF gloves). The 2 optional AF pieces per job come from Treasure Coffers (xi.treasure.onTrade), not quest.reward \u2014 not captured."
+    },
+    "3:56": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 56,
+      "quest_name": "BORGHERTZS_LURKING_HANDS",
+      "source_path": "scripts/quests/jeuno/Borghertzs_Lurking_Hands.lua",
+      "helper_base": "xi.jeuno.helpers.BorghertzQuests",
+      "rewards": {
+        "items": [
+          {
+            "id": 13973,
+            "qty": 1
+          }
+        ],
+        "keyItems": [],
+        "fame": null,
+        "fameArea": null,
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "BorghertzQuests helper. quest.reward.item = handAFId (AF gloves). The 2 optional AF pieces per job come from Treasure Coffers (xi.treasure.onTrade), not quest.reward \u2014 not captured."
+    },
+    "3:57": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 57,
+      "quest_name": "BORGHERTZS_DRAGON_HANDS",
+      "source_path": "scripts/quests/jeuno/Borghertzs_Dragon_Hands.lua",
+      "helper_base": "xi.jeuno.helpers.BorghertzQuests",
+      "rewards": {
+        "items": [
+          {
+            "id": 13974,
+            "qty": 1
+          }
+        ],
+        "keyItems": [],
+        "fame": null,
+        "fameArea": null,
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "BorghertzQuests helper. quest.reward.item = handAFId (AF gloves). The 2 optional AF pieces per job come from Treasure Coffers (xi.treasure.onTrade), not quest.reward \u2014 not captured."
+    },
+    "3:58": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 58,
+      "quest_name": "BORGHERTZS_CALLING_HANDS",
+      "source_path": "scripts/quests/jeuno/Borghertzs_Calling_Hands.lua",
+      "helper_base": "xi.jeuno.helpers.BorghertzQuests",
+      "rewards": {
+        "items": [
+          {
+            "id": 13975,
+            "qty": 1
+          }
+        ],
+        "keyItems": [],
+        "fame": null,
+        "fameArea": null,
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "BorghertzQuests helper. quest.reward.item = handAFId (AF gloves). The 2 optional AF pieces per job come from Treasure Coffers (xi.treasure.onTrade), not quest.reward \u2014 not captured."
+    },
+    "3:59": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 59,
+      "quest_name": "AXE_THE_COMPETITION",
+      "source_path": "scripts/quests/jeuno/Axe_the_Competition.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [],
+        "keyItems": [],
+        "fame": 30,
+        "fameArea": "JEUNO",
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": "DECIMATION",
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "Grants player:addLearnedWeaponskill(DECIMATION). Mid-quest KIs/items (PICK_OF_TRIALS, ANNALS_OF_TRUTH) are not rewards."
+    },
+    "3:60": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 60,
+      "quest_name": "WINGS_OF_GOLD",
+      "source_path": "scripts/quests/jeuno/Wings_of_Gold.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [
+          {
+            "id": 16680,
+            "qty": 1
+          }
+        ],
+        "keyItems": [],
+        "fame": 20,
+        "fameArea": "JEUNO",
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": ""
+    },
+    "3:61": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 61,
+      "quest_name": "SCATTERED_INTO_SHADOW",
+      "source_path": "scripts/quests/jeuno/Scattered_into_Shadow.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [
+          {
+            "id": 14097,
+            "qty": 1
+          }
+        ],
+        "keyItems": [],
+        "fame": 30,
+        "fameArea": "JEUNO",
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": ""
+    },
+    "3:63": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 63,
+      "quest_name": "PAINFUL_MEMORY",
+      "source_path": "scripts/quests/jeuno/Painful_Memory.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [
+          {
+            "id": 16766,
+            "qty": 1
+          }
+        ],
+        "keyItems": [],
+        "fame": null,
+        "fameArea": null,
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": ""
+    },
+    "3:68": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 68,
+      "quest_name": "DUCAL_HOSPITALITY",
+      "source_path": "scripts/quests/jeuno/Ducal_Hospitality.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [],
+        "keyItems": [],
+        "fame": 50,
+        "fameArea": "JEUNO",
+        "gil": 4000,
+        "bayld": 0,
+        "title": "DUCAL_DUPE",
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "Repeatable quest. Repeat path re-grants gil 4000 + fame 50 via giveCurrency/addFame (not addGil, repeat-only)."
+    },
+    "3:69": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 69,
+      "quest_name": "IN_THE_MOOD_FOR_LOVE",
+      "source_path": "scripts/quests/jeuno/In_the_Mood_for_Love.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [],
+        "keyItems": [],
+        "fame": 30,
+        "fameArea": "JEUNO",
+        "gil": 4800,
+        "bayld": 0,
+        "title": "PICK_UP_ARTIST",
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": ""
+    },
+    "3:70": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 70,
+      "quest_name": "EMPTY_MEMORIES",
+      "source_path": "scripts/quests/jeuno/Empty_Memories.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [
+          {
+            "id": 5262,
+            "qty": 1
+          },
+          {
+            "id": 5261,
+            "qty": 1
+          },
+          {
+            "id": 5263,
+            "qty": 1
+          },
+          {
+            "id": 17208,
+            "qty": 1
+          },
+          {
+            "id": 13177,
+            "qty": 1
+          },
+          {
+            "id": 17466,
+            "qty": 1
+          }
+        ],
+        "keyItems": [],
+        "fame": 5,
+        "fameArea": "JEUNO",
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": {
+        "type": "choose_one_of_many",
+        "options": [
+          "BOTTLE_OF_HYSTEROANIMA",
+          "BOTTLE_OF_PSYCHOANIMA",
+          "BOTTLE_OF_TERROANIMA",
+          "HAMAYUMI",
+          "STONE_GORGET",
+          "DIA_WAND"
+        ]
+      },
+      "notes": "quest.reward carries only fame=5; chosen item + extra 25 fame applied in handler. First three options cost 2000 gil (delGil)."
+    },
+    "3:71": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 71,
+      "quest_name": "HOOK_LINE_AND_SINKER",
+      "source_path": "scripts/quests/jeuno/Hook_Line_and_Sinker.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [],
+        "keyItems": [],
+        "fame": null,
+        "fameArea": null,
+        "gil": 3000,
+        "bayld": 0,
+        "title": "ROD_RETRIEVER",
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": ""
+    },
+    "3:72": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 72,
+      "quest_name": "A_CHOCOBOS_TALE",
+      "source_path": "scripts/quests/jeuno/A_Chocobos_Tale.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [],
+        "keyItems": [],
+        "fame": 30,
+        "fameArea": "JEUNO",
+        "gil": 5200,
+        "bayld": 0,
+        "title": "CHOCOBO_LOVE_GURU",
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": ""
+    },
+    "3:74": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 74,
+      "quest_name": "THE_GOBBIEBAG_PART_V",
+      "source_path": "scripts/quests/jeuno/The_Gobbiebag_Part_V.lua",
+      "helper_base": "xi.jeuno.helpers.GobbiebagQuest",
+      "rewards": {
+        "items": [],
+        "keyItems": [],
+        "fame": 30,
+        "fameArea": "JEUNO",
+        "gil": 0,
+        "bayld": 0,
+        "title": "GREEDALOX",
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": 5,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "GobbiebagQuest helper. Reward = fame/title only; bag expansion is player:changeContainerSize(INVENTORY,+5) (and MOGSATCHEL) in quest:complete \u2014 recorded as expandInventory."
+    },
+    "3:75": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 75,
+      "quest_name": "THE_GOBBIEBAG_PART_VI",
+      "source_path": "scripts/quests/jeuno/The_Gobbiebag_Part_VI.lua",
+      "helper_base": "xi.jeuno.helpers.GobbiebagQuest",
+      "rewards": {
+        "items": [],
+        "keyItems": [],
+        "fame": 30,
+        "fameArea": "JEUNO",
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": 5,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "GobbiebagQuest helper. Reward = fame/title only; bag expansion is player:changeContainerSize(INVENTORY,+5) (and MOGSATCHEL) in quest:complete \u2014 recorded as expandInventory."
+    },
+    "3:76": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 76,
+      "quest_name": "BEYOND_THE_SUN",
+      "source_path": "scripts/quests/jeuno/LB05_2_Beyond_the_Sun.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [
+          {
+            "id": 15194,
+            "qty": 1
+          }
+        ],
+        "keyItems": [],
+        "fame": null,
+        "fameArea": null,
+        "gil": 0,
+        "bayld": 0,
+        "title": "ULTIMATE_CHAMPION_OF_THE_WORLD",
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": ""
+    },
+    "3:77": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 77,
+      "quest_name": "UNLISTED_QUALITIES",
+      "source_path": "scripts/quests/jeuno/Unlisted_Qualities.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [],
+        "keyItems": [],
+        "fame": null,
+        "fameArea": null,
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "No quest.reward table. Completion is currently DISABLED (the quest:complete + giveItem SILVER_INGOT block is commented out pending core Fellow-save support). Intended reward: SILVER_INGOT."
+    },
+    "3:86": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 86,
+      "quest_name": "STORMS_OF_FATE",
+      "source_path": "scripts/quests/jeuno/Storms_of_Fate.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [],
+        "keyItems": [],
+        "fame": null,
+        "fameArea": null,
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "quest.reward = {} (completion-only). Mid-quest KI WHISPER_OF_THE_WYRMKING only."
+    },
+    "3:88": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 88,
+      "quest_name": "SHADOWS_OF_THE_DEPARTED",
+      "source_path": "scripts/quests/jeuno/Shadows_of_the_Departed.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [],
+        "keyItems": [],
+        "fame": null,
+        "fameArea": null,
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "quest.reward = {} (completion-only). Mid-quest KIs only. Sets var/mustZone for APOCALYPSE_NIGH follow-up."
+    },
+    "3:89": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 89,
+      "quest_name": "APOCALYPSE_NIGH",
+      "source_path": "scripts/quests/jeuno/Apocalypse_Nigh.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [
+          {
+            "id": 15962,
+            "qty": 1
+          },
+          {
+            "id": 15963,
+            "qty": 1
+          },
+          {
+            "id": 15964,
+            "qty": 1
+          },
+          {
+            "id": 15965,
+            "qty": 1
+          }
+        ],
+        "keyItems": [],
+        "fame": null,
+        "fameArea": null,
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": {
+        "type": "choose_one_of_many",
+        "options": [
+          "STATIC_EARRING",
+          "MAGNETIC_EARRING",
+          "HOLLOW_EARRING",
+          "ETHEREAL_EARRING"
+        ]
+      },
+      "notes": "quest.reward is empty {}; earring granted via npcUtil.giveItem(STATIC+option-1) in event handler \u2014 captured here by flattening all 4."
+    },
+    "3:90": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 90,
+      "quest_name": "LURE_OF_THE_WILDCAT",
+      "source_path": "scripts/quests/jeuno/Lure_of_the_Wildcat_Jeuno.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [],
+        "keyItems": [
+          756
+        ],
+        "fame": 150,
+        "fameArea": "JEUNO",
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": ""
+    },
+    "3:91": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 91,
+      "quest_name": "THE_ROAD_TO_AHT_URHGAN",
+      "source_path": "scripts/quests/jeuno/The_Road_to_Aht_Urhgan.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [],
+        "keyItems": [],
+        "fame": 30,
+        "fameArea": "JEUNO",
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "Gated by ENABLE_TOAU. Grants KIs BOARDING_PERMIT / MAP_OF_WAJAOM_WOODLANDS mid-quest; has a delGil(500000) sink (not a reward)."
+    },
+    "3:92": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 92,
+      "quest_name": "CHOCOBO_ON_THE_LOOSE",
+      "source_path": "scripts/quests/jeuno/Chocobo_on_the_Loose.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [
+          {
+            "id": 2312,
+            "qty": 1
+          }
+        ],
+        "keyItems": [],
+        "fame": null,
+        "fameArea": null,
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "In-script TODO: verify the egg item id."
+    },
+    "3:93": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 93,
+      "quest_name": "THE_GOBBIEBAG_PART_VII",
+      "source_path": "scripts/quests/jeuno/The_Gobbiebag_Part_VII.lua",
+      "helper_base": "xi.jeuno.helpers.GobbiebagQuest",
+      "rewards": {
+        "items": [],
+        "keyItems": [],
+        "fame": 30,
+        "fameArea": "JEUNO",
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": 5,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "GobbiebagQuest helper. Reward = fame/title only; bag expansion is player:changeContainerSize(INVENTORY,+5) (and MOGSATCHEL) in quest:complete \u2014 recorded as expandInventory."
+    },
+    "3:94": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 94,
+      "quest_name": "THE_GOBBIEBAG_PART_VIII",
+      "source_path": "scripts/quests/jeuno/The_Gobbiebag_Part_VIII.lua",
+      "helper_base": "xi.jeuno.helpers.GobbiebagQuest",
+      "rewards": {
+        "items": [],
+        "keyItems": [],
+        "fame": 30,
+        "fameArea": "JEUNO",
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": 5,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "GobbiebagQuest helper. Reward = fame/title only; bag expansion is player:changeContainerSize(INVENTORY,+5) (and MOGSATCHEL) in quest:complete \u2014 recorded as expandInventory."
+    },
+    "3:95": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 95,
+      "quest_name": "LAKESIDE_MINUET",
+      "source_path": "scripts/quests/jeuno/Lakeside_Minuet.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [],
+        "keyItems": [],
+        "fame": 30,
+        "fameArea": "JEUNO",
+        "gil": 0,
+        "bayld": 0,
+        "title": "TROUPE_BRILIOTH_DANCER",
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": "DNC",
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "Unlocks DNC in onEventFinish[10118] alongside quest:complete."
+    },
+    "3:96": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 96,
+      "quest_name": "THE_UNFINISHED_WALTZ",
+      "source_path": "scripts/quests/jeuno/DNC_AF1_The_Unfinished_Waltz.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [
+          {
+            "id": 19203,
+            "qty": 1
+          }
+        ],
+        "keyItems": [],
+        "fame": null,
+        "fameArea": null,
+        "gil": 0,
+        "bayld": 0,
+        "title": "PROMISING_DANCER",
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": ""
+    },
+    "3:97": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 97,
+      "quest_name": "THE_ROAD_TO_DIVADOM",
+      "source_path": "scripts/quests/jeuno/DNC_AF2_The_Road_to_Divadom.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [
+          {
+            "id": 15659,
+            "qty": 1
+          },
+          {
+            "id": 15660,
+            "qty": 1
+          }
+        ],
+        "keyItems": [],
+        "fame": null,
+        "fameArea": null,
+        "gil": 0,
+        "bayld": 0,
+        "title": "STARDUST_DANCER",
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": {
+        "type": "gender_variant",
+        "options": [
+          "DANCERS_TIGHTS_M",
+          "DANCERS_TIGHTS_F"
+        ]
+      },
+      "notes": "Reward item is gender-specific (DANCERS_TIGHTS_M/F) via npcUtil.giveItem outside quest.reward \u2014 both flattened."
+    },
+    "3:98": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 98,
+      "quest_name": "COMEBACK_QUEEN",
+      "source_path": "scripts/quests/jeuno/DNC_AF3_Comeback_Queen.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [
+          {
+            "id": 14578,
+            "qty": 1
+          },
+          {
+            "id": 14579,
+            "qty": 1
+          }
+        ],
+        "keyItems": [],
+        "fame": null,
+        "fameArea": null,
+        "gil": 0,
+        "bayld": 0,
+        "title": "ELEGANT_DANCER",
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": {
+        "type": "gender_variant",
+        "options": [
+          "DANCERS_CASAQUE_M",
+          "DANCERS_CASAQUE_F"
+        ]
+      },
+      "notes": "Reward item is gender-specific (DANCERS_CASAQUE_M/F) outside quest.reward \u2014 both flattened."
+    },
+    "3:102": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 102,
+      "quest_name": "UNLOCKING_A_MYTH_WARRIOR",
+      "source_path": "scripts/quests/jeuno/Unlocking_A_Myth_WAR.lua",
+      "helper_base": "xi.jeuno.helpers.UnlockingAMyth",
+      "rewards": {
+        "items": [],
+        "keyItems": [],
+        "fame": null,
+        "fameArea": null,
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": "KINGS_JUSTICE",
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "UnlockingAMyth helper. NO quest.reward; player keeps traded vigil weapon (net zero) and gets player:addLearnedWeaponskill \u2014 recorded as unlockWeaponskill. Not a keyItem."
+    },
+    "3:103": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 103,
+      "quest_name": "UNLOCKING_A_MYTH_MONK",
+      "source_path": "scripts/quests/jeuno/Unlocking_A_Myth_MNK.lua",
+      "helper_base": "xi.jeuno.helpers.UnlockingAMyth",
+      "rewards": {
+        "items": [],
+        "keyItems": [],
+        "fame": null,
+        "fameArea": null,
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": "ASCETICS_FURY",
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "UnlockingAMyth helper. NO quest.reward; player keeps traded vigil weapon (net zero) and gets player:addLearnedWeaponskill \u2014 recorded as unlockWeaponskill. Not a keyItem."
+    },
+    "3:104": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 104,
+      "quest_name": "UNLOCKING_A_MYTH_WHITE_MAGE",
+      "source_path": "scripts/quests/jeuno/Unlocking_A_Myth_WHM.lua",
+      "helper_base": "xi.jeuno.helpers.UnlockingAMyth",
+      "rewards": {
+        "items": [],
+        "keyItems": [],
+        "fame": null,
+        "fameArea": null,
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": "MYSTIC_BOON",
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "UnlockingAMyth helper. NO quest.reward; player keeps traded vigil weapon (net zero) and gets player:addLearnedWeaponskill \u2014 recorded as unlockWeaponskill. Not a keyItem."
+    },
+    "3:105": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 105,
+      "quest_name": "UNLOCKING_A_MYTH_BLACK_MAGE",
+      "source_path": "scripts/quests/jeuno/Unlocking_A_Myth_BLM.lua",
+      "helper_base": "xi.jeuno.helpers.UnlockingAMyth",
+      "rewards": {
+        "items": [],
+        "keyItems": [],
+        "fame": null,
+        "fameArea": null,
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": "VIDOHUNIR",
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "UnlockingAMyth helper. NO quest.reward; player keeps traded vigil weapon (net zero) and gets player:addLearnedWeaponskill \u2014 recorded as unlockWeaponskill. Not a keyItem."
+    },
+    "3:106": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 106,
+      "quest_name": "UNLOCKING_A_MYTH_RED_MAGE",
+      "source_path": "scripts/quests/jeuno/Unlocking_A_Myth_RDM.lua",
+      "helper_base": "xi.jeuno.helpers.UnlockingAMyth",
+      "rewards": {
+        "items": [],
+        "keyItems": [],
+        "fame": null,
+        "fameArea": null,
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": "DEATH_BLOSSOM",
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "UnlockingAMyth helper. NO quest.reward; player keeps traded vigil weapon (net zero) and gets player:addLearnedWeaponskill \u2014 recorded as unlockWeaponskill. Not a keyItem."
+    },
+    "3:107": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 107,
+      "quest_name": "UNLOCKING_A_MYTH_THIEF",
+      "source_path": "scripts/quests/jeuno/Unlocking_A_Myth_THF.lua",
+      "helper_base": "xi.jeuno.helpers.UnlockingAMyth",
+      "rewards": {
+        "items": [],
+        "keyItems": [],
+        "fame": null,
+        "fameArea": null,
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": "MANDALIC_STAB",
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "UnlockingAMyth helper. NO quest.reward; player keeps traded vigil weapon (net zero) and gets player:addLearnedWeaponskill \u2014 recorded as unlockWeaponskill. Not a keyItem."
+    },
+    "3:108": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 108,
+      "quest_name": "UNLOCKING_A_MYTH_PALADIN",
+      "source_path": "scripts/quests/jeuno/Unlocking_A_Myth_PLD.lua",
+      "helper_base": "xi.jeuno.helpers.UnlockingAMyth",
+      "rewards": {
+        "items": [],
+        "keyItems": [],
+        "fame": null,
+        "fameArea": null,
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": "ATONEMENT",
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "UnlockingAMyth helper. NO quest.reward; player keeps traded vigil weapon (net zero) and gets player:addLearnedWeaponskill \u2014 recorded as unlockWeaponskill. Not a keyItem."
+    },
+    "3:109": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 109,
+      "quest_name": "UNLOCKING_A_MYTH_DARK_KNIGHT",
+      "source_path": "scripts/quests/jeuno/Unlocking_A_Myth_DRK.lua",
+      "helper_base": "xi.jeuno.helpers.UnlockingAMyth",
+      "rewards": {
+        "items": [],
+        "keyItems": [],
+        "fame": null,
+        "fameArea": null,
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": "INSURGENCY",
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "UnlockingAMyth helper. NO quest.reward; player keeps traded vigil weapon (net zero) and gets player:addLearnedWeaponskill \u2014 recorded as unlockWeaponskill. Not a keyItem."
+    },
+    "3:110": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 110,
+      "quest_name": "UNLOCKING_A_MYTH_BEASTMASTER",
+      "source_path": "scripts/quests/jeuno/Unlocking_A_Myth_BST.lua",
+      "helper_base": "xi.jeuno.helpers.UnlockingAMyth",
+      "rewards": {
+        "items": [],
+        "keyItems": [],
+        "fame": null,
+        "fameArea": null,
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": "PRIMAL_REND",
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "UnlockingAMyth helper. NO quest.reward; player keeps traded vigil weapon (net zero) and gets player:addLearnedWeaponskill \u2014 recorded as unlockWeaponskill. Not a keyItem."
+    },
+    "3:111": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 111,
+      "quest_name": "UNLOCKING_A_MYTH_BARD",
+      "source_path": "scripts/quests/jeuno/Unlocking_A_Myth_BRD.lua",
+      "helper_base": "xi.jeuno.helpers.UnlockingAMyth",
+      "rewards": {
+        "items": [],
+        "keyItems": [],
+        "fame": null,
+        "fameArea": null,
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": "MORDANT_RIME",
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "UnlockingAMyth helper. NO quest.reward; player keeps traded vigil weapon (net zero) and gets player:addLearnedWeaponskill \u2014 recorded as unlockWeaponskill. Not a keyItem."
+    },
+    "3:112": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 112,
+      "quest_name": "UNLOCKING_A_MYTH_RANGER",
+      "source_path": "scripts/quests/jeuno/Unlocking_A_Myth_RNG.lua",
+      "helper_base": "xi.jeuno.helpers.UnlockingAMyth",
+      "rewards": {
+        "items": [],
+        "keyItems": [],
+        "fame": null,
+        "fameArea": null,
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": "TRUEFLIGHT",
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "UnlockingAMyth helper. NO quest.reward; player keeps traded vigil weapon (net zero) and gets player:addLearnedWeaponskill \u2014 recorded as unlockWeaponskill. Not a keyItem."
+    },
+    "3:113": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 113,
+      "quest_name": "UNLOCKING_A_MYTH_SAMURAI",
+      "source_path": "scripts/quests/jeuno/Unlocking_A_Myth_SAM.lua",
+      "helper_base": "xi.jeuno.helpers.UnlockingAMyth",
+      "rewards": {
+        "items": [],
+        "keyItems": [],
+        "fame": null,
+        "fameArea": null,
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": "TACHI_RANA",
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "UnlockingAMyth helper. NO quest.reward; player keeps traded vigil weapon (net zero) and gets player:addLearnedWeaponskill \u2014 recorded as unlockWeaponskill. Not a keyItem."
+    },
+    "3:114": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 114,
+      "quest_name": "UNLOCKING_A_MYTH_NINJA",
+      "source_path": "scripts/quests/jeuno/Unlocking_A_Myth_NIN.lua",
+      "helper_base": "xi.jeuno.helpers.UnlockingAMyth",
+      "rewards": {
+        "items": [],
+        "keyItems": [],
+        "fame": null,
+        "fameArea": null,
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": "BLADE_KAMU",
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "UnlockingAMyth helper. NO quest.reward; player keeps traded vigil weapon (net zero) and gets player:addLearnedWeaponskill \u2014 recorded as unlockWeaponskill. Not a keyItem."
+    },
+    "3:115": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 115,
+      "quest_name": "UNLOCKING_A_MYTH_DRAGOON",
+      "source_path": "scripts/quests/jeuno/Unlocking_A_Myth_DRG.lua",
+      "helper_base": "xi.jeuno.helpers.UnlockingAMyth",
+      "rewards": {
+        "items": [],
+        "keyItems": [],
+        "fame": null,
+        "fameArea": null,
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": "DRAKESBANE",
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "UnlockingAMyth helper. NO quest.reward; player keeps traded vigil weapon (net zero) and gets player:addLearnedWeaponskill \u2014 recorded as unlockWeaponskill. Not a keyItem."
+    },
+    "3:116": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 116,
+      "quest_name": "UNLOCKING_A_MYTH_SUMMONER",
+      "source_path": "scripts/quests/jeuno/Unlocking_A_Myth_SMN.lua",
+      "helper_base": "xi.jeuno.helpers.UnlockingAMyth",
+      "rewards": {
+        "items": [],
+        "keyItems": [],
+        "fame": null,
+        "fameArea": null,
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": "GARLAND_OF_BLISS",
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "UnlockingAMyth helper. NO quest.reward; player keeps traded vigil weapon (net zero) and gets player:addLearnedWeaponskill \u2014 recorded as unlockWeaponskill. Not a keyItem."
+    },
+    "3:117": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 117,
+      "quest_name": "UNLOCKING_A_MYTH_BLUE_MAGE",
+      "source_path": "scripts/quests/jeuno/Unlocking_A_Myth_BLU.lua",
+      "helper_base": "xi.jeuno.helpers.UnlockingAMyth",
+      "rewards": {
+        "items": [],
+        "keyItems": [],
+        "fame": null,
+        "fameArea": null,
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": "EXPIACION",
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "UnlockingAMyth helper. NO quest.reward; player keeps traded vigil weapon (net zero) and gets player:addLearnedWeaponskill \u2014 recorded as unlockWeaponskill. Not a keyItem."
+    },
+    "3:118": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 118,
+      "quest_name": "UNLOCKING_A_MYTH_CORSAIR",
+      "source_path": "scripts/quests/jeuno/Unlocking_A_Myth_COR.lua",
+      "helper_base": "xi.jeuno.helpers.UnlockingAMyth",
+      "rewards": {
+        "items": [],
+        "keyItems": [],
+        "fame": null,
+        "fameArea": null,
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": "LEADEN_SALUTE",
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "UnlockingAMyth helper. NO quest.reward; player keeps traded vigil weapon (net zero) and gets player:addLearnedWeaponskill \u2014 recorded as unlockWeaponskill. Not a keyItem."
+    },
+    "3:119": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 119,
+      "quest_name": "UNLOCKING_A_MYTH_PUPPETMASTER",
+      "source_path": "scripts/quests/jeuno/Unlocking_A_Myth_PUP.lua",
+      "helper_base": "xi.jeuno.helpers.UnlockingAMyth",
+      "rewards": {
+        "items": [],
+        "keyItems": [],
+        "fame": null,
+        "fameArea": null,
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": "STRINGING_PUMMEL",
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "UnlockingAMyth helper. NO quest.reward; player keeps traded vigil weapon (net zero) and gets player:addLearnedWeaponskill \u2014 recorded as unlockWeaponskill. Not a keyItem."
+    },
+    "3:120": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 120,
+      "quest_name": "UNLOCKING_A_MYTH_DANCER",
+      "source_path": "scripts/quests/jeuno/Unlocking_A_Myth_DNC.lua",
+      "helper_base": "xi.jeuno.helpers.UnlockingAMyth",
+      "rewards": {
+        "items": [],
+        "keyItems": [],
+        "fame": null,
+        "fameArea": null,
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": "PYRRHIC_KLEOS",
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "UnlockingAMyth helper. NO quest.reward; player keeps traded vigil weapon (net zero) and gets player:addLearnedWeaponskill \u2014 recorded as unlockWeaponskill. Not a keyItem."
+    },
+    "3:121": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 121,
+      "quest_name": "UNLOCKING_A_MYTH_SCHOLAR",
+      "source_path": "scripts/quests/jeuno/Unlocking_A_Myth_SCH.lua",
+      "helper_base": "xi.jeuno.helpers.UnlockingAMyth",
+      "rewards": {
+        "items": [],
+        "keyItems": [],
+        "fame": null,
+        "fameArea": null,
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": "OMNISCIENCE",
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "UnlockingAMyth helper. NO quest.reward; player keeps traded vigil weapon (net zero) and gets player:addLearnedWeaponskill \u2014 recorded as unlockWeaponskill. Not a keyItem."
+    },
+    "3:123": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 123,
+      "quest_name": "THE_GOBBIEBAG_PART_IX",
+      "source_path": "scripts/quests/jeuno/The_Gobbiebag_Part_IX.lua",
+      "helper_base": "xi.jeuno.helpers.GobbiebagQuest",
+      "rewards": {
+        "items": [],
+        "keyItems": [],
+        "fame": 30,
+        "fameArea": "JEUNO",
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": 5,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "GobbiebagQuest helper. Reward = fame/title only; bag expansion is player:changeContainerSize(INVENTORY,+5) (and MOGSATCHEL) in quest:complete \u2014 recorded as expandInventory."
+    },
+    "3:124": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 124,
+      "quest_name": "THE_GOBBIEBAG_PART_X",
+      "source_path": "scripts/quests/jeuno/The_Gobbiebag_Part_X.lua",
+      "helper_base": "xi.jeuno.helpers.GobbiebagQuest",
+      "rewards": {
+        "items": [],
+        "keyItems": [],
+        "fame": 30,
+        "fameArea": "JEUNO",
+        "gil": 0,
+        "bayld": 0,
+        "title": "GRAND_GREEDALOX",
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": 5,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "GobbiebagQuest helper. Reward = fame/title only; bag expansion is player:changeContainerSize(INVENTORY,+5) (and MOGSATCHEL) in quest:complete \u2014 recorded as expandInventory."
+    },
+    "3:128": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 128,
+      "quest_name": "IN_DEFIANT_CHALLENGE",
+      "source_path": "scripts/quests/jeuno/LB01_In_Defiant_Challenge.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [],
+        "keyItems": [],
+        "fame": 30,
+        "fameArea": "JEUNO",
+        "gil": 0,
+        "bayld": 0,
+        "title": "HORIZON_BREAKER",
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": 55,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": ""
+    },
+    "3:129": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 129,
+      "quest_name": "ATOP_THE_HIGHEST_MOUNTAINS",
+      "source_path": "scripts/quests/jeuno/LB02_Atop_the_Highest_Mountains.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [],
+        "keyItems": [],
+        "fame": 40,
+        "fameArea": "JEUNO",
+        "gil": 0,
+        "bayld": 0,
+        "title": "SUMMIT_BREAKER",
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": 60,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": ""
+    },
+    "3:130": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 130,
+      "quest_name": "WHENCE_BLOWS_THE_WIND",
+      "source_path": "scripts/quests/jeuno/LB03_Whence_Blows_the_wind.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [],
+        "keyItems": [],
+        "fame": 50,
+        "fameArea": "JEUNO",
+        "gil": 0,
+        "bayld": 0,
+        "title": "SKY_BREAKER",
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": 65,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": ""
+    },
+    "3:131": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 131,
+      "quest_name": "RIDING_ON_THE_CLOUDS",
+      "source_path": "scripts/quests/jeuno/LB04_Riding_on_the_clouds.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [],
+        "keyItems": [],
+        "fame": 60,
+        "fameArea": "JEUNO",
+        "gil": 0,
+        "bayld": 0,
+        "title": "CLOUD_BREAKER",
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": 70,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": ""
+    },
+    "3:132": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 132,
+      "quest_name": "SHATTERING_STARS",
+      "source_path": "scripts/quests/jeuno/LB05_1_Shattering_Stars.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [],
+        "keyItems": [],
+        "fame": 80,
+        "fameArea": "JEUNO",
+        "gil": 0,
+        "bayld": 0,
+        "title": "STAR_BREAKER",
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": 75,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "addTitle MAAT_MASHER and SCROLL_OF_INSTANT_WARP are mid-quest battlefield grants, not completion rewards."
+    },
+    "3:133": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 133,
+      "quest_name": "NEW_WORLDS_AWAIT",
+      "source_path": "scripts/quests/jeuno/LB06_New_Worlds_Await.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [],
+        "keyItems": [],
+        "fame": 50,
+        "fameArea": "JEUNO",
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": 80,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "Grants KI LIMIT_BREAKER mid-quest (event option 4). Spends 3 merits."
+    },
+    "3:134": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 134,
+      "quest_name": "EXPANDING_HORIZONS",
+      "source_path": "scripts/quests/jeuno/LB07_Expanding_Horizons.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [],
+        "keyItems": [],
+        "fame": 50,
+        "fameArea": "JEUNO",
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": 85,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "Spends 4 merits."
+    },
+    "3:135": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 135,
+      "quest_name": "BEYOND_THE_STARS",
+      "source_path": "scripts/quests/jeuno/LB08_Beyond_the_Stars.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [],
+        "keyItems": [],
+        "fame": 50,
+        "fameArea": "JEUNO",
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": 90,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "Spends 5 merits."
+    },
+    "3:136": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 136,
+      "quest_name": "DORMANT_POWERS_DISLODGED",
+      "source_path": "scripts/quests/jeuno/LB09_1_Dormant_Powers_Dislodged.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [],
+        "keyItems": [
+          2052
+        ],
+        "fame": 50,
+        "fameArea": "JEUNO",
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": 95,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "Spends 10 merits."
+    },
+    "3:137": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 137,
+      "quest_name": "BEYOND_INFINITY",
+      "source_path": "scripts/quests/jeuno/LB10_Beyond_Infinity.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [],
+        "keyItems": [],
+        "fame": 50,
+        "fameArea": "JEUNO",
+        "gil": 0,
+        "bayld": 0,
+        "title": "BUSHIN_ASPIRANT",
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": 99,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "SCROLL_OF_INSTANT_WARP and KIs (SOUL_GEM_CLASP, JOB_BREAKER) are mid-quest grants, not completion rewards."
+    },
+    "3:167": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 167,
+      "quest_name": "MARTIAL_MASTERY",
+      "source_path": "scripts/quests/jeuno/Martial_Mastery.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [],
+        "keyItems": [
+          2059
+        ],
+        "fame": null,
+        "fameArea": null,
+        "gil": 0,
+        "bayld": 0,
+        "title": "BUSHIN_RYU_INHERITOR",
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "Spends 15 merits."
+    },
+    "3:170": {
+      "log_id": 3,
+      "log_name": "JEUNO",
+      "quest_id": 170,
+      "quest_name": "PRELUDE_TO_PUISSANCE",
+      "source_path": "scripts/quests/jeuno/LB09_2_Prelude_to_Puissance.lua",
+      "helper_base": null,
+      "rewards": {
+        "items": [],
+        "keyItems": [
+          2053
+        ],
+        "fame": 50,
+        "fameArea": "JEUNO",
+        "gil": 0,
+        "bayld": 0,
+        "title": null,
+        "var": {}
+      },
+      "post_complete_grants": {
+        "setLevelCap": null,
+        "setNewMainJobMaxLevel": null,
+        "unlockJob": null,
+        "unlockWeaponskill": null,
+        "expandInventory": null,
+        "addGil": null
+      },
+      "branching": null,
+      "notes": "No setLevelCap here \u2014 level cap to 99 is handled by Beyond Infinity (qid 137). Auto-adds BEYOND_INFINITY on completion."
+    }
+  },
+  "missions": {},
+  "unparseable": []
+}

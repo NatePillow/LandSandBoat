@@ -43,10 +43,12 @@
 #include "packets/s2c/0x009_message.h"
 #include "packets/s2c/0x029_battle_message.h"
 #include "packets/s2c/0x076_group_effects.h"
+#include "packets/s2c/0x160_alliance_effects.h"
 #include "packets/s2c/0x0ac_command_data.h"
 #include "packets/s2c/0x0b4_config.h"
 #include "packets/s2c/0x0c8_group_tbl.h"
 #include "packets/s2c/0x0dd_group_list.h"
+#include "packets/s2c/0x0df_group_attr.h"
 
 // should have brace-or-equal initializers when MSVC supports it
 struct CParty::partyInfo_t
@@ -885,32 +887,63 @@ void CParty::ReloadParty()
             for (auto&& member : party->members)
             {
                 CCharEntity* PChar = (CCharEntity*)member;
+
+                // TODO so these apply party wide effects of some sort? Why were the two non-trust ones not here before?
+                //PChar->PLatentEffectContainer->CheckLatentsPartyJobs();
+                //PChar->PLatentEffectContainer->CheckLatentsPartyMembers(members.size(), trustCount);
+                //PChar->PLatentEffectContainer->CheckLatentsPartyAvatar();
+
                 PChar->ReloadPartyDec();
-                uint16 alliance = 0;
                 PChar->pushPacket<GP_SERV_COMMAND_GROUP_TBL>(party);
                 // auto effects = std::make_unique<GP_SERV_COMMAND_GROUP_EFFECTS>();
-                uint8 j = 0;
+
+                uint8 j = 0; // Local slot (0-5)
+                uint16 current_party_bits = 0;
+                std::vector<CCharEntity*> partyLeaders;
+                std::vector<decltype(info)::value_type> partyLeaderInfos;
+
                 for (auto&& memberinfo : info)
                 {
-                    if ((memberinfo.flags & (PARTY_SECOND | PARTY_THIRD)) != alliance)
+                    uint16 row_party_bits = memberinfo.flags & (PARTY_SECOND | PARTY_THIRD);
+
+                    if (row_party_bits != current_party_bits)
                     {
-                        alliance = memberinfo.flags & (PARTY_SECOND | PARTY_THIRD);
-                        j        = 0;
+                        // 1. Flush trusts for the previous party
+                        for (auto* PLeader : partyLeaders) {
+                            for (auto* PTrust : PLeader->PTrusts) {
+                                if (j >= 6) break;
+                                PChar->pushPacket<GP_SERV_COMMAND_GROUP_LIST>(PTrust, j, partyLeaderInfos[0].flags, partyLeaderInfos[0].zone, PChar->getZone());
+                                j++;
+                            }
+                        }
+                        // 2. RESET j to 0 so the next PC starts at the top of their party window
+                        j = 0;
+                        current_party_bits = row_party_bits;
+                        partyLeaders.clear();
+                        partyLeaderInfos.clear();
                     }
+
                     auto* PPartyMember = zoneutils::GetChar(memberinfo.id);
-                    if (PPartyMember)
-                    {
+                    if (PPartyMember) {
                         PChar->pushPacket<GP_SERV_COMMAND_GROUP_LIST>(PPartyMember, j, memberinfo.flags, PChar->getZone());
-                        // if (memberinfo.partyid == party->GetPartyID() && PPartyMember != PChar)
-                        //    effects->AddMemberEffects(PChar);
-                    }
-                    else
-                    {
-                        uint16 zoneid = memberinfo.zone == 0 ? memberinfo.prev_zone : memberinfo.zone;
-                        PChar->pushPacket<GP_SERV_COMMAND_GROUP_LIST>(memberinfo.id, memberinfo.name, memberinfo.flags, j, zoneid);
+                        if (memberinfo.flags & 0x04) partyLeaders.push_back(PPartyMember);
+                        if (memberinfo.flags & 0x04) partyLeaderInfos.push_back(memberinfo);
+                    } else {
+                        PChar->pushPacket<GP_SERV_COMMAND_GROUP_LIST>(memberinfo.id, memberinfo.name, memberinfo.flags, j, memberinfo.zone);
                     }
                     j++;
                 }
+
+                for (auto* PLeader : partyLeaders)
+                {
+                    for (auto* PTrust : PLeader->PTrusts)
+                    {
+                        if (j >= 6) break;
+                        PChar->pushPacket<GP_SERV_COMMAND_GROUP_LIST>(PTrust, j, partyLeaderInfos[0].flags, partyLeaderInfos[0].zone, PChar->getZone());
+                        j++;
+                    }
+                }
+
                 // PChar->pushPacket(effects.release());
             }
         }
@@ -1276,6 +1309,31 @@ void CParty::PushEffectsPacket()
 
             // Make and send packet for PMemberChar
             PMemberChar->pushPacket<GP_SERV_COMMAND_GROUP_EFFECTS>(sameZoneMembers);
+
+            // Send alliance effects packet covering members from the other alliance parties.
+            if (m_PAlliance)
+            {
+                std::vector<CCharEntity*> allianceMembers;
+                for (auto* PParty : m_PAlliance->partyList)
+                {
+                    if (PParty->m_PartyID == m_PartyID)
+                    {
+                        continue; // Own party already covered by 0x076
+                    }
+                    for (auto& PMemberB : PParty->members)
+                    {
+                        auto* PAllyMember = static_cast<CCharEntity*>(PMemberB);
+                        if (PAllyMember && PAllyMember->getZone() == PMemberChar->getZone())
+                        {
+                            allianceMembers.push_back(PAllyMember);
+                        }
+                    }
+                }
+                if (!allianceMembers.empty())
+                {
+                    PMemberChar->pushPacket<GP_SERV_COMMAND_ALLIANCE_EFFECTS>(allianceMembers);
+                }
+            }
         }
         m_EffectsChanged = false;
     }

@@ -210,6 +210,24 @@ void CMobController::TryLink()
         return;
     }
 
+    // SINGLEPLAYER FORK: skip mob linking when a headless bot is the
+    // aggro target. Pulling a single mob out of a linked group is a
+    // real player skill — path around siblings' link radius, break LoS
+    // through corners, kite through terrain that filters the link
+    // check. That skill is expensive to code in AI; the headless
+    // puller can't do it, and every pull would link. Rather than build
+    // a link-aware puller, we suppress links on the headless side. Real
+    // PC pulls still link — a human can be expected to handle their own
+    // mistakes. Trusts and pets unaffected.
+    if (PTarget->objtype == TYPE_PC)
+    {
+        auto* PChar = static_cast<CCharEntity*>(PTarget);
+        if (PChar->isHeadless())
+        {
+            return;
+        }
+    }
+
     // handle pet behavior on the targets behalf (faster than in ai_pet_dummy)
     // Avatars defend masters by attacking mobs if the avatar isn't attacking anything currently (bodyguard behavior)
     // Alexander, Odin and Atomos are passive and do not protect the master.

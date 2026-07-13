@@ -153,6 +153,15 @@ auto MapEngine::init() -> Task<void>
                      mapIPP.getIP(),
                      mapIPP.getPort());
 
+    // SINGLEPLAYER BEGIN
+    // Wipe any leftover synthetic headless-session rows from the previous run.
+    // Identified by client_addr = 0 (sentinel set in createHeadlessSession);
+    // real client sessions always have a non-zero accountIP. Without this
+    // they'd accumulate forever because the per-server-IPP DELETE above
+    // doesn't match server_addr/server_port = 0.
+    db::preparedStmt("DELETE FROM accounts_sessions WHERE client_addr = 0 AND server_addr = 0 AND server_port = 0");
+    // SINGLEPLAYER END
+
     ShowInfo("do_init: zlib is reading");
     zlib_init();
 

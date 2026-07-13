@@ -54,35 +54,28 @@ mission.sections =
                     if option == 0 then
                         player:updateEvent(0, 1, 0, 0, 0, 0, 0, 0, 0)
 
-                    -- Chosen Balrahn's Ring.
-                    elseif option == 1 then
-                        if npcUtil.giveItem(player, xi.item.BALRAHNS_RING) then
+                    -- Singleplayer over-grant: deliver ALL 4 options (3 rings +
+                    -- Imperial Standard) at once regardless of which is picked.
+                    elseif option >= 1 and option <= 4 then
+                        local allRewards = {
+                            xi.item.BALRAHNS_RING,
+                            xi.item.ULTHALAMS_RING,
+                            xi.item.JALZAHNS_RING,
+                            xi.item.IMPERIAL_STANDARD,
+                        }
+                        local ok = true
+                        for _, id in ipairs(allRewards) do
+                            if not npcUtil.giveItem(player, id) then
+                                ok = false
+                            end
+                        end
+                        if ok then
                             player:updateEvent(1, 1, 0, 0, 0, 0, 0, 0, 0)
-                            player:setCharVar('Mission[4][45]Ring', NextConquestTally(), NextConquestTally())
+                            if option <= 3 then
+                                player:setCharVar('Mission[4][45]Ring', NextConquestTally(), NextConquestTally())
+                            end
                         else
-                            player:updateEvent(1, 1, 0, 0, 0, 0, 0, 0, 0)
-                        end
-
-                    -- Chosen Ulthalam's Ring.
-                    elseif option == 2 then
-                        if npcUtil.giveItem(player, xi.item.ULTHALAMS_RING) then
-                            player:updateEvent(1, 1, 0, 0, 0, 0, 0, 0, 0)
-                            player:setCharVar('Mission[4][45]Ring', NextConquestTally(), NextConquestTally())
-                        end
-
-                    -- Chosen Jalzahn's Ring.
-                    elseif option == 3 then
-                        if npcUtil.giveItem(player, xi.item.JALZAHNS_RING) then
-                            player:updateEvent(1, 1, 0, 0, 0, 0, 0, 0, 0)
-                            player:setCharVar('Mission[4][45]Ring', NextConquestTally(), NextConquestTally())
-                        end
-
-                    -- Get Imperial Standard.
-                    elseif option == 4 then
-                        if npcUtil.giveItem(player, xi.item.IMPERIAL_STANDARD) then
-                            player:updateEvent(1, 1, 0, 0, 0, 0, 0, 0, 0)
-                        else
-                            player:updateEvent(0, 0, 0, 0, 0, 0, 0, 0, 0) -- TODO: Try with full inv.
+                            player:updateEvent(0, 0, 0, 0, 0, 0, 0, 0, 0)
                         end
 
                     -- Offered rings.

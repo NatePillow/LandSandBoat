@@ -263,5 +263,65 @@ set(PACKET_C2S_SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/0x11c_party_request.h
         ${CMAKE_CURRENT_SOURCE_DIR}/0x11d_jump.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/0x11d_jump.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x151_addon_relay.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x151_addon_relay.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x153_request_server_ident.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x153_request_server_ident.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x165_autoscroll.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x165_autoscroll.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x168_autowarp.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x168_autowarp.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x169_autoinvite.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x169_autoinvite.cpp
+        # SINGLEPLAYER BEGIN
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x16a_instance_enter.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x16a_instance_enter.cpp
+        # SINGLEPLAYER END
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x16f_ah_cat_query.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x16f_ah_cat_query.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x171_equip_bot_item.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x171_equip_bot_item.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x173_equip_by_id.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x173_equip_by_id.cpp
+        # SINGLEPLAYER BEGIN
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x175_spawn_headless.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x175_spawn_headless.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x176_headless_command.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x176_headless_command.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x178_set_lot_assignment.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x178_set_lot_assignment.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x17d_use_food_config.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x17d_use_food_config.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x184_lot_list_action.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x184_lot_list_action.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x185_list_alliance_pcs.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x185_list_alliance_pcs.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x18b_list_bot_spells.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x18b_list_bot_spells.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x191_set_autoskill.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x191_set_autoskill.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x193_list_autoskill.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x193_list_autoskill.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x194_automog_transfer.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x194_automog_transfer.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x196_automog_box_pull.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x196_automog_box_pull.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x19a_automog_synth.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x19a_automog_synth.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x162_automog_change_look.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x162_automog_change_look.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x19c_automog_change_job.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x19c_automog_change_job.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x19e_automog_get_job_info.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x19e_automog_get_job_info.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x1a0_bot_command.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x1a0_bot_command.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x1a1_autoequip_copy_xml.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x1a1_autoequip_copy_xml.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x1a2_set_puller_name_filter.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x1a2_set_puller_name_filter.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x1a7_get_char_profile.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/0x1a7_get_char_profile.cpp
+        # SINGLEPLAYER END
         PARENT_SCOPE
 )

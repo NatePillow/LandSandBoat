@@ -67,6 +67,8 @@ zones[xi.zone.KONSCHTAT_HIGHLANDS] =
         FORGER         = GetFirstID('Forger'),
         HATY           = GetFirstID('Haty'),
         BENDIGEIT_VRAN = GetFirstID('Bendigeit_Vran'),
+        GHILLIE_DHU           = GetFirstID('Ghillie_Dhu'),
+        HIGHLANDER_LIZARD     = GetFirstID('Highlander_Lizard'),
 
         VOIDWALKER =
         {

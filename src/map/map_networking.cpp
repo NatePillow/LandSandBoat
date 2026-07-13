@@ -45,19 +45,36 @@
 #include "zone.h"
 #include "zone_entities.h"
 
+// SINGLEPLAYER BEGIN
+// Need singleplayer::initializeRuntime() in the ctor below.
+#include "singleplayer/packet_registry.h"
+// SINGLEPLAYER END
+
 extern std::map<uint16, CZone*> g_PZoneList; // Global array of pointers for zones
 
 MapNetworking::MapNetworking(Scheduler& scheduler, MapStatistics& mapStatistics, MapConfig config)
 : scheduler_(scheduler)
 , mapStatistics_(mapStatistics)
 , mapIPP_(config.ipp) // TODO: Refactor to not use this, since we have config_ in here
-, mapSessions_(scheduler)
+, mapSessions_(scheduler, config) // SINGLEPLAYER: createHeadlessSession needs MapConfig for charutils::LoadChar
 , config_(config)
 , PBuff{}
 , PBuffCopy{}
 , PScratchBuffer{}
 {
     TracyZoneScoped;
+
+    // SINGLEPLAYER BEGIN
+    // Register the session container globally so packet handlers (e.g., 0x175
+    // spawn_headless) can reach it without taking a MapNetworking dependency.
+    mapsessions::init(&mapSessions_);
+    // Runtime bring-up of fork-specific subsystems (config cache, auction
+    // bot). Compile-time packet registration happens in packet_system.cpp's
+    // buildPacketHandlers() via singleplayer::registerCustomPackets — this
+    // call is only for the side-effecting initializers that have to run at
+    // process startup.
+    singleplayer::initializeRuntime();
+    // SINGLEPLAYER END
 
     // Embedded map server for testing does not actually need to open a socket
     if (config_.isTestServer)
@@ -528,7 +545,7 @@ int32 MapNetworking::send_parse(uint8* buff, size_t* buffsize, MapSession* PSess
             auto packetList = PChar->getPacketListCopy();
             packets         = 0;
 
-            while (!packetList.empty() && *buffsize + packetList.front()->getSize() < kMaxBufferSize && static_cast<size_t>(packets) < PacketCount)
+            while (!packetList.empty() && *buffsize + packetList.front()->getSize() < kRawPackBudget && static_cast<size_t>(packets) < PacketCount)
             {
                 PSmallPacket = std::move(packetList.front());
                 packetList.pop_front();

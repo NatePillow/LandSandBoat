@@ -86,37 +86,29 @@ entity.onEventFinish = function(player, csid, option, npc)
     elseif csid == 718 then
         npcUtil.giveKeyItem(player, xi.ki.TUNING_FORK_OF_ICE)
     elseif csid == 709 then
-        local item = 0
-
-        if option == 1 then
-            item = xi.item.SHIVAS_CLAWS -- Shiva's Claws
-        elseif option == 2 then
-            item = xi.item.ICE_BELT -- Ice Belt
-        elseif option == 3 then
-            item = xi.item.ICE_RING -- Ice Ring
-        elseif option == 4 then
-            item = xi.item.BOTTLE_OF_RUST_B_GONE  -- Rust 'B' Gone
+        -- Singleplayer over-grant: deliver ALL 6 reward options at once
+        -- regardless of which the player picks. npcUtil.giveItem handles
+        -- duplicate-owned items gracefully (returns true if player already
+        -- has it), so repeatable-quest re-runs are no-ops.
+        local rewardItems = {
+            xi.item.SHIVAS_CLAWS,
+            xi.item.ICE_BELT,
+            xi.item.ICE_RING,
+            xi.item.BOTTLE_OF_RUST_B_GONE,
+        }
+        for _, id in ipairs(rewardItems) do
+            npcUtil.giveItem(player, id)
         end
-
-        if player:getFreeSlotsCount() == 0 and (option ~= 5 or option ~= 6) then
-            player:messageSpecial(ID.text.ITEM_CANNOT_BE_OBTAINED, item)
-        else
-            if option == 5 then
-                npcUtil.giveCurrency(player, 'gil', 10000)
-            elseif option == 6 then
-                player:addSpell(xi.magic.spell.SHIVA) -- Avatar
-                player:messageSpecial(ID.text.SHIVA_UNLOCKED, 0, 0, 4)
-            else
-                player:addItem(item)
-                player:messageSpecial(ID.text.ITEM_OBTAINED, item) -- Item
-            end
-
-            player:addTitle(xi.title.HEIR_OF_THE_GREAT_ICE)
-            player:delKeyItem(xi.ki.WHISPER_OF_FROST) --Whisper of Frost, as a trade for the above rewards
-            player:setCharVar('TrialByIce_date', JstMidnight())
-            player:addFame(xi.fameArea.SANDORIA, 30)
-            player:completeQuest(xi.questLog.SANDORIA, xi.quest.id.sandoria.TRIAL_BY_ICE)
+        npcUtil.giveCurrency(player, 'gil', 10000)
+        if not player:hasSpell(xi.magic.spell.SHIVA) then
+            player:addSpell(xi.magic.spell.SHIVA)
+            player:messageSpecial(ID.text.SHIVA_UNLOCKED, 0, 0, 4)
         end
+        player:addTitle(xi.title.HEIR_OF_THE_GREAT_ICE)
+        player:delKeyItem(xi.ki.WHISPER_OF_FROST)
+        player:setCharVar('TrialByIce_date', JstMidnight())
+        player:addFame(xi.fameArea.SANDORIA, 30)
+        player:completeQuest(xi.questLog.SANDORIA, xi.quest.id.sandoria.TRIAL_BY_ICE)
     elseif csid == 713 or csid == 712 then
         if player:getFreeSlotsCount() ~= 0 then
             player:addItem(xi.item.ICE_PENDULUM)

@@ -125,7 +125,16 @@ quest.sections =
                         option <= 4 and
                         player:hasKeyItem(xi.keyItem.MAGICAL_PATTERN)
                     then
-                        if npcUtil.giveItem(player, rseTable[player:getRace()][option]) then
+                        -- Singleplayer over-grant: deliver ALL 4 RSE slots
+                        -- (body/hands/legs/feet) for the player's race at once.
+                        local rse = rseTable[player:getRace()]
+                        local pickedOk = npcUtil.giveItem(player, rse[option])
+                        if pickedOk then
+                            for i, itemId in ipairs(rse) do
+                                if i ~= option then
+                                    npcUtil.giveItem(player, itemId)
+                                end
+                            end
                             player:delKeyItem(xi.keyItem.MAGICAL_PATTERN)
 
                             if player:getQuestStatus(quest.areaId, quest.questId) == xi.questStatus.QUEST_ACCEPTED then

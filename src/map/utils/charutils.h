@@ -111,6 +111,11 @@ void   AddCapacityPoints(CCharEntity* PChar, CBaseEntity* PMob, uint32 capacityP
 void   DistributeCapacityPoints(CCharEntity* PChar, CMobEntity* PMob);
 
 void  TrySkillUP(CCharEntity* PChar, SKILLTYPE SkillID, uint8 lvl, bool forceSkillUp = false, bool useSubSkill = false);
+
+// SINGLEPLAYER (#199): max job level across JOB_WAR..JOB_RUN. Used to derive
+// crafting skill caps from combat progression. Iterates jobs.job[] (stored
+// per-job levels, not current/equipped) so the cap reflects highest achieved.
+uint8 getHighestJobLevel(const CCharEntity* PChar);
 bool  isArtsBonusActive(CCharEntity* PChar, SKILLTYPE SkillID);
 int16 ArtsBonusSkill(CCharEntity* PChar, SKILLTYPE SkillID);
 void  BuildingCharSkillsTable(CCharEntity* PChar);

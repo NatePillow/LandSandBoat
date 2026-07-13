@@ -259,6 +259,19 @@ end
 xi.player.onPlayerLevelDown = function(player)
 end
 
+-- Called from luautils::OnSynthFinish at the end of synthutils::handleSynthSuccess.
+-- synthResult: 1 = success, 2 = HQ, 3 = HQ2, 4 = HQ3 (SYNTHESIS_* enum).
+-- Failures don't reach here.
+xi.player.onSynthFinish = function(player, synthResult)
+end
+
+-- Called from luautils::OnPlayerRaise at the end of CCharEntity::Raise(). Fires
+-- for both real-player Accept clicks (0x01A RaiseMenu) and the bot auto-accept
+-- Lua path. By the time this runs, m_hasRaise is cleared, HP/MP are restored,
+-- and Weakness is applied — the entity is fully resurrected.
+xi.player.onPlayerRaise = function(player)
+end
+
 xi.player.onPlayerMount = function(player)
     -- For PM3-3 The Road Forks.  This value will be checked periodically, and break
     -- the Mimeo Jewel should a player be mounted, zone, or disconnect.

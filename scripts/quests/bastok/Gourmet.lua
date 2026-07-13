@@ -97,8 +97,9 @@ quest.sections =
 
             onEventFinish =
             {
+                -- Singleplayer over-grant: max-tier reward regardless of trade branch.
                 [201] = function(player, csid, option, npc)
-                    tradeEventFinish(player, 200, 30)
+                    tradeEventFinish(player, 350, 90)
                 end,
 
                 [202] = function(player, csid, option, npc)
@@ -106,7 +107,7 @@ quest.sections =
                 end,
 
                 [203] = function(player, csid, option, npc)
-                    tradeEventFinish(player, 100, 0)
+                    tradeEventFinish(player, 350, 90)
                 end,
             },
         },

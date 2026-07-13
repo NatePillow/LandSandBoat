@@ -115,7 +115,18 @@ CMobSkillState::CMobSkillState(CBattleEntity* PEntity, uint16 targid, uint16 wsi
         // face toward target // TODO : add force param to turnTowardsTarget on certain TP moves like Petro Eyes
         battleutils::turnTowardsTarget(m_PEntity, PTarget);
     }
+    // SINGLEPLAYER BEGIN
+    // WEAPONSKILL_STATE_ENTER listener for ai_equip_swap.lua's pre-WS gear hook
+    // on mob/pet WSes; pairs with the OnMobSkillStart bot-AI notify below.
     m_PEntity->PAI->EventHandler.triggerListener("WEAPONSKILL_STATE_ENTER", m_PEntity, m_PSkill->getID());
+
+    // Notify Lua-side bot AI of the mob WS windup with its real cast time.
+    // ai_magic.lua uses this to set stun/bash interrupt windows precisely to
+    // the move's duration rather than guessing at a constant. Fast-paths to
+    // no-op when no dispatcher is registered.
+    luautils::OnMobSkillStart(m_PEntity, m_castTime);
+    // SINGLEPLAYER END
+
     SpendCost();
 
     // Probably ok to do this for all skills, but there's no need

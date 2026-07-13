@@ -292,5 +292,57 @@ set(PACKET_S2C_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/0x11d_partyreq.h
     ${CMAKE_CURRENT_SOURCE_DIR}/0x11e_jump.h
     ${CMAKE_CURRENT_SOURCE_DIR}/0x11e_jump.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x150_server_ident.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x150_server_ident.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x152_addon_relay.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x152_addon_relay.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x160_alliance_effects.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x160_alliance_effects.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x166_autoscroll_result.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x166_autoscroll_result.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x167_enmity.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x167_enmity.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x170_ah_cat_result.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x170_ah_cat_result.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x174_equip_by_id_result.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x174_equip_by_id_result.cpp
+    # SINGLEPLAYER BEGIN
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x178_headless_state.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x178_headless_state.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x179_headless_event.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x179_headless_event.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x17c_dps_update.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x17c_dps_update.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x186_alliance_pc_list.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x186_alliance_pc_list.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x18c_bot_spells_list.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x18c_bot_spells_list.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x191_party_status.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x191_party_status.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x192_autoskill_state.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x192_autoskill_state.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x195_automog_transfer_result.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x195_automog_transfer_result.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x197_automog_box_result.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x197_automog_box_result.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x19b_automog_synth_result.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x19b_automog_synth_result.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x163_automog_change_look_result.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x163_automog_change_look_result.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x19d_automog_change_job_result.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x19d_automog_change_job_result.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x19f_automog_job_info.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x19f_automog_job_info.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x1a0_instance_enter_result.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x1a0_instance_enter_result.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x1a2_autoequip_copy_xml_result.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x1a2_autoequip_copy_xml_result.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x1a3_sync_ack.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x1a3_sync_ack.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x1a4_puller_nearby_names.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x1a4_puller_nearby_names.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x1a8_char_profile.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/0x1a8_char_profile.cpp
+    # SINGLEPLAYER END
     PARENT_SCOPE
 )

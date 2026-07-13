@@ -67,36 +67,26 @@ entity.onEventFinish = function(player, csid, option, npc)
     elseif csid == 285 then
         npcUtil.giveKeyItem(player, xi.ki.TUNING_FORK_OF_FIRE)
     elseif csid == 273 then
-        local item = 0
-        if option == 1 then
-            item = xi.item.IFRITS_BLADE
-        elseif option == 2 then
-            item = xi.item.FIRE_BELT
-        elseif option == 3 then
-            item = xi.item.FIRE_RING
-        elseif option == 4 then
-            item = xi.item.EGILS_TORCH
+        -- Singleplayer over-grant: deliver ALL 6 reward options at once.
+        local rewardItems = {
+            xi.item.IFRITS_BLADE,
+            xi.item.FIRE_BELT,
+            xi.item.FIRE_RING,
+            xi.item.EGILS_TORCH,
+        }
+        for _, id in ipairs(rewardItems) do
+            npcUtil.giveItem(player, id)
         end
-
-        if player:getFreeSlotsCount() == 0 and (option ~= 5 or option ~= 6) then
-            player:messageSpecial(ID.text.ITEM_CANNOT_BE_OBTAINED, item)
-        else
-            if option == 5 then
-                npcUtil.giveCurrency(player, 'gil', 10000)
-            elseif option == 6 then
-                player:addSpell(xi.magic.spell.IFRIT) -- Ifrit Spell
-                player:messageSpecial(ID.text.IFRIT_UNLOCKED, 0, 0, 0)
-            else
-                player:addItem(item)
-                player:messageSpecial(ID.text.ITEM_OBTAINED, item) -- Item
-            end
-
-            player:addTitle(xi.title.HEIR_OF_THE_GREAT_FIRE)
-            player:delKeyItem(xi.ki.WHISPER_OF_FLAMES)
-            player:setCharVar('TrialByFire_date', JstMidnight())
-            player:addFame(xi.fameArea.WINDURST, 30)
-            player:completeQuest(xi.questLog.OUTLANDS, xi.quest.id.outlands.TRIAL_BY_FIRE)
+        npcUtil.giveCurrency(player, 'gil', 10000)
+        if not player:hasSpell(xi.magic.spell.IFRIT) then
+            player:addSpell(xi.magic.spell.IFRIT)
+            player:messageSpecial(ID.text.IFRIT_UNLOCKED, 0, 0, 0)
         end
+        player:addTitle(xi.title.HEIR_OF_THE_GREAT_FIRE)
+        player:delKeyItem(xi.ki.WHISPER_OF_FLAMES)
+        player:setCharVar('TrialByFire_date', JstMidnight())
+        player:addFame(xi.fameArea.WINDURST, 30)
+        player:completeQuest(xi.questLog.OUTLANDS, xi.quest.id.outlands.TRIAL_BY_FIRE)
     end
 end
 

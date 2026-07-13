@@ -95,6 +95,13 @@ public:
     bool IsFollowingScriptedPath();
     bool IsPatrolling();
 
+    // True iff currently following a path AND that path was issued with
+    // PATHFLAG_RUN. Used by the headless-bot speed-broadcast path so
+    // CCharUpdatePacket/CCharStatusPacket can ask "should we tell the
+    // client this entity is running right now?" without exposing
+    // m_pathFlags publicly.
+    bool IsRunningPath() const;
+
     // look at the given point
     void LookAt(const position_t& point);
 

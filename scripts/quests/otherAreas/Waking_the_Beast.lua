@@ -73,11 +73,9 @@ quest.sections =
                         quest:setVar(player, 'completedThisWeek', 1, NextConquestTally())
                         player:delKeyItem(xi.ki.FADED_RUBY)
 
-                        if quest:getVar(player, 'Option') == 0 then
-                            player:addTitle(xi.title.DISTURBER_OF_SLUMBER)
-                        else
-                            player:addTitle(xi.title.INTERRUPTER_OF_DREAMS)
-                        end
+                        -- Singleplayer over-grant: award BOTH titles.
+                        player:addTitle(xi.title.DISTURBER_OF_SLUMBER)
+                        player:addTitle(xi.title.INTERRUPTER_OF_DREAMS)
                     end
                 end,
             },

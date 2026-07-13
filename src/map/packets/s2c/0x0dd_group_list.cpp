@@ -110,6 +110,47 @@ GP_SERV_COMMAND_GROUP_LIST::GP_SERV_COMMAND_GROUP_LIST(const CTrustEntity* PTrus
     this->setSize(sizeof(GP_SERV_HEADER) + sizeof(PacketData) - 16 + packetNameSize);
 }
 
+GP_SERV_COMMAND_GROUP_LIST::GP_SERV_COMMAND_GROUP_LIST(const CTrustEntity* PTrust, const uint8_t MemberNumber, const uint16_t ownerFlags, const uint16_t ownerZoneID, const uint16_t ZoneID)
+{
+    if (PTrust == nullptr)
+    {
+        ShowError("GP_SERV_COMMAND_GROUP_LIST::GP_SERV_COMMAND_GROUP_LIST() - PTrust was null.");
+        return;
+    }
+
+    auto& packet = this->data();
+
+    packet.UniqueNo     = PTrust->id;
+    packet.GAttr.PartyNo           = (ownerFlags >> 0) & 0x03;
+
+    if (ownerZoneID == ZoneID)
+    {
+        packet.Hp           = PTrust->health.hp;
+        packet.Mp           = PTrust->health.mp;
+        packet.Tp           = PTrust->health.tp;
+        packet.ActIndex     = PTrust->targid;
+        packet.MemberNumber = MemberNumber;
+        packet.Hpp          = PTrust->GetHPP();
+        packet.Mpp          = PTrust->GetMPP();
+        packet.mjob_no      = PTrust->GetMJob();
+        packet.mjob_lv      = PTrust->GetMLevel();
+        packet.sjob_no      = PTrust->GetSJob();
+        packet.sjob_lv      = PTrust->GetSLevel();
+    }
+    else
+    {
+        packet.ZoneNo = PTrust->getZone();
+    }
+
+    const auto nameSize       = std::min<size_t>(PTrust->getName().size(), sizeof(packet.Name));
+    const auto packetNameSize = roundUpToNearestFour(static_cast<uint32_t>(nameSize)) + 4; // Always 4 bytes of padding after name
+    std::memcpy(packet.Name, PTrust->packetName.c_str(), nameSize);
+
+    // Resize packets to match name length + the 4 bytes of padding the client expects.
+    // Header + struct - max name size + effective packet name size
+    this->setSize(sizeof(GP_SERV_HEADER) + sizeof(PacketData) - 16 + packetNameSize);
+}
+
 GP_SERV_COMMAND_GROUP_LIST::GP_SERV_COMMAND_GROUP_LIST(const uint32_t id, const std::string& name, const uint16_t memberFlags, const uint8_t MemberNumber, const uint16_t ZoneID)
 {
     auto& packet = this->data();

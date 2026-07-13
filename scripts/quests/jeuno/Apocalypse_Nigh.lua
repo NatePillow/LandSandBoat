@@ -32,9 +32,20 @@ local rewardOnEventFinish = function(player, csid, option, npc)
         option >= 1 and
         option <= 4
     then
-        local rewardItem = xi.item.STATIC_EARRING + option - 1
-
-        if npcUtil.giveItem(player, rewardItem) then
+        -- Singleplayer over-grant: deliver ALL 4 earrings at once.
+        local allEarrings = {
+            xi.item.STATIC_EARRING,
+            xi.item.MAGNETIC_EARRING,
+            xi.item.HOLLOW_EARRING,
+            xi.item.ETHEREAL_EARRING,
+        }
+        local ok = true
+        for _, id in ipairs(allEarrings) do
+            if not npcUtil.giveItem(player, id) then
+                ok = false
+            end
+        end
+        if ok then
             quest:complete(player)
         end
     else

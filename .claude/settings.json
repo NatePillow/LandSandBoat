@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "deny": [
+      "Bash(git checkout --:*)",
+      "Bash(git checkout .)",
+      "Bash(git checkout .:*)",
+      "Bash(git restore:*)",
+      "Bash(git reset --hard:*)",
+      "Bash(git reset --merge:*)",
+      "Bash(git reset --keep:*)",
+      "Bash(git clean -f:*)",
+      "Bash(git clean -fd:*)",
+      "Bash(git clean -ffd:*)",
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Bash(git push --force-with-lease:*)",
+      "Bash(git branch -D:*)",
+      "Bash(git branch --delete --force:*)",
+      "Bash(git stash drop:*)",
+      "Bash(git stash clear)",
+      "Bash(git stash pop:*)",
+      "Bash(git commit --amend:*)",
+      "Bash(git rebase:*)",
+      "Bash(git filter-branch:*)",
+      "Bash(git update-ref -d:*)",
+      "Bash(git gc --prune:*)",
+      "Bash(git reflog delete:*)",
+      "Bash(git reflog expire:*)"
+    ]
+  }
+}

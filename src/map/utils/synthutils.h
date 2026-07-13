@@ -58,6 +58,14 @@ enum SYNTHESIS_RESULT
 
 void LoadSynthRecipes();
 void startSynth(CCharEntity* PChar, const SynthOffer& offer);
+// SINGLEPLAYER BEGIN
+// Instant synth — runs the full resolution (recipe lookup, crystal/ingredient
+// claim, success/fail roll, commit, skillup) inline, without the 15s wait or
+// the ANIMATION_SYNTH state machine. Used by 0x19A AUTOMOG_SYNTH so headless
+// bots can craft on behalf of the primary without standing in place. Cooldown
+// is 200ms (vs upstream's 15s for combine_ask) and is enforced inside.
+void doInstantSynth(CCharEntity* PChar, const SynthOffer& offer);
+// SINGLEPLAYER END
 void sendSynthDone(CCharEntity* PChar);
 void doSynthCriticalFail(CCharEntity* PChar);
 

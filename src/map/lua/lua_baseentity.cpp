@@ -33,6 +33,7 @@
 #include "lua_zone.h"
 #include "luautils.h"
 
+#include "common/database.h"
 #include "common/logging.h"
 #include "common/timer.h"
 #include "common/utils.h"
@@ -53,6 +54,7 @@
 #include "job_points.h"
 #include "latent_effect_container.h"
 #include "linkshell.h"
+#include "map_session_container.h"
 #include "mob_modifier.h"
 #include "mob_spell_container.h"
 #include "mob_spell_list.h"
@@ -111,6 +113,7 @@
 #include "packets/entity_update.h"
 #include "packets/s2c/0x009_message.h"
 #include "packets/s2c/0x017_chat_std.h"
+#include "packets/s2c/0x192_autoskill_state.h"
 #include "packets/s2c/0x01b_job_info.h"
 #include "packets/s2c/0x01c_item_max.h"
 #include "packets/s2c/0x01d_item_same.h"
@@ -344,6 +347,19 @@ void CLuaBaseEntity::printToPlayer(const std::string& message, const sol::object
         PChar->pushPacket<GP_SERV_COMMAND_CHAT_STD>(PChar, messageType, message, name);
     }
 }
+
+// SINGLEPLAYER BEGIN
+// Lua-callable: push an AUTOSKILL_STATE 0x192 packet to this CCharEntity.
+// Used by xi.singleplayer.bots.skillup.push_skillup_state_to to re-emit cached override state in
+// response to a 0x193 LIST_AUTOSKILL request from this player's addon.
+void CLuaBaseEntity::pushAutoskillState(const std::string& botName, uint8 mode)
+{
+    if (auto* PChar = dynamic_cast<CCharEntity*>(m_PBaseEntity))
+    {
+        PChar->pushPacket<GP_SERV_COMMAND_AUTOSKILL_STATE>(botName, mode);
+    }
+}
+// SINGLEPLAYER END
 
 /************************************************************************
  *  Function: printToArea()
@@ -2037,12 +2053,22 @@ bool CLuaBaseEntity::atPoint(sol::variadic_args va)
  *  Notes   : Currently only used by Selh'Teus during final CoP fight
  ************************************************************************/
 
-void CLuaBaseEntity::pathTo(float x, float y, float z, const sol::object& flags)
+bool CLuaBaseEntity::pathTo(float x, float y, float z, const sol::object& flags)
 {
     if (m_PBaseEntity->objtype == TYPE_PC)
     {
-        ShowWarning("Invalid entity (Player: %s) calling function.", m_PBaseEntity->getName());
-        return;
+        // SINGLEPLAYER: headless bots are PCs but are server-driven, not
+        // player-driven. They get a CPathFind allocated at session creation
+        // (bot_sessions.cpp::createHeadlessSession) so they can use the
+        // engine's pathfinding pipeline for smooth movement instead of
+        // setPos-based stepping. Real PCs still rejected — pathTo on a
+        // human-controlled char would fight the client's own input.
+        auto* PChar = static_cast<CCharEntity*>(m_PBaseEntity);
+        if (!PChar->isHeadless())
+        {
+            ShowWarning("Invalid entity (Player: %s) calling function.", m_PBaseEntity->getName());
+            return false;
+        }
     }
 
     position_t point;
@@ -2054,8 +2080,16 @@ void CLuaBaseEntity::pathTo(float x, float y, float z, const sol::object& flags)
     {
         uint8 pathFlags = (flags != sol::lua_nil) ? flags.as<uint8>() : static_cast<uint8>(PATHFLAG_RUN | PATHFLAG_WALLHACK | PATHFLAG_SCRIPT);
 
-        m_PBaseEntity->PAI->PathFind->PathTo(point, pathFlags);
+        // CPathFind::PathTo returns true on success (either an exact route
+        // found, or — with WALLHACK in flags — a closest-mesh-point fallback
+        // appended). Without WALLHACK, returns false when the target is
+        // unreachable on the navmesh (FindPath returned an empty point list).
+        // SINGLEPLAYER's slot-ring movement (#234 follow-up) calls pathTo
+        // without WALLHACK and iterates candidate slots until one returns
+        // true; on full exhaustion it warps to primary.
+        return m_PBaseEntity->PAI->PathFind->PathTo(point, pathFlags);
     }
+    return false;
 }
 
 /************************************************************************
@@ -2743,7 +2777,8 @@ auto CLuaBaseEntity::sendGuild(const uint16 guildId, uint8 open, uint8 close, ui
 
     if ((VanadielHour < open) || (VanadielHour >= close))
     {
-        status = GP_SERV_COMMAND_GUILD_OPEN_STAT::Close;
+        // status = GP_SERV_COMMAND_GUILD_OPEN_STAT::Close;
+        ShowInfo("sendGuild: guild %d would be closed at Vanadiel hour %d (open: %d, close: %d) -- shop kept open", guildId, VanadielHour, open, close);
     }
 
     CItemContainer* PGuildShop = guildutils::GetGuildShop(guildId);
@@ -6916,64 +6951,7 @@ void CLuaBaseEntity::changeJob(uint8 newJob)
 {
     if (auto* PChar = dynamic_cast<CCharEntity*>(m_PBaseEntity))
     {
-        JOBTYPE prevjob = PChar->GetMJob();
-
-        PChar->resetPetZoningInfo();
-
-        charutils::RemoveAllEquipMods(PChar);
-        PChar->jobs.unlocked |= (1 << newJob);
-        PChar->SetMJob(newJob);
-        charutils::ApplyAllEquipMods(PChar);
-
-        if (newJob == JOB_BLU)
-        {
-            if (prevjob != JOB_BLU)
-            {
-                blueutils::LoadSetSpells(PChar);
-            }
-        }
-        else if (PChar->GetSJob() != JOB_BLU)
-        {
-            blueutils::UnequipAllBlueSpells(PChar);
-        }
-
-        puppetutils::LoadAutomaton(PChar);
-        charutils::SetStyleLock(PChar, false);
-        luautils::CheckForGearSet(PChar); // check for gear set on gear change
-        jobpointutils::RefreshGiftMods(PChar);
-        charutils::BuildingCharSkillsTable(PChar);
-        charutils::CalculateStats(PChar);
-        charutils::CheckValidEquipment(PChar);
-        PChar->PRecastContainer->ChangeJob();
-        charutils::BuildingCharAbilityTable(PChar);
-        charutils::BuildingCharTraitsTable(PChar);
-
-        // clang-format off
-        PChar->ForParty([](CBattleEntity* PMember)
-        {
-            ((CCharEntity*)PMember)->PLatentEffectContainer->CheckLatentsPartyJobs();
-        });
-        // clang-format on
-
-        PChar->UpdateHealth();
-        PChar->health.hp = PChar->GetMaxHP();
-        PChar->health.mp = PChar->GetMaxMP();
-
-        charutils::SaveCharStats(PChar);
-        charutils::SaveCharJob(PChar, PChar->GetMJob());
-        charutils::SaveCharExp(PChar, PChar->GetMJob());
-        PChar->updatemask |= UPDATE_HP;
-
-        PChar->pushPacket<GP_SERV_COMMAND_JOB_INFO>(PChar);
-        PChar->pushPacket<GP_SERV_COMMAND_CLISTATUS>(PChar);
-        PChar->pushPacket<GP_SERV_COMMAND_CLISTATUS2>(PChar);
-        PChar->pushPacket<GP_SERV_COMMAND_ABIL_RECAST>(PChar);
-        PChar->pushPacket<GP_SERV_COMMAND_COMMAND_DATA>(PChar);
-        PChar->pushPacket<CCharStatusPacket>(PChar);
-        PChar->pushPacket<GP_SERV_COMMAND_MISCDATA::MERITS>(PChar);
-        PChar->pushPacket<GP_SERV_COMMAND_MISCDATA::MONSTROSITY1>(PChar);
-        PChar->pushPacket<GP_SERV_COMMAND_MISCDATA::MONSTROSITY2>(PChar);
-        PChar->pushPacket<CCharSyncPacket>(PChar);
+        PChar->changeMJob(newJob);
     }
     else if (auto* PMob = dynamic_cast<CMobEntity*>(m_PBaseEntity))
     {
@@ -7068,23 +7046,7 @@ void CLuaBaseEntity::changesJob(uint8 subJob)
         ShowWarning("Invalid entity type calling function (%s).", m_PBaseEntity->getName());
         return;
     }
-
-    auto* PChar = static_cast<CCharEntity*>(m_PBaseEntity);
-
-    PChar->jobs.unlocked |= (1 << subJob);
-    PChar->SetSJob(subJob);
-    charutils::UpdateSubJob(PChar);
-
-    if (subJob == JOB_BLU)
-    {
-        blueutils::LoadSetSpells(PChar);
-    }
-    else
-    {
-        blueutils::UnequipAllBlueSpells(PChar);
-    }
-
-    puppetutils::LoadAutomaton(PChar);
+    static_cast<CCharEntity*>(m_PBaseEntity)->changeSJob(subJob);
 }
 
 /************************************************************************
@@ -7159,6 +7121,25 @@ uint8 CLuaBaseEntity::getMainLvl()
     return static_cast<CBattleEntity*>(m_PBaseEntity)->GetMLevel();
 }
 
+// SINGLEPLAYER: current/next EXP on the bot's main job. Used by bots_status.lua
+// when filling the 0x191 PARTY_STATUS push so the autobots Status tab can render
+// per-bot level + EXP progress bar. Ashita's IPartyManager exposes
+// GetMemberMainJobLevel for free but has no EXP getter — these bindings exist
+// to plug that gap for headless members.
+uint32 CLuaBaseEntity::getCurrentJobExp()
+{
+    auto* PChar = dynamic_cast<CCharEntity*>(m_PBaseEntity);
+    if (PChar == nullptr) { return 0; }
+    return PChar->jobs.exp[PChar->GetMJob()];
+}
+
+uint32 CLuaBaseEntity::getRequiredJobExp()
+{
+    auto* PChar = dynamic_cast<CCharEntity*>(m_PBaseEntity);
+    if (PChar == nullptr) { return 0; }
+    return charutils::GetExpNEXTLevel(PChar->jobs.job[PChar->GetMJob()]);
+}
+
 /************************************************************************
  *  Function: getSubLvl()
  *  Purpose : Returns the level of entity's current sub job
@@ -7224,6 +7205,7 @@ void CLuaBaseEntity::setLevel(uint8 level)
         PChar->jobs.exp[PChar->GetMJob()] = charutils::GetExpNEXTLevel(PChar->jobs.job[PChar->GetMJob()]) - 1;
         charutils::ApplyAllEquipMods(PChar);
 
+        ShowInfo(fmt::format("[STYLELOCK] caller=lua_baseentity.setLevel char={}", PChar->getName()));
         charutils::SetStyleLock(PChar, false);
         blueutils::ValidateBlueSpells(PChar);
         charutils::CalculateStats(PChar);
@@ -7283,6 +7265,7 @@ void CLuaBaseEntity::setsLevel(uint8 slevel)
     PChar->SetSLevel(PChar->jobs.job[PChar->GetSJob()]);
     PChar->jobs.exp[PChar->GetSJob()] = charutils::GetExpNEXTLevel(PChar->jobs.job[PChar->GetSJob()]) - 1;
 
+    ShowInfo(fmt::format("[STYLELOCK] caller=lua_baseentity.setSLevel char={}", PChar->getName()));
     charutils::SetStyleLock(PChar, false);
     jobpointutils::RefreshGiftMods(PChar);
     charutils::BuildingCharSkillsTable(PChar);
@@ -8049,6 +8032,38 @@ void CLuaBaseEntity::setRank(uint8 rank)
     auto* PChar = static_cast<CCharEntity*>(m_PBaseEntity);
 
     PChar->profile.rank[PChar->profile.nation] = rank;
+
+    charutils::SaveMissionsList(PChar);
+}
+
+/************************************************************************
+ *  Function: setRankByNation()
+ *  Purpose : Sets the player's rank for an explicit nation (0=Sandoria,
+ *            1=Bastok, 2=Windurst). Does NOT change current nation, does
+ *            NOT touch rankpoints (which is a single shared bar belonging
+ *            to the player's current nation). Use this when applying a
+ *            cross-nation rank mirror, e.g. setting Sandy rank 7 on a
+ *            Bastok-current alt.
+ *  Example : player:setRankByNation(xi.nation.SANDORIA, 7)
+ ************************************************************************/
+
+void CLuaBaseEntity::setRankByNation(uint8 nation, uint8 rank)
+{
+    if (m_PBaseEntity->objtype != TYPE_PC)
+    {
+        ShowWarning("Invalid entity type calling function (%s).", m_PBaseEntity->getName());
+        return;
+    }
+
+    if (nation > 2)
+    {
+        ShowError("Lua::setRankByNation: invalid nation %i (expected 0..2)", nation);
+        return;
+    }
+
+    auto* PChar = static_cast<CCharEntity*>(m_PBaseEntity);
+
+    PChar->profile.rank[nation] = rank;
 
     charutils::SaveMissionsList(PChar);
 }
@@ -11264,6 +11279,25 @@ uint32 CLuaBaseEntity::canLearnSpell(uint16 spellID)
 }
 
 /************************************************************************
+ *  Function: canUseSpell()
+ *  Purpose : Returns true iff the caster can actually cast spellID right
+ *            now — checks main-job level, sub-job level, status-effect
+ *            gates (Tabula Rasa, SCH addendums, BLU spell-set, etc.).
+ *            Distinct from hasSpell, which only checks the spell list.
+ *  Example : if bot:canUseSpell(340) then ... -- Utsusemi: Ni
+ ************************************************************************/
+
+bool CLuaBaseEntity::canUseSpell(uint16 spellID)
+{
+    if (m_PBaseEntity->objtype == TYPE_NPC)
+    {
+        return false;
+    }
+    auto* PBattle = static_cast<CBattleEntity*>(m_PBaseEntity);
+    return spell::CanUseSpell(PBattle, static_cast<SpellID>(spellID));
+}
+
+/************************************************************************
  *  Function: delSpell()
  *  Purpose : Deletes a spell from a player's spell list
  *  Example : player:delSpell(528, { sendUpdate = false })
@@ -11880,6 +11914,44 @@ uint8 CLuaBaseEntity::getAllianceSize()
     }
 
     return alliancesize;
+}
+
+/************************************************************************
+ *  Function: getAllianceParty()
+ *  Purpose : Returns this entity's party slot within the alliance (1..3),
+ *            or 1 if the entity is in a solo party / no alliance.
+ *  Example : local partyNo = bot:getAllianceParty()
+ ************************************************************************/
+
+uint8 CLuaBaseEntity::getAllianceParty() const
+{
+    if (m_PBaseEntity->objtype == TYPE_NPC)
+    {
+        return 0;
+    }
+
+    const auto* PBattle = static_cast<const CBattleEntity*>(m_PBaseEntity);
+    if (PBattle->PParty == nullptr)
+    {
+        return 1;
+    }
+    if (PBattle->PParty->m_PAlliance == nullptr)
+    {
+        // Solo party (no alliance) — there's no "party 0", call it party 1.
+        return 1;
+    }
+    // CParty::m_PartyNumber is private; iterate the alliance's partyList to
+    // find which slot owns this entity's PParty. partyList is small (≤3) so
+    // the linear scan is negligible.
+    const auto& partyList = PBattle->PParty->m_PAlliance->partyList;
+    for (size_t i = 0; i < partyList.size(); ++i)
+    {
+        if (partyList[i] == PBattle->PParty)
+        {
+            return static_cast<uint8>(i + 1);
+        }
+    }
+    return 1;
 }
 
 /************************************************************************
@@ -16050,6 +16122,55 @@ auto CLuaBaseEntity::spawnTrust(uint16 trustId) -> CBaseEntity*
     return trustutils::SpawnTrust(static_cast<CCharEntity*>(m_PBaseEntity), trustId);
 }
 
+// Direct trust summon for the bot pipeline: skips the cast-time / interrupt
+// path that xi.trust.canCast + magic_state run, but keeps the three checks
+// that matter for correctness:
+//   1) caster has the spell learned
+//   2) the same trust isn't already in the caster's PTrusts
+//   3) the magic recast isn't still ticking
+// Returns:  0 success
+//           1 spell not learned
+//           2 trust already in party
+//           3 recast still active
+//           4 trustutils::SpawnTrust returned nullptr (bad data)
+//           5 wrong entity type (binding misuse)
+int32 CLuaBaseEntity::summonTrustDirect(uint16 trustSpellId)
+{
+    if (m_PBaseEntity->objtype != TYPE_PC)
+    {
+        ShowWarning("Invalid entity type calling function (%s).", m_PBaseEntity->getName());
+        return 5;
+    }
+
+    auto* PChar = static_cast<CCharEntity*>(m_PBaseEntity);
+
+    if (charutils::hasSpell(PChar, trustSpellId) == 0)
+    {
+        return 1;
+    }
+
+    for (auto* PTrust : PChar->PTrusts)
+    {
+        if (PTrust != nullptr && PTrust->m_TrustID == trustSpellId)
+        {
+            return 2;
+        }
+    }
+
+    // Recast list uses (RECASTTYPE, Recast id) — for magic the id is the spell id.
+    if (PChar->PRecastContainer->Has(RECAST_MAGIC, static_cast<Recast>(trustSpellId)))
+    {
+        return 3;
+    }
+
+    if (trustutils::SpawnTrust(PChar, trustSpellId) == nullptr)
+    {
+        return 4;
+    }
+
+    return 0;
+}
+
 /************************************************************************
  *  Function: clearTrusts()
  *  Purpose :
@@ -18947,6 +19068,14 @@ void CLuaBaseEntity::useJobAbility(uint16 skillID, const sol::object& pet)
 }
 
 /************************************************************************
+ *  Function: weaponSkill()
+ *  Purpose : Queue a weapon skill execution on a target. Routes through
+ *            PAI->WeaponSkill, same path as a player-initiated WS but
+ *            invokable from server-side AI for headless chars.
+ ************************************************************************/
+// SINGLEPLAYER: definitions for weaponSkill, rangedAttack, useItem, isHeadless, getParentCharId, getBotMode, setBotMode, getAggroMode, setAggroMode, getLastClientMoveInputMs, applyStyleLock, clearStyleLock, spawnHeadless, formAllianceFromSpec, botLotItem, botPassItem, isBotCasting, isBotRangedAttacking, isBotUsingAbility, isBotWeaponSkilling, isBotResting, startBotResting, stopBotResting live in src/map/singleplayer/lua_bindings.cpp.
+
+/************************************************************************
  *  Function: useMobAbility()
  *  Purpose : Uses a specified Mob Ability or the next one ready in the que
  *  Example : automation:useMobAbility(2132, automation) --Specifying pet
@@ -20216,6 +20345,7 @@ void CLuaBaseEntity::Register()
     SOL_REGISTER("showText", CLuaBaseEntity::showText);
     SOL_REGISTER("messageText", CLuaBaseEntity::messageText);
     SOL_REGISTER("printToPlayer", CLuaBaseEntity::printToPlayer);
+    SOL_REGISTER("pushAutoskillState", CLuaBaseEntity::pushAutoskillState); // SINGLEPLAYER
     SOL_REGISTER("printToArea", CLuaBaseEntity::printToArea);
     SOL_REGISTER("messageBasic", CLuaBaseEntity::messageBasic);
     SOL_REGISTER("messageName", CLuaBaseEntity::messageName);
@@ -20511,6 +20641,8 @@ void CLuaBaseEntity::Register()
 
     SOL_REGISTER("getMainLvl", CLuaBaseEntity::getMainLvl);
     SOL_REGISTER("getSubLvl", CLuaBaseEntity::getSubLvl);
+    SOL_REGISTER("getCurrentJobExp", CLuaBaseEntity::getCurrentJobExp);
+    SOL_REGISTER("getRequiredJobExp", CLuaBaseEntity::getRequiredJobExp);
     SOL_REGISTER("getJobLevel", CLuaBaseEntity::getJobLevel);
     SOL_REGISTER("setLevel", CLuaBaseEntity::setLevel);
     SOL_REGISTER("setsLevel", CLuaBaseEntity::setsLevel);
@@ -20541,6 +20673,7 @@ void CLuaBaseEntity::Register()
 
     SOL_REGISTER("getRank", CLuaBaseEntity::getRank);
     SOL_REGISTER("setRank", CLuaBaseEntity::setRank);
+    SOL_REGISTER("setRankByNation", CLuaBaseEntity::setRankByNation);
     SOL_REGISTER("getRankPoints", CLuaBaseEntity::getRankPoints);
     SOL_REGISTER("addRankPoints", CLuaBaseEntity::addRankPoints);
     SOL_REGISTER("setRankPoints", CLuaBaseEntity::setRankPoints);
@@ -20692,6 +20825,7 @@ void CLuaBaseEntity::Register()
     SOL_REGISTER("addSpell", CLuaBaseEntity::addSpell);
     SOL_REGISTER("hasSpell", CLuaBaseEntity::hasSpell);
     SOL_REGISTER("canLearnSpell", CLuaBaseEntity::canLearnSpell);
+    SOL_REGISTER("canUseSpell", CLuaBaseEntity::canUseSpell);
     SOL_REGISTER("delSpell", CLuaBaseEntity::delSpell);
     SOL_REGISTER("getSetBlueSpells", CLuaBaseEntity::getSetBlueSpells);
 
@@ -20716,6 +20850,7 @@ void CLuaBaseEntity::Register()
 
     SOL_REGISTER("getAlliance", CLuaBaseEntity::getAlliance);
     SOL_REGISTER("getAllianceSize", CLuaBaseEntity::getAllianceSize);
+    SOL_REGISTER("getAllianceParty", CLuaBaseEntity::getAllianceParty);
 
     SOL_REGISTER("reloadParty", CLuaBaseEntity::reloadParty);
     SOL_REGISTER("disableLevelSync", CLuaBaseEntity::disableLevelSync);
@@ -20969,6 +21104,7 @@ void CLuaBaseEntity::Register()
 
     // Trust related
     SOL_REGISTER("spawnTrust", CLuaBaseEntity::spawnTrust);
+    SOL_REGISTER("summonTrustDirect", CLuaBaseEntity::summonTrustDirect); // SINGLEPLAYER
     SOL_REGISTER("clearTrusts", CLuaBaseEntity::clearTrusts);
     SOL_REGISTER("getTrustID", CLuaBaseEntity::getTrustID);
     SOL_REGISTER("trustPartyMessage", CLuaBaseEntity::trustPartyMessage);
@@ -21057,6 +21193,45 @@ void CLuaBaseEntity::Register()
 
     SOL_REGISTER("castSpell", CLuaBaseEntity::castSpell);
     SOL_REGISTER("useJobAbility", CLuaBaseEntity::useJobAbility);
+    // SINGLEPLAYER BEGIN
+    SOL_REGISTER("weaponSkill", CLuaBaseEntity::weaponSkill);
+    SOL_REGISTER("rangedAttack", CLuaBaseEntity::rangedAttack);
+    SOL_REGISTER("useItem", CLuaBaseEntity::useItem);
+    SOL_REGISTER("isHeadless", CLuaBaseEntity::isHeadless);
+    SOL_REGISTER("getParentCharId", CLuaBaseEntity::getParentCharId);
+    SOL_REGISTER("getBotMode", CLuaBaseEntity::getBotMode);
+    SOL_REGISTER("setBotMode", CLuaBaseEntity::setBotMode);
+    SOL_REGISTER("getAggroMode", CLuaBaseEntity::getAggroMode);
+    SOL_REGISTER("setAggroMode", CLuaBaseEntity::setAggroMode);
+    SOL_REGISTER("getLastClientMoveInputMs", CLuaBaseEntity::getLastClientMoveInputMs);
+    SOL_REGISTER("applyStyleLock", CLuaBaseEntity::applyStyleLock);
+    SOL_REGISTER("clearStyleLock", CLuaBaseEntity::clearStyleLock);
+    SOL_REGISTER("spawnHeadless", CLuaBaseEntity::spawnHeadless);
+    SOL_REGISTER("formAllianceFromSpec", CLuaBaseEntity::formAllianceFromSpec);
+    SOL_REGISTER("botLotItem", CLuaBaseEntity::botLotItem);
+    SOL_REGISTER("botPassItem", CLuaBaseEntity::botPassItem);
+    SOL_REGISTER("isBotCasting", CLuaBaseEntity::isBotCasting);
+    SOL_REGISTER("isBotRangedAttacking", CLuaBaseEntity::isBotRangedAttacking);
+    SOL_REGISTER("isBotUsingAbility", CLuaBaseEntity::isBotUsingAbility);
+    SOL_REGISTER("isBotWeaponSkilling", CLuaBaseEntity::isBotWeaponSkilling);
+    SOL_REGISTER("isBotResting", CLuaBaseEntity::isBotResting);
+    SOL_REGISTER("startBotResting", CLuaBaseEntity::startBotResting);
+    SOL_REGISTER("stopBotResting", CLuaBaseEntity::stopBotResting);
+    SOL_REGISTER("hasJobAbility", CLuaBaseEntity::hasJobAbility);
+    SOL_REGISTER("raycastClampTo", CLuaBaseEntity::raycastClampTo);
+    SOL_REGISTER("raycastClear",   CLuaBaseEntity::raycastClear);
+    SOL_REGISTER("equipItemUnique", CLuaBaseEntity::equipItemUnique);
+    SOL_REGISTER("acceptRaise",     CLuaBaseEntity::acceptRaise);
+    SOL_REGISTER("pushPullerNearbyNames", CLuaBaseEntity::pushPullerNearbyNames);
+    SOL_REGISTER("publishBotState",       CLuaBaseEntity::publishBotState);
+    // #230 diff-based alliance reshape primitives.
+    SOL_REGISTER("formPartyAlone",        CLuaBaseEntity::formPartyAlone);
+    SOL_REGISTER("partyAddMember",        CLuaBaseEntity::partyAddMember);
+    SOL_REGISTER("partyRemoveMember",     CLuaBaseEntity::partyRemoveMember);
+    SOL_REGISTER("attachToAlliance",      CLuaBaseEntity::attachToAlliance);
+    SOL_REGISTER("detachFromAlliance",    CLuaBaseEntity::detachFromAlliance);
+    SOL_REGISTER("destroyAsHeadless",     CLuaBaseEntity::destroyAsHeadless);
+    // SINGLEPLAYER END
     SOL_REGISTER("useMobAbility", CLuaBaseEntity::useMobAbility);
     SOL_REGISTER("usePetAbility", CLuaBaseEntity::usePetAbility);
     SOL_REGISTER("getAbilityDistance", CLuaBaseEntity::getAbilityDistance);

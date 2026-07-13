@@ -137,30 +137,37 @@ quest.sections =
                 end,
 
                 [520] = function(player, csid, option, npc) -- Cactus trade with Iron Sword reward
+                    -- Singleplayer over-grant: sword + max fame + max gil.
                     if npcUtil.giveItem(player, xi.item.IRON_SWORD) then
                         quest:complete(player)
                         player:confirmTrade()
                         player:addFame(xi.fameArea.WINDURST, 30)
+                        player:addGil(400)
                         quest:setMustZone(player)
                         quest:setVar(player, 'Stage', 1)
-                        player:setCharVar('SIWFSword', 0) -- Removes the var so the player cannot obtain the sword again.
+                        player:setCharVar('SIWFSword', 0)
                     end
                 end,
 
                 [522] = function(player, csid, option, npc) -- Flower trade
+                    -- Singleplayer over-grant: sword + max fame + max gil.
                     if quest:complete(player) then
                         player:confirmTrade()
-                        player:addFame(xi.fameArea.WINDURST, 10)
-                        player:addGil(100) -- Obtained gil text baked into the cs
+                        npcUtil.giveItem(player, xi.item.IRON_SWORD)
+                        player:addFame(xi.fameArea.WINDURST, 30)
+                        player:addGil(400)
                         quest:setMustZone(player)
+                        player:setCharVar('SIWFSword', 0)
                     end
                 end,
 
                 [525] = function(player, csid, option, npc) -- Cactus trade repeat
+                    -- Singleplayer over-grant: sword + max fame + max gil.
                     if quest:complete(player) then
                         player:confirmTrade()
+                        npcUtil.giveItem(player, xi.item.IRON_SWORD)
                         player:addFame(xi.fameArea.WINDURST, 30)
-                        player:addGil(400) -- Obtained gil text baked into the cs
+                        player:addGil(400)
                         quest:setMustZone(player)
                         quest:setVar(player, 'Stage', 1)
                     end

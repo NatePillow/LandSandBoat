@@ -190,42 +190,35 @@ entity.onEventFinish = function(player, csid, option, npc)
         local firstKI  = player:getLocalVar('firstKI')
         local secondKI = player:getLocalVar('secondKI')
 
+        -- Singleplayer over-grant: complete the ENTIRE 3-piece SCH AF chain
+        -- on any single-piece completion. Deliver whichever AF pieces the
+        -- player doesn't already own, set AF_SCH_COMPLETE, clean up state.
         if player:getFreeSlotsCount() == 0 then
             player:messageSpecial(ID.text.ITEM_CANNOT_BE_OBTAINED, itemid)
 
         else
-            -- Remove LocalVars
             player:setLocalVar('item', 0)
             player:setLocalVar('firstKI', 0)
             player:setLocalVar('secondKI', 0)
 
-            -- Flag the path complete
-            if itemid == 15748 then
-                player:setCharVar('AF_SCH_BOOTS', 4)
-            elseif itemid == 16311 then
-                player:setCharVar('AF_SCH_PANTS', 4)
-            else
-                player:setCharVar('AF_SCH_BODY', 4)
+            -- Grant all 3 SCH AF pieces (skipping any already-owned).
+            local schAF = { xi.item.SCHOLARS_LOAFERS, xi.item.SCHOLARS_PANTS, xi.item.SCHOLARS_GOWN }
+            for _, id in ipairs(schAF) do
+                if not player:hasItem(id) then
+                    npcUtil.giveItem(player, id)
+                end
             end
 
-            local afProgress = player:getCharVar('AF_Loussaire')
-            if afProgress == 3 then
-
-                -- They are done. Clean-up
-                player:setCharVar('AF_SCH_BOOTS',    0)
-                player:setCharVar('AF_SCH_PANTS',    0)
-                player:setCharVar('AF_SCH_BODY',     0)
-                player:setCharVar('AF_Loussaire',    0)
-                player:setCharVar('AF_SCH_COMPLETE', 1)
-
-            else
-                player:setCharVar('AF_Loussaire', afProgress + 1) -- They got an item. Add it!
-            end
+            -- Chain complete: clear per-path progress, set completion flag.
+            player:setCharVar('AF_SCH_BOOTS',    0)
+            player:setCharVar('AF_SCH_PANTS',    0)
+            player:setCharVar('AF_SCH_BODY',     0)
+            player:setCharVar('AF_Loussaire',    0)
+            player:setCharVar('AF_SCH_COMPLETE', 1)
 
             player:delKeyItem(firstKI)
             player:delKeyItem(secondKI)
             player:messageSpecial(ID.text.ITEM_OBTAINED, itemid)
-            player:addItem(itemid)
         end
     end
 end

@@ -52,6 +52,7 @@ public:
     uint16 getTier();
     uint32 getDuration();
     uint32 getStartTime();
+    uint64 getStartTimeMs();
     uint32 getLastTick();
     uint32 getTimeRemaining();
     uint32 getTickCount();

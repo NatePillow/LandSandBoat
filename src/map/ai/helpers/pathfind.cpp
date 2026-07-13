@@ -541,6 +541,15 @@ bool CPathFind::IsFollowingScriptedPath()
     return IsFollowingPath() && m_pathFlags & PATHFLAG_SCRIPT;
 }
 
+// SINGLEPLAYER BEGIN — public predicate used by Lua-side movement diagnostics
+// and the bot AI's per-tick speed gating. Mirrors IsFollowingScriptedPath()'s
+// shape; non-disruptive if upstream lands a similar helper.
+bool CPathFind::IsRunningPath() const
+{
+    return !m_points.empty() && (m_pathFlags & PATHFLAG_RUN);
+}
+// SINGLEPLAYER END
+
 bool CPathFind::IsPatrolling()
 {
     return m_patrolFlags & PATHFLAG_PATROL;

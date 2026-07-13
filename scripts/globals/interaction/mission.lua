@@ -29,6 +29,13 @@ function Mission:new(areaId, missionId)
     setmetatable(obj, self)
     obj.areaId = areaId
     obj.missionId = missionId
+    -- SINGLEPLAYER (#178): self-register into a flat (areaId, missionId) →
+    -- Mission lookup so bots_progression_cascade can walk every modernized
+    -- mission at Sync click time and call Mission:complete(headless).
+    xi                = xi or {}
+    xi.MissionRegistry = xi.MissionRegistry or {}
+    xi.MissionRegistry[areaId] = xi.MissionRegistry[areaId] or {}
+    xi.MissionRegistry[areaId][missionId] = obj
     return obj
 end
 

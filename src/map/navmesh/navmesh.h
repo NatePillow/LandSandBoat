@@ -56,6 +56,16 @@ public:
     auto findPath(const position_t& start, const position_t& end) -> std::vector<pathpoint_t> override;
     auto findRandomPosition(const position_t& start, float maxRadius) -> std::pair<int16, position_t> override;
     auto raycast(const position_t& start, const position_t& end) -> bool override;
+
+    // SINGLEPLAYER BEGIN
+    // Parametric distance (0..1) along [start, end] of the most recent
+    // raycast() call's first wall hit. FLT_MAX = no hit. Read by the bot AI's
+    // step-clamp logic to stop bots at wall surfaces instead of letting setPos
+    // teleport them through geometry. Declared as virtual on INavMesh so the
+    // bot AI can call through the interface; NullNavMesh returns FLT_MAX.
+    auto lastRaycastT() const -> float override { return m_raycastHit.t; }
+    // SINGLEPLAYER END
+
     auto validPosition(const position_t& position) -> bool override;
     auto findClosestValidPoint(const position_t& position, float* validPoint) -> bool override;
     auto findFurthestValidPoint(const position_t& startPosition, const position_t& endPosition, float* validPoint) -> bool override;

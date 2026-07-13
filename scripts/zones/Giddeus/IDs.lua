@@ -33,6 +33,8 @@ zones[xi.zone.GIDDEUS] =
         JUU_DUZU_THE_WHIRLWIND = GetFirstID('Juu_Duzu_the_Whirlwind'),
         VUU_PUQU_THE_BEGUILER  = GetFirstID('Vuu_Puqu_the_Beguiler'),
         VAA_HUJA_THE_ERUDITE   = GetFirstID('Vaa_Huja_the_Erudite'),
+        QUU_XIJO_THE_ILLUSORY   = GetFirstID('Quu_Xijo_the_Illusory'),
+        EYY_MON_THE_IRONBREAKER = GetFirstID('Eyy_Mon_the_Ironbreaker'),
     },
     npc =
     {

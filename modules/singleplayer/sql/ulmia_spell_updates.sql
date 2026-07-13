@@ -1,0 +1,8 @@
+INSERT INTO `mob_spell_lists` VALUES ('TRUST_Ulmia',326,368,7,16);   -- foe_requiem (7~16)
+INSERT INTO `mob_spell_lists` VALUES ('TRUST_Ulmia',326,369,17,36);  -- foe_requiem_ii (17~36)
+INSERT INTO `mob_spell_lists` VALUES ('TRUST_Ulmia',326,370,37,46);  -- foe_requiem_iii (37~46)
+INSERT INTO `mob_spell_lists` VALUES ('TRUST_Ulmia',326,371,47,56);  -- foe_requiem_iv (47~56)
+INSERT INTO `mob_spell_lists` VALUES ('TRUST_Ulmia',326,372,57,66);  -- foe_requiem_v (57~66)
+INSERT INTO `mob_spell_lists` VALUES ('TRUST_Ulmia',326,373,67,75);  -- foe_requiem_vi (67~75)
+INSERT INTO `mob_spell_lists` VALUES ('TRUST_Ulmia',326,374,76,255); -- foe_requiem_vii (76~255)
+INSERT INTO `mob_spell_lists` VALUES ('TRUST_Ulmia',326,462,33,255); -- magic_finale (33~255)

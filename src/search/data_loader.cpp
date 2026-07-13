@@ -111,9 +111,9 @@ std::vector<ahItem*> CDataLoader::GetAHItemsToCategory(uint8 ahCategoryID, const
         const auto queryStr = fmt::format("SELECT item_basic.itemid, item_basic.stackSize, COUNT(*)-SUM(stack), SUM(stack) "
                                           "FROM {} "
                                           "LEFT JOIN auction_house ON item_basic.itemId = auction_house.itemid AND auction_house.buyer_name IS NULL "
-                                          "LEFT JOIN item_equipment ON item_basic.itemid = item_equipment.itemid "
+                                          "LEFT JOIN item_equipment ON item_basic.itemid = item_equipment.itemid AND item_equipment.level < 76 "
                                           "LEFT JOIN item_weapon ON item_basic.itemid = item_weapon.itemid "
-                                          "WHERE aH = ? "
+                                          "WHERE aH = ? AND NOT EXISTS (SELECT 1 FROM item_equipment WHERE item_equipment.itemid = item_basic.itemid AND item_equipment.level > 75)"
                                           "GROUP BY item_basic.itemid "
                                           "{}",
                                           fromTable,
@@ -181,9 +181,11 @@ ahItem CDataLoader::GetAHItemFromItemID(uint16 ItemID)
 uint32 CDataLoader::GetPlayersCount(const search_req& sr)
 {
     uint8 jobid = sr.jobid;
+    // SINGLEPLAYER: client_addr = 0 sentinel filters out synthetic
+    // accounts_sessions rows for headless bots (see createHeadlessSession).
     if (jobid > 0 && jobid < 21)
     {
-        auto rset = db::preparedStmt("SELECT COUNT(*) FROM accounts_sessions LEFT JOIN char_stats USING (charid) WHERE mjob = ?", jobid);
+        auto rset = db::preparedStmt("SELECT COUNT(*) FROM accounts_sessions LEFT JOIN char_stats USING (charid) WHERE mjob = ? AND client_addr != 0", jobid);
         if (rset && rset->rowsCount() && rset->next())
         {
             return rset->get<uint32>("COUNT(*)");
@@ -191,7 +193,7 @@ uint32 CDataLoader::GetPlayersCount(const search_req& sr)
     }
     else
     {
-        auto rset = db::preparedStmt("SELECT COUNT(*) FROM accounts_sessions");
+        auto rset = db::preparedStmt("SELECT COUNT(*) FROM accounts_sessions WHERE client_addr != 0");
         if (rset && rset->rowsCount() && rset->next())
         {
             return rset->get<uint32>("COUNT(*)");
@@ -254,7 +256,7 @@ std::list<SearchEntity*> CDataLoader::GetPlayersList(search_req sr, int* count)
         "LEFT JOIN char_stats USING (charid) "
         "LEFT JOIN char_profile USING(charid) "
         "LEFT JOIN char_flags USING(charid) "
-        "WHERE charname IS NOT NULL ";
+        "WHERE charname IS NOT NULL AND client_addr != 0 "; // SINGLEPLAYER: filter synthetic headless rows
 
     fmtQuery.append(filterQry);
     fmtQuery.append(" ORDER BY charname ASC");
@@ -528,7 +530,7 @@ std::list<SearchEntity*> CDataLoader::GetPartyList(uint32 PartyID, uint32 Allian
 {
     std::list<SearchEntity*> PartyList;
 
-    auto rset = db::preparedStmt("SELECT charid, partyid, charname, pos_zone, nation, rank_sandoria, rank_bastok, rank_windurst, race, settings, mjob, sjob, mlvl, slvl, languages, seacom_type, disconnecting "
+    auto rset = db::preparedStmt("SELECT charid, partyid, partyflag, charname, pos_zone, nation, rank_sandoria, rank_bastok, rank_windurst, race, settings, mjob, sjob, mlvl, slvl, languages, seacom_type, disconnecting "
                                  "FROM accounts_sessions "
                                  "LEFT JOIN accounts_parties USING(charid) "
                                  "LEFT JOIN chars USING(charid) "
@@ -537,6 +539,11 @@ std::list<SearchEntity*> CDataLoader::GetPartyList(uint32 PartyID, uint32 Allian
                                  "LEFT JOIN char_profile USING(charid) "
                                  "LEFT JOIN char_flags USING(charid) "
                                  "WHERE IF (allianceid <> 0, allianceid IN (SELECT allianceid FROM accounts_parties WHERE charid = ?) , partyid = ?) "
+                                 // SINGLEPLAYER: deliberately NO `client_addr != 0` filter here. This is the
+                                 // party/alliance MEMBER LIST behind the vanilla Party menu, where headless
+                                 // bots MUST appear. The synthetic-row filter (client_addr = 0 sentinel)
+                                 // belongs only on /search find-players and the linkshell list, NOT on a
+                                 // player's own party roster. Re-adding it silently hides bots from the menu.
                                  "ORDER BY charname ASC "
                                  "LIMIT 64",
                                  (!AllianceID ? PartyID : AllianceID),
@@ -584,13 +591,22 @@ std::list<SearchEntity*> CDataLoader::GetPartyList(uint32 PartyID, uint32 Allian
             PPlayer->seacom_type   = rset->get<uint8>("seacom_type");
             PPlayer->disconnecting = rset->get<bool>("disconnecting");
 
+            // Name color in the vanilla Party menu is driven by these flag bits,
+            // NOT by the request's PartyID param -- which arrives as 0 when the
+            // client asks in alliance mode, leaving every returned name white.
+            // Derive leader/member state from each row's own accounts_parties
+            // data instead. partyid/partyflag are selected above.
+            //   PARTY_LEADER = 0x0004 (see src/map/party.h PARTYFLAG)
+            const uint32 rowPartyID   = rset->get<uint32>("partyid");
+            const uint16 rowPartyFlag = rset->get<uint16>("partyflag");
+
             if (PPlayer->mentor)
             {
                 PPlayer->flags1 |= 0x0001;
             }
-            if (PartyID == PPlayer->id)
+            if (PartyID == PPlayer->id || (rowPartyFlag & 0x0004))
             {
-                PPlayer->flags1 |= 0x0008;
+                PPlayer->flags1 |= 0x0008; // party/alliance leader -> distinct (yellow) name
             }
             if (PPlayer->seacom_type)
             {
@@ -604,9 +620,9 @@ std::list<SearchEntity*> CDataLoader::GetPartyList(uint32 PartyID, uint32 Allian
             {
                 PPlayer->flags1 |= 0x0800;
             }
-            if (PartyID != 0)
+            if (rowPartyID != 0)
             {
-                PPlayer->flags1 |= 0x2000;
+                PPlayer->flags1 |= 0x2000; // shares a party/alliance with the viewer -> member (blue) name
             }
             if (playerSettings.AnonymityFlg)
             {
@@ -645,7 +661,8 @@ std::list<SearchEntity*> CDataLoader::GetLinkshellList(uint32 LinkshellID)
                                  "LEFT JOIN char_stats USING (charid) "
                                  "LEFT JOIN char_profile USING(charid) "
                                  "LEFT JOIN char_flags USING(charid) "
-                                 "WHERE linkshellid1 = ? OR linkshellid2 = ? "
+                                 "WHERE (linkshellid1 = ? OR linkshellid2 = ?) "
+                                 "AND client_addr != 0 " // SINGLEPLAYER: filter synthetic headless rows
                                  "ORDER BY charname ASC "
                                  "LIMIT 64",
                                  LinkshellID,

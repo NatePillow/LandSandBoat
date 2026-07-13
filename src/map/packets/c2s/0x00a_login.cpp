@@ -34,6 +34,10 @@
 #include "utils/gardenutils.h"
 #include "utils/zoneutils.h"
 
+#include "common/logging.h"
+
+#include "singleplayer/login_hooks.h" // SINGLEPLAYER
+
 auto GP_CLI_COMMAND_LOGIN::validate(MapSession* PSession, const CCharEntity* PChar) const -> PacketValidationResult
 {
     return PacketValidator(PChar)
@@ -48,6 +52,8 @@ void GP_CLI_COMMAND_LOGIN::process(MapSession* PSession, CCharEntity* PChar) con
         ShowError("GP_CLI_COMMAND_LOGIN: PChar is null for player");
         return;
     }
+
+    singleplayer::evictConflictingHeadlessForLogin(PChar); // SINGLEPLAYER
 
     //
     // Handle out of sync zone correction..
@@ -97,6 +103,8 @@ void GP_CLI_COMMAND_LOGIN::process(MapSession* PSession, CCharEntity* PChar) con
         }
 
         destZone->IncreaseZoneCounter(PChar);
+
+        singleplayer::moveOwnedHeadlessIntoPrimaryZone(PChar); // SINGLEPLAYER
 
         // Current zone could either be current zone or destination
         CZone* currentZone = zoneutils::GetZone(PChar->getZone());

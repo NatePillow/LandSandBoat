@@ -25,6 +25,9 @@
 #include <common/cbasetypes.h>
 #include <common/types/maybe.h>
 
+#include <string>
+#include <vector>
+
 #include "common/lua.h"
 extern sol::state lua;
 
@@ -223,6 +226,24 @@ auto GetNPCByID(uint32 npcid, const sol::object& instanceObj) -> CBaseEntity*;
 auto GetMobByID(uint32 mobid, const sol::object& instanceObj) -> CBaseEntity*;
 auto GetEntityByID(uint32 mobid, const sol::object& instanceObj, const sol::object& arg3) -> CBaseEntity*;
 
+// Resolves a weapon-skill English name to its ID from the loaded WS list.
+// Returns 0 if not found. (GetItemIDByName already exists elsewhere with a
+// DB-backed implementation — reuse that.)
+uint16      GetWeaponskillByName(const std::string& name);
+std::string GetWeaponskillNameByID(uint16 id);
+
+// Returns { primary, secondary, tertiary } SC properties for a WS ID, or nil
+// if the ID is unknown. Used to decode the engine's EFFECT_SKILLCHAIN power
+// bits (primary | secondary<<4 | tertiary<<8) against a configured opener WS
+// so callers can answer "is the pending SC ours?" without a Lua-side action
+// listener.
+auto GetWeaponskillProperties(uint16 id) -> sol::table;
+
+// Returns a Lua table { id, name, element, skill, mpcost } for a spell ID, or
+// nil if the ID is unknown. Used by bot_equip's build_spell_info for ad_name
+// / ad_element / ad_skill XML conditions.
+auto GetSpellMetaByID(uint16 spellId) -> sol::table;
+
 void  WeekUpdateConquest(uint8 updateType);
 uint8 GetRegionOwner(uint8 type);
 uint8 GetRegionInfluence(uint8 type); // Return influence graphics
@@ -307,6 +328,209 @@ void OnZoneOut(CCharEntity* PChar);
 void AfterZoneIn(CBaseEntity* PChar);
 void OnZoneInitialize(uint16 ZoneID);
 void OnZoneTick(CZone* PZone);
+
+// SINGLEPLAYER BEGIN
+// Per-char bot AI tick. Fires from CCharEntity::PostTick when m_botMode != Off.
+// botMode is the BotMode enum value as uint8 (1 = CombatOnly, 2 = Full).
+void OnBotTick(CCharEntity* PChar, timer::time_point tick, uint8 botMode);
+
+// Command dispatch from the 0x176 packet handler into the bot_ai Lua module.
+// `command` is a short uppercase identifier (e.g., "ATTACK", "DISENGAGE").
+// `arg` carries an opcode-specific numeric payload (target ID, etc.).
+void OnBotCommand(CCharEntity* PMain, const std::string& command, uint32 arg);
+void OnBotFinish(CCharEntity* PMain);
+void OnBotSummonTrusts(CCharEntity* PMain);
+void OnBotSetHealMode(CCharEntity* PMain, bool on, const std::string& botName);
+void OnBotSetAddControlMode(CCharEntity* PMain, const std::string& botName, uint8 mode);
+void OnBotSetStunMode(CCharEntity* PMain, uint8 mode);
+void OnBotSetMultiEngageMode(CCharEntity* PMain, uint8 mode);
+void OnBotSetPullerPaused(CCharEntity* PMain, uint8 paused);
+// Per-bot THF utility-RA cadence in seconds. 0 = Off (no RA throws).
+// Driven by the Status tab combo on THF cards.
+void OnBotSetThfRaDelay(CCharEntity* PMain, const std::string& botName, uint8 delaySec);
+// OnBotSetNmMode retired — `is_nm` is now always engine-autodetect.
+// Role AI policy — alliance-wide per-role item-usage settings driven by the
+// Role AI tab. role: 0=tank/1=melee/2=heal/3=rdm/4=nuke,
+// type: 0=hp/1=mp/2=status, mode: 0=off/1=nm-only/2=always.
+void OnRoleAiSetMode(CCharEntity* PMain, uint8 role, uint8 type, uint8 mode);
+// Per-status checkbox under each role's Status section. statusKey is the
+// canonical index into role_policy.STATUS_LIST (Lua-side).
+void OnRoleAiSetStatusFlag(CCharEntity* PMain, uint8 role, uint8 statusKey, bool on);
+void OnBotFireAllWs(CCharEntity* PMain);
+void OnBotSetScThreshold(CCharEntity* PMain, uint8 which, uint8 value);
+// Per-bot SA/TA scheduling mode. 0=Combined (current behavior — SA→TA→WS in
+// one combo), 1=Split (alternate SA and TA across WSes so both fire over the
+// 60s recast). Lua-side validates that botName belongs to PMain.
+void OnBotSetSataMode(CCharEntity* PMain, const std::string& botName, uint8 mode);
+void OnBotSetCasualNukeRotation(CCharEntity* PMain, const std::string& botName, uint8 value);
+void OnBotSetCasualNukeMbMode(CCharEntity* PMain, const std::string& botName, uint8 mode);
+// Nudge a bot ±1y along the vector toward its currently engaged target.
+// direction: 0=forward (toward), 1=backward (away). Lua-side validates
+// ownership + engagement; silent no-op otherwise.
+void OnBotTankNudge(CCharEntity* PMain, const std::string& botName, uint8 direction);
+// Snap a bot to the primary's current xyz. Used to recover a stuck tank
+// or pass aggro at the primary's feet. Lua-side validates ownership;
+// silent no-op otherwise.
+void OnBotTankWalkToMe(CCharEntity* PMain, const std::string& botName);
+// Set the alliance puller. Empty botName clears the selection. Lua-side
+// validates that the bot belongs to PMain.
+void OnBotSetPuller(CCharEntity* PMain, const std::string& botName);
+// Set the puller's scan range (yalms from camp anchor). Server clamps to [5, 255].
+void OnBotSetPullerRange(CCharEntity* PMain, uint8 rangeYalms);
+// Set the puller's con range (min..max). 0=TW, 1=EP, 2=DC, 3=EM, 4=T, 5=VT, 6=IT.
+void OnBotSetPullerConRange(CCharEntity* PMain, uint8 minCon, uint8 maxCon);
+void OnBotSetPullerResumeMpp(CCharEntity* PMain, uint8 mpp);
+// Request the list of unique mob names within 255y of the alliance camp anchor.
+// Server scans, sorts by count, pushes S2C 0x1A3 PULLER_NEARBY_NAMES back.
+void OnBotRequestPullerNames(CCharEntity* PMain);
+// Apply the user's selected name filter for the puller. Empty list clears it.
+void OnBotSetPullerNameFilter(CCharEntity* PMain, const std::vector<std::string>& names);
+// Grant SIGNET to the primary + every owned headless. Each member's own
+// nation/rank drives their individual duration formula (matches the gate-
+// guard overseer path in scripts/globals/conquest.lua). Also strips any
+// competing INFLUENCE-flagged effects (sigil/sanction) on each member first.
+void OnBotGiveSignet(CCharEntity* PMain);
+// Per-bot role_heal scope. 0=party (default — heal own party only),
+// 1=allianceAssist (party + BLM-tier fallback on alliance), 2=allianceMain
+// (WHM-tier cures + single-target -na widened to alliance). Lua-side
+// validates botName belongs to PMain.
+void OnBotSetHealScope(CCharEntity* PMain, const std::string& botName, uint8 mode);
+// Alliance-wide headless aggro mode. 0=Off (trust-like, mobs ignore
+// headless), 1=Full (mobs aggro headless like real players), 2=Engaged
+// (invisible until the headless has a battle target, then vanilla rules).
+// Replaces the old static singleplayer.HEADLESS_MOB_AGGRO setting. Lua
+// dispatcher writes alliance.aggroMode and cascades each owned headless's
+// m_aggroMode via the setAggroMode binding so the C++ aggro hot path
+// stays branch-free.
+void OnBotSetAggroMode(CCharEntity* PMain, uint8 mode);
+// Primary issues a one-shot action command at a specific headless. Dispatched
+// to xi.singleplayer.bots.ai_command.dispatch which validates ownership, queues
+// the command on the bot's per-bot pendingCommand slot, and lets the next AI
+// tick fire it. Acks come back as printToPlayer chat messages.
+void OnBotIssueCommand(CCharEntity* PMain, const std::string& botName,
+                       const std::string& actionKind, const std::string& actionName,
+                       uint32 targetId);
+void OnBotScPause(CCharEntity* PMain, uint8 scId, bool paused);
+
+// 0x176 SYNC_QUESTS / SYNC_MISSIONS entry points (#178 — account-wide cascade).
+// Collect every linked headless owned by PMain, hand the list to the Lua
+// xi.singleplayer.bots.bots_progression_cascade.sync_quests / sync_missions function, then push an S2C 0x1A3
+// SYNC_ACK back to PMain with the count so the addon UI can clear its
+// "in-flight" guard. Kind bits in the ACK: 0 = quests, 1 = missions.
+void OnBotSyncQuests(CCharEntity* PMain);
+void OnBotSyncMissions(CCharEntity* PMain);
+// Cascade primary's teleport bitfields (all TELEPORT_TYPE values) onto each
+// owned headless. Mirrors the quest/mission sync hooks; replies with S2C
+// 0x1A3 SYNC_ACK kind=2.
+void OnBotSyncTeleports(CCharEntity* PMain);
+// Per-bot BRD song-roster override. slot0..slot3 are uint16 spell IDs in
+// the order: front_minuet, front_madrigal, back_ballad_a, back_ballad_b.
+// 0 = "auto" sentinel (role_brd falls through to best_tier for that slot).
+void OnBotSetBrdSongRoster(CCharEntity* PMain, const std::string& botName,
+                           uint16 slot0, uint16 slot1, uint16 slot2, uint16 slot3);
+
+// Per-bot SMN avatar dropdown selection. avatarSpellId is the summon spell
+// the bot auto-resummons after release / death. 0 = "auto" sentinel
+// (role_smn falls back to Carbuncle).
+void OnBotSetSmnAvatar(CCharEntity* PMain, const std::string& botName, uint16 avatarSpellId);
+
+// 0x191 SET_AUTOSKILL entry point. Routes to xi.singleplayer.bots.skillup.set_skillup_for_bot
+// which writes the runtime override table and starts/stops the skill-up loop
+// on the named bot. Authorized iff target is the requester or a headless owned
+// by them — checked in Lua against PSession->parentCharId.
+void OnSetAutoskill(CCharEntity* PMain, const std::string& botName, uint8 mode, const std::vector<uint16>& spellIds);
+
+// 0x193 LIST_AUTOSKILL entry point. Walks every active xi.singleplayer.bots.skillup override
+// owned by the requester and fires a 0x192 AUTOSKILL_STATE for each so the
+// addon can populate its UI cache on load.
+void OnListAutoskill(CCharEntity* PMain);
+
+// Role assignment for a specific char (0x176 SET_ROLE).
+void OnBotSetRole(CCharEntity* PBot, uint8 role);
+
+// 0x176 SET_FORMATION subcommand entry point. Kind: 0 = battle, 1 = walking.
+// Name: formation identifier (e.g. "default", "camp", "column", "role").
+// Applies to the primary's xi.singleplayer.bots.primary[charId] state; trickles down to
+// every bot via xi.singleplayer.bots.ai_formation during their movement tick.
+void OnBotSetFormation(CCharEntity* PPrimary, uint8 kind, const std::string& name);
+
+// 0x175 spawn entry point. Resolves to xi.singleplayer.bots.bots_spawn_from_config(player, configName)
+// on the Lua side, which reads singleplayer/config/alliance/<name>.json
+// and drives synthetic session creation, party formation, and trust queuing.
+void OnBotSpawnFromConfig(CCharEntity* PChar, const std::string& configName);
+// 0x176 UPDATE_CONFIG entry point. Routes to the diff-based update
+// (bots_spawn.update_alliance_diff) which computes the partition against
+// the running alliance and applies the minimum mutation. Falls back to a
+// full despawn+respawn internally for cases the diff can't handle.
+void OnBotUpdateAllianceConfig(CCharEntity* PChar, const std::string& configName);
+
+// Fired right before a headless bot is torn down (destroyHeadlessForParent /
+// destroyHeadlessByCharId), while PChar is still valid. Lets the Lua AI
+// modules wipe per-bot state tables so they don't leak across spawn/despawn.
+void OnBotDespawn(CCharEntity* PChar);
+
+// 0x17d use-food entry point. Resolves to xi.singleplayer.bots.item.use_food_from_config
+// which reads singleplayer/config/food/<name>.json (char-name → food
+// item name) and fires bot:useItem on each linked headless.
+void OnUseFoodFromConfig(CCharEntity* PChar, const std::string& configName);
+// AutoLot group assignment from the primary char's addon. Runtime state only —
+// applies on the live entity (primary or owned headless); silently no-ops if
+// charName isn't currently a spawned PC. See ai_lot.set_assignment_for_char.
+void OnSetLotAssignment(CCharEntity* PMain, const std::string& charName, const std::string& groupName, bool on);
+
+// Lua-callable: fetch a config file body + its mtime from the server's
+// in-memory cache. Returns (body: string|nil, mtime: int). Consumers that
+// cache parsed/derived state alongside the raw body use the mtime as a
+// freshness key — store the mtime when caching, compare on each lookup,
+// re-derive when mtime advances. The watcher poll keeps the cache fresh
+// against external edits within ~2 s; addon CRUD writes through the
+// loopback HTTP config server (config_http_server.cpp) update the cache
+// atomically via configcache::putAndPersist before the response returns.
+auto GetServerConfig(const std::string& category, const std::string& name) -> std::tuple<sol::object, int64_t>;
+
+// 0x176 AUTOLOT namespace entry points. The addon's Lot List action edits a
+// per-(primary, item_id) → set-of-bots structure inside xi.singleplayer.bots.ai_lot. Each
+// listed bot will lot drops of itemId until they have one in inventory.
+void OnLotListAdd(CCharEntity* PChar, uint32 itemId, const std::string& botName);
+void OnLotListRemove(CCharEntity* PChar, uint32 itemId, const std::string& botName);
+void OnLotListClear(CCharEntity* PChar, uint32 itemId);
+
+// Universal action-result hook. Fires once per finalized action_t (regardless
+// of category: melee/WS/magic/JA/ranged/mob_skill/etc.) from the BATTLE2 packet
+// ctor. Routes to xi.singleplayer.bots.onActionResult on the Lua side with the actor entity
+// and a flattened table of the action's targets / results so bot_dps and
+// future damage-side consumers can categorize without scattered PAI listeners.
+// (action_t is already fwd-declared in global namespace above.)
+void OnActionResult(const action_t& action);
+
+// Fires from CMobSkillState constructor at the start of a mob TP move windup.
+// Provides the actual cast time so Lua-side bot AI (ai_magic.lua) can set its
+// stun/bash interrupt windows to the precise mob WS duration instead of a
+// conservative constant. Called BEFORE damage resolution; listeners get the
+// full windup to react.
+void OnMobSkillStart(CBaseEntity* PActor, timer::duration castTime);
+
+// Server → primary client packet helpers used by the bot_ai Lua module.
+// `BotPushLog` corresponds to the 0x179 LOG_MESSAGE event — bot AI chatter that
+// should render in the addon's autoutil.log on the client, not the server log.
+// `BotPushState` corresponds to the 0x178 state update (per-bot HP/MP/role/target).
+// Both target the primary char's queue so the addon displays them.
+// First arg is the Lua-side CLuaBaseEntity wrapper (sol2 can't auto-marshal
+// it across to CCharEntity*); the impl downcasts inside.
+void BotPushLog(CLuaBaseEntity* PLuaPrimary, const std::string& tag, const std::string& msg);
+void BotPushState(CLuaBaseEntity* PLuaPrimary, uint8 stateType, sol::table payload);
+
+// 0x17C per-bot DPS push. categories is a Lua table list of 6 entries, each
+// shaped { damage = u32, hits = u16, misses = u16 } in the canonical order
+// {melee, ranged, ws, magic, burst, ja}. Missing entries default to zeros.
+void BotPushDps(CLuaBaseEntity* PLuaPrimary, uint32 botCharId, bool isFinal, uint32 totalDamage, uint32 activeMs, sol::table categories);
+
+// 0x191 per-party status push (autostatus.lua, ~5s cadence). `partyNumber` is
+// 1..3 (party slot inside the alliance). `members` is a Lua list whose entries
+// are { charId = u32, effects = { effectId, effectId, ... } }. Effects are
+// silently truncated at GP_SERV_COMMAND_PARTY_STATUS::kMaxEffectsPerBot.
+void PushPartyStatus(CLuaBaseEntity* PLuaPrimary, uint8 partyNumber, sol::table members);
+// SINGLEPLAYER END
 
 void OnTriggerAreaEnter(CCharEntity* PChar, const std::unique_ptr<ITriggerArea>& PTriggerArea); // when player enters a trigger area in a zone
 void OnTriggerAreaLeave(CCharEntity* PChar, const std::unique_ptr<ITriggerArea>& PTriggerArea); // when player leaves a trigger area in a zone
@@ -443,6 +667,14 @@ auto GetFurthestValidPosition(CLuaBaseEntity* fromTarget, float distance, float 
 
 void OnPlayerDeath(CCharEntity* PChar);
 void OnPlayerLevelUp(CCharEntity* PChar);
+// Fires from CCharEntity::Raise() after the revive completes. Single funnel
+// for both real-player Accept (0x01A RaiseMenu) and the bot auto-accept Lua
+// binding — both go through Raise().
+void OnPlayerRaise(CCharEntity* PChar);
+// synthResult: 1=success, 2=HQ, 3=HQ2, 4=HQ3 (matches the SYNTHESIS_*
+// enum). Fired after a synth completes successfully (any tier). FAIL path
+// doesn't go through here.
+void OnSynthFinish(CCharEntity* PChar, uint8 synthResult);
 void OnPlayerLevelDown(CCharEntity* PChar);
 void OnPlayerMount(CCharEntity* PChar);
 void OnPlayerEmote(CCharEntity* PChar, Emote EmoteID);

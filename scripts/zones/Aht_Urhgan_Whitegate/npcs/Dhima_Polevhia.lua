@@ -139,7 +139,17 @@ entity.onEventFinish = function(player, csid, option, npc)
     -- "Complete order" events.
     if csid == 792 or csid == 793 then
         if npcUtil.giveItem(player, orderId) then
-            player:incrementCharVar('[AF]pupCrafted', bit.lshift(1, dataTable[orderId][1]))
+            -- Singleplayer over-grant: deliver ALL 3 PUP AF pieces at once
+            -- + set the bitmask fully (bits 1|2|3 = 14) idempotently, so
+            -- the crafting chain reads as "all AF complete" going forward.
+            -- Player still traded for the picked piece (that's the game act);
+            -- the other 2 are extras.
+            for otherPiece, _ in pairs(dataTable) do
+                if otherPiece ~= orderId then
+                    npcUtil.giveItem(player, otherPiece)
+                end
+            end
+            player:setCharVar('[AF]pupCrafted', 14)
             player:setCharVar('[PUP]orderId', 0)
             player:setCharVar('[PUP]orderStage', 0)
             player:setCharVar('[PUP]orderTime', 0)

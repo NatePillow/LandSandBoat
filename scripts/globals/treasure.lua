@@ -1612,7 +1612,7 @@ local function kneelBeforeChest(player, npc)
     npc:setLocalVar('traded', 1)
 end
 
-local function moveTreasure(npc, respawnTime)
+xi.treasure.moveTreasure = function(npc, respawnTime)
     local zoneId         = npc:getZoneID()
     local containerType  = npcTable[npc:getName()]
     local positions      = posTable[zoneId][containerType]
@@ -1679,6 +1679,10 @@ end
 -----------------------------------
 -- Public functions
 -----------------------------------
+xi.treasure.type     = { CHEST = treasureType.CHEST, COFFER = treasureType.COFFER }
+xi.treasure.posTable = posTable
+xi.treasure.npcTable = npcTable
+
 xi.treasure.initZone = function(zone)
     local zoneId = zone:getID()
     local ID     = zones[zoneId]
@@ -1687,7 +1691,7 @@ xi.treasure.initZone = function(zone)
         local npc = GetNPCByID(ID.npc.TREASURE_CHEST)
         if npc then
             npc:setStatus(xi.status.NORMAL)
-            moveTreasure(npc, respawnType.IMMEDIATE)
+            xi.treasure.moveTreasure(npc, respawnType.IMMEDIATE)
         end
     end
 
@@ -1695,7 +1699,7 @@ xi.treasure.initZone = function(zone)
         local npc = GetNPCByID(ID.npc.TREASURE_COFFER)
         if npc then
             npc:setStatus(xi.status.NORMAL)
-            moveTreasure(npc, respawnType.IMMEDIATE)
+            xi.treasure.moveTreasure(npc, respawnType.IMMEDIATE)
         end
     end
 end
@@ -1848,7 +1852,7 @@ xi.treasure.onTrade = function(player, npc, trade, bypassType, bypassReward)
             playerEntity:addStatusEffect(xi.effect.WEAKNESS, { power = 1, duration = weaknessDuration, origin = player })
             playerEntity:messageSpecial(ID.text.CHEST_UNLOCKED + 2)
             npc:entityAnimationPacket(xi.animationString.OPEN_CRATE_SMOKE)
-            moveTreasure(npc, respawnType.REGULAR)
+            xi.treasure.moveTreasure(npc, respawnType.REGULAR)
         end)
 
         player:timer(4000, function(playerEntity)
@@ -1875,7 +1879,7 @@ xi.treasure.onTrade = function(player, npc, trade, bypassType, bypassReward)
             mimic:setSpawn(npc:getXPos(), npc:getYPos(), npc:getZPos(), npc:getRotPos())
             npcUtil.popFromQM(playerEntity, npc, mimicId, { claim = true, hide = 5 })
             playerEntity:messageSpecial(ID.text.CHEST_UNLOCKED + 4)
-            moveTreasure(npc, respawnType.IMMEDIATE)
+            xi.treasure.moveTreasure(npc, respawnType.IMMEDIATE)
             playerEntity:setFreezeFlag(false)
         end)
 
@@ -1898,7 +1902,7 @@ xi.treasure.onTrade = function(player, npc, trade, bypassType, bypassReward)
             if npcUtil.giveItem(playerEntity, bypassReward) then
                 playerEntity:messageSpecial(ID.text.CHEST_UNLOCKED)
                 npc:entityAnimationPacket(xi.animationString.OPEN_CRATE_GLOW)
-                moveTreasure(npc, respawnType.REGULAR)
+                xi.treasure.moveTreasure(npc, respawnType.REGULAR)
             end
         end)
 
@@ -1919,7 +1923,7 @@ xi.treasure.onTrade = function(player, npc, trade, bypassType, bypassReward)
             playerEntity:messageSpecial(ID.text.CHEST_UNLOCKED - 1, bypassReward) -- TODO: message -2 seems to be for other party members?
             playerEntity:addKeyItem(bypassReward)
             npc:entityAnimationPacket(xi.animationString.OPEN_CRATE_GLOW)
-            moveTreasure(npc, respawnType.REGULAR)
+            xi.treasure.moveTreasure(npc, respawnType.REGULAR)
         end)
 
         player:timer(4000, function(playerEntity)
@@ -1942,7 +1946,7 @@ xi.treasure.onTrade = function(player, npc, trade, bypassType, bypassReward)
             playerEntity:messageSpecial(ID.text.CHEST_UNLOCKED - 1, treasureMap) -- TODO: message -2 seems to be for other party members?
             playerEntity:addKeyItem(treasureMap)
             npc:entityAnimationPacket(xi.animationString.OPEN_CRATE_GLOW)
-            moveTreasure(npc, respawnType.REGULAR)
+            xi.treasure.moveTreasure(npc, respawnType.REGULAR)
         end)
 
         player:timer(4000, function(playerEntity)
@@ -1977,7 +1981,7 @@ xi.treasure.onTrade = function(player, npc, trade, bypassType, bypassReward)
             playerEntity:messageSpecial(ID.text.CHEST_UNLOCKED)
             handleGilDistribution(playerEntity, treasureLevel)
             npc:entityAnimationPacket(xi.animationString.OPEN_CRATE_GLOW)
-            moveTreasure(npc, respawnType.REGULAR)
+            xi.treasure.moveTreasure(npc, respawnType.REGULAR)
         end)
 
         player:timer(4000, function(playerEntity)
@@ -1994,7 +1998,7 @@ xi.treasure.onTrade = function(player, npc, trade, bypassType, bypassReward)
             playerEntity:addTreasure(itemId, npc)
             playerEntity:messageSpecial(ID.text.CHEST_UNLOCKED)
             npc:entityAnimationPacket(xi.animationString.OPEN_CRATE_GLOW)
-            moveTreasure(npc, respawnType.REGULAR)
+            xi.treasure.moveTreasure(npc, respawnType.REGULAR)
         end)
 
         player:timer(4000, function(playerEntity)

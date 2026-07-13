@@ -73,7 +73,7 @@ void CGuild::updateGuildPointsPattern(uint8 pattern)
                 const auto points    = rset->get<uint16>("points");
                 const auto maxPoints = rset->get<uint16>("max_points");
 
-                m_GPItems[i].emplace_back(xi::items::lookup(itemId), maxPoints, points);
+                m_GPItems[i].emplace_back(xi::items::lookup(itemId), maxPoints * 10, points);
             }
         }
     }
@@ -86,12 +86,12 @@ auto CGuild::addGuildPoints(CCharEntity* PChar, const CItem* PItem) const -> std
     rank                   = std::clamp<uint8>(rank, 3, 9);
     const uint16 curPoints = PChar->getCharVar("[GUILD]daily_points");
 
-    if (curPoints == 1)
+    /*if (curPoints == 1)
     {
         // curPoints set to 1 means the player is not eligible for points
         // due to changing guilds recently.
         return { 0, 0 };
-    }
+    }*/
 
     if (PItem)
     {
@@ -116,7 +116,9 @@ auto CGuild::addGuildPoints(CCharEntity* PChar, const CItem* PItem) const -> std
 
                 charutils::AddPoints(PChar, pointsName.c_str(), pointsToAdd);
                 // Tally of earned points expire at JST midnight.
-                PChar->setCharVar("[GUILD]daily_points", curPoints + pointsToAdd, luautils::JstMidnight());
+                auto nextHourMs = std::chrono::ceil<std::chrono::hours>(std::chrono::system_clock::now());
+                auto nextHour = static_cast<uint32>(std::chrono::floor<std::chrono::seconds>(nextHourMs.time_since_epoch()).count());
+                PChar->setCharVar("[GUILD]daily_points", curPoints + pointsToAdd, nextHour);
 
                 return { quantity, pointsToAdd };
             }

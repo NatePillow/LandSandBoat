@@ -50,6 +50,7 @@ zones[xi.zone.LUFAISE_MEADOWS] =
         BAUMESEL              = GetFirstID('Baumesel'),
         BLACKBONE_FRAZDIZ     = GetFirstID('Blackbone_Frazdiz'),
         COLORFUL_LESHY        = GetFirstID('Colorful_Leshy'),
+        DEFOLIATE_LESHY       = GetFirstID('Defoliate_Leshy'),
         FLOCKBOCK             = GetFirstID('Flockbock'),
         FOMOR_BARD            = GetTableOfIDs('Fomor_Bard'),
         FOMOR_BEASTMASTER     = GetTableOfIDs('Fomor_Beastmaster'),

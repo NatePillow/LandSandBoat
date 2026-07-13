@@ -93,36 +93,26 @@ entity.onEventFinish = function(player, csid, option, npc)
     elseif csid == 107 then
         npcUtil.giveKeyItem(player, xi.ki.TUNING_FORK_OF_WIND)
     elseif csid == 69 then
-        local item = 0
-        if option == 1 then
-            item = xi.item.GARUDAS_DAGGER
-        elseif option == 2 then
-            item = xi.item.WIND_BELT
-        elseif option == 3 then
-            item = xi.item.WIND_RING
-        elseif option == 4 then
-            item = xi.item.BOTTLE_OF_BUBBLY_WATER
+        -- Singleplayer over-grant: deliver ALL 6 reward options at once.
+        local rewardItems = {
+            xi.item.GARUDAS_DAGGER,
+            xi.item.WIND_BELT,
+            xi.item.WIND_RING,
+            xi.item.BOTTLE_OF_BUBBLY_WATER,
+        }
+        for _, id in ipairs(rewardItems) do
+            npcUtil.giveItem(player, id)
         end
-
-        if player:getFreeSlotsCount() == 0 and (option ~= 5 or option ~= 6) then
-            player:messageSpecial(ID.text.ITEM_CANNOT_BE_OBTAINED, item)
-        else
-            if option == 5 then
-                npcUtil.giveCurrency(player, 'gil', 10000)
-            elseif option == 6 then
-                player:addSpell(xi.magic.spell.GARUDA) -- Garuda Spell
-                player:messageSpecial(ID.text.GARUDA_UNLOCKED, 0, 0, 3)
-            else
-                player:addItem(item)
-                player:messageSpecial(ID.text.ITEM_OBTAINED, item) -- Item
-            end
-
-            player:addTitle(xi.title.HEIR_OF_THE_GREAT_WIND)
-            player:delKeyItem(xi.ki.WHISPER_OF_GALES) --Whisper of Gales, as a trade for the above rewards
-            player:setCharVar('TrialByWind_date', JstMidnight())
-            player:addFame(xi.fameArea.SELBINA_RABAO, 30)
-            player:completeQuest(xi.questLog.OUTLANDS, xi.quest.id.outlands.TRIAL_BY_WIND)
+        npcUtil.giveCurrency(player, 'gil', 10000)
+        if not player:hasSpell(xi.magic.spell.GARUDA) then
+            player:addSpell(xi.magic.spell.GARUDA)
+            player:messageSpecial(ID.text.GARUDA_UNLOCKED, 0, 0, 3)
         end
+        player:addTitle(xi.title.HEIR_OF_THE_GREAT_WIND)
+        player:delKeyItem(xi.ki.WHISPER_OF_GALES)
+        player:setCharVar('TrialByWind_date', JstMidnight())
+        player:addFame(xi.fameArea.SELBINA_RABAO, 30)
+        player:completeQuest(xi.questLog.OUTLANDS, xi.quest.id.outlands.TRIAL_BY_WIND)
     elseif csid == 86 or csid == 87 then
         if player:getFreeSlotsCount() ~= 0 then
             player:addItem(xi.item.WIND_PENDULUM)

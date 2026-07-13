@@ -29,6 +29,15 @@ function Quest:new(areaId, questId)
     setmetatable(obj, self)
     obj.areaId = areaId
     obj.questId = questId
+    -- SINGLEPLAYER (#178): self-register into a flat (areaId, questId) → Quest
+    -- lookup so bots_progression_cascade can walk every modernized quest at
+    -- Sync click time and call Quest:complete(headless) to cascade rewards.
+    -- Helper-wrapped quests (Borghertz/UnlockingAMyth/Gobbiebag) also call
+    -- Quest:new internally so they self-register too.
+    xi              = xi or {}
+    xi.QuestRegistry = xi.QuestRegistry or {}
+    xi.QuestRegistry[areaId] = xi.QuestRegistry[areaId] or {}
+    xi.QuestRegistry[areaId][questId] = obj
     return obj
 end
 

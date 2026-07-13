@@ -78,6 +78,10 @@ void GP_CLI_COMMAND_POS::process(MapSession* PSession, CCharEntity* PChar) const
             const float distanceTravelled = distance(PChar->m_previousLocation.p, PChar->loc.p);
             PChar->m_charHistory.distanceTravelled += static_cast<uint32>(distanceTravelled);
         }
+
+        // SINGLEPLAYER BEGIN: bot-AI Full-mode yield window. Same-position heartbeats don't stamp.
+        PChar->m_lastClientMoveInput = timer::now();
+        // SINGLEPLAYER END
     }
 
     // Request updates for all entity types

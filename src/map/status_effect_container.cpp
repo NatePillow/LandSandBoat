@@ -236,6 +236,10 @@ bool CStatusEffectContainer::CanGainStatusEffect(CStatusEffect* PStatusEffect)
     // check for immunities first
     switch (statusEffect)
     {
+        case EFFECT_MEDICINE:
+            {
+                return false;
+            }
         case EFFECT_SLEEP:
         case EFFECT_SLEEP_II:
         case EFFECT_LULLABY:

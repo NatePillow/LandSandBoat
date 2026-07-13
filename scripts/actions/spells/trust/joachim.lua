@@ -18,6 +18,10 @@ spellObject.onSpellCast = function(caster, target, spell)
 end
 
 spellObject.onMobSpawn = function(mob)
+    -- SINGLEPLAYER BEGIN
+    if xi.singleplayer and xi.singleplayer.trust
+       and xi.singleplayer.trust.maybeOverrideSpawn(mob, 'JOACHIM') then return end
+    -- SINGLEPLAYER END
     xi.trust.message(mob, xi.trust.messageOffset.SPAWN)
 
     mob:addGambit(ai.t.PARTY, { ai.c.STATUS, xi.effect.POISON }, { ai.r.MA, ai.s.SPECIFIC, xi.magic.spell.POISONA })

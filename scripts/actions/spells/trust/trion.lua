@@ -18,6 +18,10 @@ spellObject.onSpellCast = function(caster, target, spell)
 end
 
 spellObject.onMobSpawn = function(mob)
+    -- SINGLEPLAYER BEGIN
+    if xi.singleplayer and xi.singleplayer.trust
+       and xi.singleplayer.trust.maybeOverrideSpawn(mob, 'TRION') then return end
+    -- SINGLEPLAYER END
     xi.trust.teamworkMessage(mob, {
         [xi.magic.spell.CURILLA] = xi.trust.messageOffset.TEAMWORK_1,
         [xi.magic.spell.RAHAL] = xi.trust.messageOffset.TEAMWORK_2,

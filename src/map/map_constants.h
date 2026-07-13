@@ -69,5 +69,11 @@ static constexpr auto kIPCPumpInterval = 100ms;
 
 // Packet & networking constants
 static constexpr auto kMaxBufferSize           = 2500U;
+// Raw-pack budget for send_parse's inner loop. The bit-packed compressor can
+// expand binary-heavy input up to ~1 output byte per input byte; stopping the
+// raw pack a bit short of kMaxBufferSize leaves headroom so the compressor
+// rarely hits its retry path (zlib_compress: ran out of space). Lower = more
+// packets per send but fewer retries; raise if perf testing shows pressure.
+static constexpr auto kRawPackBudget           = 2200U;
 static constexpr auto kMaxPacketPerCompression = 32U;
 static constexpr auto kMaxPacketBacklogSize    = kMaxPacketPerCompression * 6U; // If we hit this number, things are going very very badly.

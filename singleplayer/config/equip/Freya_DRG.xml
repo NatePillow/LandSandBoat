@@ -1,0 +1,186 @@
+<ashitacast>
+	<settings>
+        <blockresends>false</blockresends>
+        <predictivepet>true</predictivepet>
+		<buffupdate>true</buffupdate>
+		<statusupdate>true</statusupdate>
+		<hpupdate>true</hpupdate> 
+		<autoupdate>true</autoupdate> 
+	</settings>
+	<sets>
+		<set name="Idle" baseset="Engaged">
+			<head>Emperor Hairpin</head>
+			<ear1>Dodge Earring</ear1>
+			<ear2>Dodge Earring</ear2>
+			<ring1>Vigor Ring +1</ring1>
+			<ring2>Vigor Ring +1</ring2>
+			<back>Nomad's Mantle +1</back>
+			<waist>Warrior's Belt +1</waist>
+		</set>
+		
+		<set name="Engaged">
+			<sub>Mythril Grip +1</sub>
+			<ammo>Tiphia Sting</ammo>
+			<head>Valkyrie's Mask</head>
+			<neck>Peacock Charm</neck>
+			<ear1>Spike Earring</ear1>
+			<ear2>Spike Earring</ear2>
+			<body>Thrk. Breastplate</body>
+			<hands>Combat Mittens +1</hands>
+			<ring1>Sniper's Ring +1</ring1>
+			<ring2>Sniper's Ring +1</ring2>
+			<back>Amemet Mantle +1</back>
+			<waist>Speed Belt</waist>
+			<legs>Magna F Chausses</legs>
+			<feet>Mtt. Leggings +1</feet>
+		</set>
+
+		<set name="STR" baseset="Engaged">
+			<sub>Mythril Grip +1</sub>
+			<head>Voyager Sallet</head>
+			<neck>Spike Necklace</neck>
+			<ear1>Heims Earring</ear1>
+			<ear2>Giant's Earring</ear2>
+			<body>Thrk. Breastplate</body>
+			<hands>Enkelados's Brc.</hands>
+			<ring1>Victory Ring</ring1>
+			<ring2>Victory Ring</ring2>
+			<back>Jaguar Mantle</back>
+			<waist>Brave Belt</waist>
+			<legs>Garrison Hose</legs>
+			<feet>Mtt. Leggings +1</feet>
+		</set>
+
+		<set name="STR_20">
+			<neck>Armiger's Lace</neck>
+			<ring1>Courage Ring +1</ring1>
+			<ring2>Courage Ring +1</ring2>
+			<waist>Brave Belt</waist>
+			<feet>Mtt. Leggings +1</feet>
+		</set>
+
+		<set name="STR_30" baseset="STR_20">
+			<neck>Spike Necklace</neck>
+			<ear1>Giant's Earring</ear1>
+			<hands>Gigas Bracelets</hands>
+			<legs>Garrison Hose</legs>
+		</set>
+
+		<set name="STR_40" baseset="STR_30">
+			<hands>Ogygos's Brc.</hands>
+			<ring1>Puissance Ring</ring1>
+			<ring2>Puissance Ring</ring2>
+		</set>
+
+		<set name="STR_50" baseset="STR_40">
+			<head>Voyager Sallet</head>
+			<ear2>Heims Earring</ear2>
+			<body>Brigandine +1</body>
+			<hands>Enkelados's Brc.</hands>
+		</set>
+
+		<set name="STR_60" baseset="STR_50">
+			<sub>Mythril Grip +1</sub>
+			<ring1>Victory Ring</ring1>
+			<ring2>Victory Ring</ring2>
+		</set>
+
+		<set name="Engaged_20">
+			<sub>Disciple Grip</sub>
+			<ammo>Tiny Tathlum</ammo>
+			<neck>Armiger's Lace</neck>
+			<ear1>Bone Earring +1</ear1>
+			<ear2>Bone Earring +1</ear2>
+			<body>Garrison Tunica</body>
+			<hands>Guerilla Gloves</hands>
+			<ring1>Courage Ring +1</ring1>
+			<ring2>Courage Ring +1</ring2>
+			<back>Besieger Mantle</back>
+			<waist>Brave Belt</waist>
+			<feet>Mtt. Leggings +1</feet>
+		</set>
+
+		<set name="Engaged_30" baseset="Engaged_20">
+			<sub>Brass Grip +1</sub>
+			<head>Emperor Hairpin</head>
+			<neck>Spike Necklace</neck>
+			<ear1>Beetle Earring +1</ear1>
+			<ear2>Beetle Earring +1</ear2>
+			<body>Aega's Doublet</body>
+			<hands>Combat Mittens +1</hands>
+			<back>Exact. Mantle +1</back>
+		</set>
+
+		<set name="Engaged_40" baseset="Engaged_30">
+			<neck>Peacock Charm</neck>
+			<ring1>Sniper's Ring +1</ring1>
+			<ring2>Sniper's Ring +1</ring2>
+			<legs>Magna F Chausses</legs>
+		</set>
+
+		<set name="Engaged_50" baseset="Engaged_40">
+			<ammo>Optical Needle</ammo>
+			<head>Valkyrie's Mask</head>
+			<ear1>Tor. Earring +1</ear1>
+			<ear2>Tor. Earring +1</ear2>
+			<body>Brigandine +1</body>
+			<waist>Headlong Belt</waist>
+		</set>
+
+		<set name="Engaged_60" baseset="Engaged_50">
+			<sub>Mythril Grip +1</sub>
+			<ammo>Tiphia Sting</ammo>
+			<ear1>Spike Earring</ear1>
+			<ear2>Spike Earring</ear2>
+			<body>Scp. Harness +1</body>
+			<waist>Speed Belt</waist>
+		</set>
+
+		<set name="Gearlock" baseset="Idle">
+			<head>Emperor Hairpin</head>
+			<body>Thrk. Breastplate</body>
+			<hands>Enkelados's Brc.</hands>
+			<legs>Magna F Chausses</legs>
+			<feet>Mtt. Leggings +1</feet>`
+		</set>
+
+	</sets>
+
+	<gearlock>
+		<equip set="Gearlock" />
+	</gearlock>
+		
+	<variables>
+		<var name="autows">0</var>
+	</variables>
+	
+	<inputcommands>
+		<cmd input="/wson">
+			<setvar name="autows" values="1"/>
+			<addtochat colo="50">Auto WS enabled!</addtochat>
+		</cmd>
+		<cmd input="/wsoff">
+			<setvar name="autows" values="0"/>
+			<addtochat colo="50">Auto WS disabled!</addtochat>
+		</cmd>
+	</inputcommands>
+
+	<idlegear>
+		<if p_status="engaged">
+			<equip set="Engaged" />
+			<if p_tp=">999">
+				<if advanced="$autows=1">
+					<command>/ws "Double Thrust" &lt;t&gt;</command>
+				</if>
+			</if>
+		</if>
+		<else>
+			<equip set="Idle" />
+		</else>
+	</idlegear>
+	
+	<weaponskill>
+		<equip set="STR" />
+	</weaponskill>
+	
+</ashitacast>

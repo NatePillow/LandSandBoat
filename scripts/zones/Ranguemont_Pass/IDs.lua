@@ -42,6 +42,7 @@ zones[xi.zone.RANGUEMONT_PASS] =
         },
         TAISAIJIN    = GetFirstID('Taisaijin'),
         TROS         = GetFirstID('Tros'),
+        MUCOID_MASS  = GetFirstID('Mucoid_Mass'),
     },
     npc =
     {

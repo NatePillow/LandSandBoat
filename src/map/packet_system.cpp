@@ -157,75 +157,28 @@
 #include "packets/c2s/0x11b_mastery_display.h"
 #include "packets/c2s/0x11c_party_request.h"
 #include "packets/c2s/0x11d_jump.h"
+#include "packets/c2s/0x151_addon_relay.h"
+#include "packets/c2s/0x165_autoscroll.h"
+#include "packets/c2s/0x168_autowarp.h"
+#include "packets/c2s/0x169_autoinvite.h"
+#include "packets/c2s/0x16f_ah_cat_query.h"
 #include "utils/moduleutils.h"
+
+// SINGLEPLAYER BEGIN
+// Compile-time custom packet registration. singleplayer::registerCustomPackets()
+// is a consteval function defined in packet_registry.h that calls
+// registerPacket<T> for each fork-specific packet (0x150-0x1FF range) so the
+// custom handlers land in the same constexpr dispatch table as upstream
+// packets. Invoked at the tail of buildPacketHandlers() below.
+//
+// PacketHandler typedef, packetSizeRange<T>, ValidatedPacketHandler<T>, and
+// registerPacket<T> live in packet_system.h (moved out of this file's
+// anonymous namespace) so the consteval registrar can see them.
+#include "singleplayer/packet_registry.h"
+// SINGLEPLAYER END
 
 namespace
 {
-
-using PacketHandler = void (*)(MapSession* const, CCharEntity* const, CBasicPacket&);
-
-template <typename T>
-constexpr auto packetSizeRange() -> std::pair<std::size_t, std::size_t>
-{
-    constexpr auto maxSize = roundUpToNearestFour(static_cast<uint32>(sizeof(T)));
-    if constexpr (requires { T::getMinSize(); })
-    {
-        return { T::getMinSize(), maxSize };
-    }
-    else
-    {
-        return { maxSize, maxSize };
-    }
-}
-
-template <typename T>
-void ValidatedPacketHandler(MapSession* const PSession, CCharEntity* const PChar, CBasicPacket& data)
-{
-    TracyZoneScoped;
-
-    constexpr auto packetId   = static_cast<uint16>(T::packetId);
-    constexpr auto sizeRange  = packetSizeRange<T>();
-    constexpr auto minSize    = sizeRange.first;
-    constexpr auto maxSize    = sizeRange.second;
-    const auto     actualSize = data.getSize();
-
-    if (actualSize < minSize || actualSize > maxSize)
-    {
-        ShowWarningFmt("Bad packet size for {} ({:#05x}) from {}: got {}, expected [{}, {}]",
-                       T::name,
-                       packetId,
-                       PChar->getName(),
-                       actualSize,
-                       minSize,
-                       maxSize);
-        return;
-    }
-
-    const T* packet = data.as<T>();
-
-    if (const auto result = packet->validate(PSession, PChar); result.valid())
-    {
-        PChar->m_LastPacketType = packetId;
-
-        // Modules can optionally block processing of packets by returning true from OnIncomingPacket
-        if (moduleutils::OnIncomingPacket(PSession, PChar, data))
-        {
-            return;
-        }
-
-        packet->process(PSession, PChar);
-    }
-    else
-    {
-        ShowWarningFmt("Invalid {} packet from {}: {} ", T::name, PChar->getName(), result.errorString());
-    }
-}
-
-template <typename T>
-constexpr void registerPacket(std::array<PacketHandler, 512>& handlers)
-{
-    handlers[static_cast<uint16>(T::packetId)] = &ValidatedPacketHandler<T>;
-}
 
 consteval auto buildPacketHandlers() -> std::array<PacketHandler, 512>
 {
@@ -361,6 +314,13 @@ consteval auto buildPacketHandlers() -> std::array<PacketHandler, 512>
     registerPacket<GP_CLI_COMMAND_MASTERY_DISPLAY>(handlers);
     registerPacket<GP_CLI_COMMAND_PARTY_REQUEST>(handlers);
     registerPacket<GP_CLI_COMMAND_JUMP>(handlers);
+
+    // SINGLEPLAYER BEGIN
+    // Tail-call into the fork's compile-time custom packet registrar so
+    // 0x150-0x1FF handlers land in the same constexpr dispatch table. Body
+    // is consteval-defined in singleplayer/packet_registry.h.
+    singleplayer::registerCustomPackets(handlers);
+    // SINGLEPLAYER END
 
     return handlers;
 }

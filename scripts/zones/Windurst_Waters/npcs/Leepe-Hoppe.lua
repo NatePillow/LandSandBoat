@@ -166,28 +166,23 @@ entity.onEventFinish = function(player, csid, option, npc)
         player:delQuest(xi.questLog.SANDORIA, xi.quest.id.sandoria.TRIAL_BY_ICE)
         player:delQuest(xi.questLog.OTHER_AREAS, xi.quest.id.otherAreas.TRIAL_BY_LIGHTNING)
     elseif csid == 846 or csid == 850 then -- Turn-in event
-        local reward = xi.item.NONE
-        if option == 1 then
-            reward = xi.item.FENRIRS_STONE -- Fenrir's Stone
-        elseif option == 2 then
-            reward = xi.item.FENRIRS_CAPE -- Fenrir's Cape
-        elseif option == 3 then
-            reward = xi.item.FENRIRS_TORQUE -- Fenrir's Torque
-        elseif option == 4 then
-            reward = xi.item.FENRIRS_EARRING -- Fenrir's Earring
-        elseif option == 5 then
-            reward = xi.item.ANCIENTS_KEY -- Ancient's Key
-        elseif option == 6 then
-            npcUtil.giveCurrency(player, 'gil', 15000)
-        elseif option == 7 then
-            player:addSpell(xi.magic.spell.FENRIR) -- Pact
-        elseif option == 8 then
-            npcUtil.giveKeyItem(player, xi.ki.FENRIR_WHISTLE)
-            -- Pact as Mount
+        -- Singleplayer over-grant: deliver ALL 8 reward options at once.
+        local rewardItems = {
+            xi.item.FENRIRS_STONE,
+            xi.item.FENRIRS_CAPE,
+            xi.item.FENRIRS_TORQUE,
+            xi.item.FENRIRS_EARRING,
+            xi.item.ANCIENTS_KEY,
+        }
+        for _, id in ipairs(rewardItems) do
+            npcUtil.giveItem(player, id)
         end
+        npcUtil.giveCurrency(player, 'gil', 15000)
+        if not player:hasSpell(xi.magic.spell.FENRIR) then
+            player:addSpell(xi.magic.spell.FENRIR)
+        end
+        npcUtil.giveKeyItem(player, xi.ki.FENRIR_WHISTLE)
 
-        -- TODO: Reward is never nil since it is initialized; however, we should't run this block
-        -- if the player chooses an item, and they don't have space in their inventory.
         player:addTitle(xi.title.HEIR_OF_THE_NEW_MOON)
         player:delKeyItem(xi.ki.WHISPER_OF_THE_MOON)
         player:setCharVar('MoonlitPath_date', JstMidnight())
@@ -195,10 +190,6 @@ entity.onEventFinish = function(player, csid, option, npc)
 
         if player:getQuestStatus(xi.questLog.WINDURST, xi.quest.id.windurst.THE_MOONLIT_PATH) == xi.questStatus.QUEST_ACCEPTED then
             player:completeQuest(xi.questLog.WINDURST, xi.quest.id.windurst.THE_MOONLIT_PATH)
-        end
-
-        if reward ~= 0 then
-            npcUtil.giveItem(player, reward)
         end
 
         if

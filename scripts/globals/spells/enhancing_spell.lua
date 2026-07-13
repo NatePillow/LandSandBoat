@@ -194,6 +194,15 @@ local pTable =
     [xi.magic.spell.TEMPER_II    ] = { 2, xi.effect.MULTI_STRIKES, 99,    5,  180, true,  false, 0 },
 }
 
+-- Public accessor: returns the status-effect ID the given enhancing spell
+-- applies (xi.effect.*), or nil if the spellId isn't an enhancing spell.
+-- Callers use this to check whether the caster/target already has the
+-- effect without needing to hardcode a spell → effect mapping.
+xi.spells.enhancing.getEffectId = function(spellId)
+    local entry = pTable[spellId]
+    return entry and entry[column.EFFECT_ID] or nil
+end
+
 -- Enhancing Spell Base Potency function.
 xi.spells.enhancing.calculateEnhancingBasePower = function(caster, target, spell, spellId, spellEffect)
     local basePower  = pTable[spellId][column.EFFECT_POWER]

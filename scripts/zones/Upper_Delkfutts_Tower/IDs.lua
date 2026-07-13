@@ -37,6 +37,9 @@ zones[xi.zone.UPPER_DELKFUTTS_TOWER] =
         IXTAB     = GetTableOfIDs('Ixtab'),
         PALLAS    = GetFirstID('Pallas'),
         ALKYONEUS = GetFirstID('Alkyoneus'),
+        MIMAS     = GetFirstID('Mimas'),
+        AUTARCH   = GetFirstID('Autarch'),
+        PORPHYRION = GetFirstID('Porphyrion'),
     },
     npc =
     {

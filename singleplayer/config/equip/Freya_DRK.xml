@@ -1,0 +1,80 @@
+<ashitacast>
+	<settings>
+        <blockresends>false</blockresends>
+        <predictivepet>true</predictivepet>
+		<buffupdate>true</buffupdate>
+		<statusupdate>true</statusupdate>
+		<hpupdate>true</hpupdate> 
+		<autoupdate>true</autoupdate> 
+	</settings>
+	<sets>
+		<set name="Idle" baseset="Engaged">
+			<lring>Warp Ring</lring>
+		</set>
+		
+		<set name="Engaged">
+			<head>Voyager Sallet</head>
+			<neck>Peacock Charm</neck>
+			<lear>Beetle Earring +1</lear>
+			<rear>Beetle Earring +1</rear>
+			<body>Brigandine +1</body>
+			<hands>Guerilla Gloves</hands>
+			<lring>Sniper's Ring +1</lring>
+			<rring>Sniper's Ring +1</rring>
+			<back>Exact. Mantle +1</back>
+			<waist>Headlong Belt</waist>
+			<legs>Magna F Chausses</legs>
+			<feet>Mtt. Leggings +1</feet>
+		</set>
+		
+		<set name="STR" baseset="Idle">
+			<head>Voyager Sallet</head>
+			<neck>Spike Necklace</neck>
+			<lear>Giant's Earring</lear>
+			<hands>Ogygos's Brc.</hands>
+			<lring>Puissance Ring</lring>
+			<rring>Puissance Ring</rring>
+			<back>Besieger Mantle</back>
+			<waist>Brave Belt</waist>
+			<legs>Garrison Hose</legs>
+			<feet>Mtt. Leggings +1</feet>
+		</set>
+		
+		<set name="STR_MND" baseset="STR">
+		</set>
+	</sets>
+		
+	<variables>
+		<var name="autows">0</var>
+	</variables>
+	
+	<inputcommands>
+		<cmd input="/wson">
+			<setvar name="autows" values="1"/>
+			<addtochat colo="50">Auto WS enabled!</addtochat>
+		</cmd>
+		<cmd input="/wsoff">
+			<setvar name="autows" values="0"/>
+			<addtochat colo="50">Auto WS disabled!</addtochat>
+		</cmd>
+	</inputcommands>
+
+	<idlegear>
+		<if p_status="engaged">
+			<equip set="Engaged" />
+			<if p_tp=">999">
+				<if advanced="$autows=1">
+					<command>/ws "Hard Slash" &lt;t&gt;</command>
+				</if>
+			</if>
+		</if>
+		<else>
+			<equip set="Idle" />
+		</else>
+	</idlegear>
+	
+	<weaponskill>
+		<equip set="STR" />
+	</weaponskill>
+	
+</ashitacast>

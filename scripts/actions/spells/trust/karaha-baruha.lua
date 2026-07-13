@@ -13,6 +13,10 @@ spellObject.onSpellCast = function(caster, target, spell)
 end
 
 spellObject.onMobSpawn = function(mob)
+    -- SINGLEPLAYER BEGIN
+    if xi.singleplayer and xi.singleplayer.trust
+       and xi.singleplayer.trust.maybeOverrideSpawn(mob, 'KARAHA_BARUHA') then return end
+    -- SINGLEPLAYER END
     -- TODO: Add logic so that Spirit Taker is used if lower on mana, instead of holding to close TP.
     xi.trust.teamworkMessage(mob, {
         [xi.magic.spell.STAR_SIBYL] = xi.trust.messageOffset.TEAMWORK_1,

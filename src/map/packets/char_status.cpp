@@ -29,6 +29,7 @@
 #include <cstring>
 
 #include "ai/ai_container.h"
+#include "ai/helpers/pathfind.h"
 #include "ai/states/death_state.h"
 #include "entities/charentity.h"
 #include "item_container.h"
@@ -280,7 +281,15 @@ CCharStatusPacket::CCharStatusPacket(CCharEntity* PChar)
     // flags 1 starts at 0x2C
     charStatusFlags::flags1_t flags1 = {};
 
-    flags1.Speed        = PChar->UpdateSpeed();
+    // SINGLEPLAYER: see char_update.cpp:262 for the full rationale. Headless
+    // bots on a PATHFLAG_RUN path need run=true so the broadcast speed byte
+    // matches the actual server-stepped velocity; otherwise the client renders
+    // them at walk speed while they're moving at run speed.
+    const bool headlessRunning = PChar->isHeadless()
+                              && PChar->PAI
+                              && PChar->PAI->PathFind
+                              && PChar->PAI->PathFind->IsRunningPath();
+    flags1.Speed        = PChar->UpdateSpeed(headlessRunning);
     flags1.Hackmove     = PChar->wallhackEnabled; // GM wallhack, walk through walls
     flags1.FreezeFlag   = PChar->isFrozenFlagged; // Freezes player in place, making them unable to move. Used when opening treasure chests, for instance.
     flags1.unknown_1_14 = 0;                      // Unknown.

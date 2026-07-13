@@ -1,0 +1,279 @@
+<ashitacast>
+	<settings>
+        <blockresends>false</blockresends>
+        <predictivepet>true</predictivepet>
+		<buffupdate>true</buffupdate>
+		<statusupdate>true</statusupdate>
+		<hpupdate>true</hpupdate> 
+		<autoupdate>true</autoupdate> 
+	</settings>
+	<sets>
+		<set name="Idle">
+			<main>Terra's Staff</main>
+			<!--<head>Emperor Hairpin</head>-->
+			<ear1>Dodge Earring</ear1>
+			<ear2>Dodge Earring</ear2>
+			<body>Royal Cloak</body>
+			<hands>Scentless Armlets</hands>
+			<ring1>Vigor Ring +1</ring1>
+			<ring2>Vigor Ring +1</ring2>
+			<back>Nomad's Mantle +1</back>
+			<waist>Warrior's Belt +1</waist>
+			<legs>Custom Pants</legs>
+			<feet>Mountain Gaiters</feet>
+		</set>
+		
+		<set name="Engaged" baseset="Idle">
+			<main>Buzzard Tuck</main>
+			<ring1>Fencer's Ring</ring1>
+		</set>
+		
+		<set name="INT" baseset="Idle">
+			<main>Astaroth Cane</main>
+			<sub>Bugard Strap +1</sub>
+			<ammo>Morion Tathlum</ammo>
+			<neck>Solon Torque</neck>
+			<ear1>Helenus's Earring</ear1>
+			<ear2>Cass. Earring</ear2>
+			<body>Shaman's Cloak</body>
+			<hands>Sly Gauntlets</hands>
+			<ring1>Genius Ring</ring1>
+			<ring2>Genius Ring</ring2>
+			<back>Black Cape +1</back>
+			<waist>Ocean Stone</waist>
+			<legs>Magic Cuisses</legs>
+			<feet>Custom F Boots</feet>
+		</set>
+		
+		<set name="Elemental" baseset="INT">
+			<main>Qi Staff +1</main>
+			<ear1>Wizard's Earring</ear1>
+			<ear2>Moldavite Earring</ear2>
+			<body>Channeling Robe</body>
+			<legs>Druid's Slops</legs>
+		</set>
+		
+		<set name="MND" baseset="Idle">
+			<main>Passaddhi Staff +1</main>
+			<sub>Raptor Strap +1</sub>
+			<ammo>Brio Dart</ammo>
+			<head>Circe's Hat</head>
+			<neck>Promise Badge</neck>
+			<ear1>Harvest Earring</ear1>
+			<body>Bishop's Robe +1</body>
+			<hands>Dvt. Mitts +1</hands>
+			<ring1>Serenity Ring</ring1>
+			<ring2>Serenity Ring</ring2>
+			<back>White Cape +1</back>
+			<waist>Ocean Stone</waist>
+			<legs>Custom Pants</legs>
+			<feet>Garrison Boots</feet>
+		</set>
+		
+		<set name="Cure" baseset="MND">
+			<main>Melampus Staff</main>
+			<ammo>Jasper Tathlum</ammo>
+			<legs>Druid's Slops</legs>
+		</set>
+
+		<set name="MPHeal" baseset="Idle">
+			<main>Pluto's Staff</main>
+			<ear1>Boroka Earring</ear1>
+			<body>Seer's Tunic +1</body>
+		</set>
+		
+		<set name="FastCast" baseset="Idle">
+		</set>
+		
+		<set name="SpellInterruptDown" baseset="Idle">
+			<main>Hermit's Wand</main>
+			<neck>Willpower Torque</neck>
+			<waist>Druid's Rope</waist>
+			<feet>Mountain Gaiters</feet>
+		</set>
+
+		<set name="Staff_Fire"><main>Vulcan's Staff</main></set>
+		<set name="Staff_Ice"><main>Aquilo's Staff</main></set>
+		<set name="Staff_Wind"><main>Auster's Staff</main></set>
+		<set name="Staff_Earth"><main>Terra's Staff</main></set>
+		<set name="Staff_Lightning"><main>Jupiter's Staff</main></set>
+		<set name="Staff_Water"><main>Neptune's Staff</main></set>
+		<set name="Staff_Light"><main>Apollo's Staff</main></set>
+		<set name="Staff_Dark"><main>Pluto's Staff</main></set>
+
+		<set name="INT_20">
+			<main>Yew Wand +1</main>
+			<body>Mage's Tunic</body>
+			<hands>Garrison Gloves</hands>
+			<ring1>Eremite's Ring +1</ring1>
+			<ring2>Eremite's Ring +1</ring2>
+			<legs>Mage's Slacks</legs>
+			<feet>Garrison Boots</feet>
+		</set>
+
+		<set name="INT_30" baseset="INT_20">
+			<main>Astaroth Cane</main>
+			<sub>Lizard Strap +1</sub>
+			<ammo>Morion Tathlum</ammo>
+			<ear1>Morion Earring +1</ear1>
+			<ear2>Morion Earring +1</ear2>
+			<waist>Shaman's Belt</waist>
+			<feet>Custom F Boots</feet>
+		</set>
+
+		<set name="INT_40" baseset="INT_30">
+			<neck>Solon Torque</neck>
+			<back>Black Cape +1</back>
+		</set>
+
+		<set name="INT_50" baseset="INT_40">
+			<main>Qi Staff +1</main>
+			<ear1>Moldavite Earring</ear1>
+			<hands>Sly Gauntlets</hands>
+			<waist>Ocean Stone</waist>
+			<legs>Magic Cuisses</legs>
+		</set>
+
+		<set name="INT_60" baseset="INT_50">
+			<sub>Bugard Strap +1</sub>
+			<ear1>Helenus's Earring</ear1>
+			<ear2>Cass. Earring</ear2>
+			<body>Shaman's Cloak</body>
+			<ring1>Genius Ring</ring1>
+			<ring2>Genius Ring</ring2>
+		</set>
+
+		<set name="MND_20">
+			<main>Yew Wand +1</main>
+			<head>Traveler's Hat</head>
+			<neck>Justice Badge</neck>
+			<body>Priest's Robe</body>
+			<hands>Zealot's Mitts</hands>
+			<ring1>Saintly Ring +1</ring1>
+			<ring2>Saintly Ring +1</ring2>
+			<back>Mist Silk Cape</back>
+			<waist>Friar's Rope</waist>
+			<feet>Garrison Boots</feet>
+		</set>
+
+		<set name="MND_30" baseset="MND_20">
+			<main>Melampus Staff</main>
+			<ammo>Brio Dart</ammo>
+			<sub>Lizard Strap +1</sub>
+			<head>Circe's Hat</head>
+			<neck>Holy Phial</neck>
+			<hands>Dvt. Mitts +1</hands>
+			<feet></feet>
+		</set>
+
+		<set name="MND_40" baseset="MND_30">
+			<main>Passaddhi Staff +1</main>
+			<body>Bishop's Robe +1</body>
+			<back>White Cape +1</back>
+			<legs>Custom Pants</legs>
+		</set>
+
+		<set name="MND_50" baseset="MND_40">
+			<neck>Promise Badge</neck>
+			<ear1>Harvest Earring</ear1>
+			<waist>Ocean Stone</waist>
+		</set>
+
+		<set name="MND_60" baseset="MND_50">
+			<sub>Raptor Strap +1</sub>
+			<ammo>Jasper Tathlum</ammo>
+			<ring1>Serenity Ring</ring1>
+			<ring2>Serenity Ring</ring2>
+		</set>
+
+		<set name="Cure_20">
+		</set>
+
+		<set name="Cure_30" baseset="Cure_20">
+			<main>Melampus Staff</main>
+		</set>
+
+		<set name="Cure_40" baseset="Cure_30">
+		</set>
+
+		<set name="Cure_50" baseset="Cure_40">
+		</set>
+
+		<set name="Cure_60" baseset="Cure_50">
+			<main>Apollo's Staff</main>
+		</set>
+
+		<set name="MPHeal_20">
+		</set>
+
+		<set name="MPHeal_30" baseset="MPHeal_20">
+			<body>Seer's Tunic +1</body>
+		</set>
+
+		<set name="MPHeal_40" baseset="MPHeal_30">
+		</set>
+
+		<set name="MPHeal_50" baseset="MPHeal_40">
+			<ear1>Boroka Earring</ear1>
+		</set>
+
+		<set name="MPHeal_60" baseset="MPHeal_50">
+			<main>Pluto's Staff</main>
+		</set>
+
+		<set name="Gearlock" baseset="Idle">
+			<!--<head>Emperor Hairpin</head>-->
+			<body>Royal Cloak</body>
+			<hands>Scentless Armlets</hands>
+			<legs>Custom Pants</legs>
+			<feet>Mountain Gaiters</feet>
+		</set>
+
+	</sets>
+
+	<gearlock>
+		<equip set="Gearlock" />
+	</gearlock>
+
+	<idlegear>
+		<if p_status="engaged">
+			<equip set="Engaged" />
+		</if>
+		<elseif p_status="resting">
+			<equip set="MPHeal" />
+		</elseif>
+		<else>
+			<equip set="Idle" />
+		</else>
+	</idlegear>
+
+	<premagic>
+		<equip set="FastCast" />
+	</premagic>
+		
+	<midmagic>
+		<if ad_type="WhiteMagic">
+			<if ad_name="Cure*|Curaga*">
+				<equip set="Cure" />
+			</if>
+			<else>
+				<equip set="MND" />
+			</else>
+		</if>
+		
+		<if ad_type="BlackMagic">
+			<equip set="INT" />
+			<if ad_skill="ElementalMagic">
+				<equip set="Elemental" />
+			</if>
+			<else>
+				<equip set="INT" />
+			</else>
+		</if>
+		
+		<if ad_type="WhiteMagic|BlackMagic">
+			<equip set="Staff_%ad_element" />
+		</if>
+	</midmagic>
+
+</ashitacast>

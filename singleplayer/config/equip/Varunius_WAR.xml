@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<ashitacast>
+	<settings>
+		<blockresends>false</blockresends>
+		<predictivepet>true</predictivepet>
+		<buffupdate>true</buffupdate>
+		<statusupdate>true</statusupdate>
+		<hpupdate>true</hpupdate>
+		<autoupdate>true</autoupdate>
+	</settings>
+	<sets>
+		<set baseset="Engaged" name="Idle">
+			<head>Emperor Hairpin</head>
+			<ear1>Dodge Earring</ear1>
+			<ear2>Dodge Earring</ear2>
+			<ring1>Vigor Ring +1</ring1>
+			<ring2>Vigor Ring +1</ring2>
+			<back>Nomad's Mantle +1</back>
+			<waist>Warrior's Belt +1</waist>
+		</set>
+		<set name="Engaged">
+			<sub>Mythril Grip +1</sub>
+			<head>Valkyrie's Mask</head>
+			<neck>Peacock Charm</neck>
+			<ear1>Spike Earring</ear1>
+			<ear2>Spike Earring</ear2>
+			<body>Haubergeon +1</body>
+			<hands>Spiked Fng.Gnt.</hands>
+			<ring1>Sniper's Ring +1</ring1>
+			<ring2>Sniper's Ring +1</ring2>
+			<back>Amemet Mantle +1</back>
+			<waist>Speed Belt</waist>
+			<legs>Luisant Brayettes</legs>
+			<feet>Luisant Sollerets</feet>
+		</set>
+		<set baseset="Engaged" name="YellowEngaged">
+			<ring1>Soldier's Ring</ring1>
+		</set>
+		<set baseset="Engaged" name="STR">
+			<sub>Mythril Grip +1</sub>
+			<head>Voyager Sallet</head>
+			<neck>Spike Necklace</neck>
+			<ear1>Heims Earring</ear1>
+			<ear2>Giant's Earring</ear2>
+			<hands>Enkelados's Brc.</hands>
+			<ring1>Victory Ring</ring1>
+			<ring2>Victory Ring</ring2>
+			<waist>Ocean Belt</waist>
+			<legs>Luisant Brayettes</legs>
+			<feet>Luisant Sollerets</feet>
+		</set>
+		<set baseset="STR" name="STR_Night">
+			<ear1>Vampire Earring</ear1>
+			<ear2>Vampire Earring</ear2>
+		</set>
+		<set name="STR_20">
+			<neck>Armiger's Lace</neck>
+			<ring1>Courage Ring +1</ring1>
+			<ring2>Courage Ring +1</ring2>
+			<waist>Brave Belt</waist>
+			<feet>Mtt. Leggings +1</feet>
+		</set>
+		<set baseset="STR_20" name="STR_30">
+			<neck>Spike Necklace</neck>
+			<ear1>Giant's Earring</ear1>
+			<hands>Custom M Gloves</hands>
+			<legs>Garrison Hose</legs>
+		</set>
+		<set baseset="STR_30" name="STR_40">
+			<hands>Ogygos's Brc.</hands>
+			<ring1>Puissance Ring</ring1>
+			<ring2>Puissance Ring</ring2>
+		</set>
+		<set baseset="STR_40" name="STR_50">
+			<head>Voyager Sallet</head>
+			<ear2>Heims Earring</ear2>
+			<body>Luisant Haubert</body>
+			<hands>Enkelados's Brc.</hands>
+			<legs>Luisant Brayettes</legs>
+			<feet>Luisant Sollerets</feet>
+			<waist>Ocean Belt</waist>
+		</set>
+		<set baseset="STR_50" name="STR_60">
+			<sub>Mythril Grip +1</sub>
+			<ring1>Victory Ring</ring1>
+			<ring2>Victory Ring</ring2>
+		</set>
+		<set name="Engaged_20">
+			<sub>Disciple Grip</sub>
+			<ammo>Tiny Tathlum</ammo>
+			<neck>Armiger's Lace</neck>
+			<ear1>Bone Earring +1</ear1>
+			<ear2>Bone Earring +1</ear2>
+			<body>Garrison Tunica</body>
+			<hands>Guerilla Gloves</hands>
+			<ring1>Courage Ring +1</ring1>
+			<ring2>Courage Ring +1</ring2>
+			<back>Besieger Mantle</back>
+			<waist>Brave Belt</waist>
+			<feet>Mtt. Leggings +1</feet>
+		</set>
+		<set baseset="Engaged_20" name="Engaged_30">
+			<sub>Brass Grip +1</sub>
+			<head>Emperor Hairpin</head>
+			<neck>Spike Necklace</neck>
+			<ear1>Beetle Earring +1</ear1>
+			<ear2>Beetle Earring +1</ear2>
+			<body>Kampfbrust</body>
+			<back>Exact. Mantle +1</back>
+		</set>
+		<set baseset="Engaged_30" name="Engaged_40">
+			<neck>Peacock Charm</neck>
+			<ring1>Sniper's Ring +1</ring1>
+			<ring2>Sniper's Ring +1</ring2>
+		</set>
+		<set baseset="Engaged_40" name="Engaged_50">
+			<head>Valkyrie's Mask</head>
+			<ear1>Tor. Earring +1</ear1>
+			<ear2>Tor. Earring +1</ear2>
+			<body>Luisant Haubert</body>
+			<hands>Spiked Fng.Gnt.</hands>
+			<waist>Headlong Belt</waist>
+		</set>
+		<set baseset="Engaged_50" name="Engaged_60">
+			<sub>Mythril Grip +1</sub>
+			<ammo>Tiphia Sting</ammo>
+			<ear1>Spike Earring</ear1>
+			<ear2>Spike Earring</ear2>
+			<body>Haubergeon +1</body>
+			<waist>Speed Belt</waist>
+		</set>
+		<set baseset="Idle" name="Gearlock">
+			<head>Emperor Hairpin</head>
+			<body>Haubergeon +1</body>
+			<hands>Spiked Fng.Gnt.</hands>
+			<legs>Luisant Brayettes</legs>
+			<feet>Luisant Sollerets</feet>
+		</set>
+	</sets>
+	<gearlock>
+		<equip set="Gearlock"/>
+	</gearlock>
+	<variables>
+		<var name="autows">0</var>
+	</variables>
+	<inputcommands>
+		<cmd input="/wson">
+			<setvar name="autows" values="1"/>
+			<addtochat colo="50">Auto WS enabled!</addtochat>
+		</cmd>
+		<cmd input="/wsoff">
+			<setvar name="autows" values="0"/>
+			<addtochat colo="50">Auto WS disabled!</addtochat>
+		</cmd>
+	</inputcommands>
+	<idlegear>
+		<if p_status="engaged">
+			<if p_hpp="<75" p_tp="<1000">
+				<equip set="YellowEngaged"/>
+			</if>
+			<else>
+				<equip set="Engaged"/>
+			</else>
+			<if p_tp=">999">
+				<if advanced="$autows=1">
+					<command>/ws "Raging Axe" &lt;t&gt;</command>
+				</if>
+			</if>
+		</if>
+		<else>
+			<equip set="Idle"/>
+		</else>
+	</idlegear>
+	<weaponskill>
+		<if e_time="<6.00|>17.59">
+			<equip set="STR_Night"/>
+		</if>
+		<else>
+			<equip set="STR"/>
+		</else>
+	</weaponskill>
+</ashitacast>

@@ -1,0 +1,109 @@
+<ashitacast>
+	<settings>
+        <blockresends>false</blockresends>
+        <predictivepet>true</predictivepet>
+		<buffupdate>true</buffupdate>
+		<statusupdate>true</statusupdate>
+		<hpupdate>true</hpupdate> 
+		<autoupdate>true</autoupdate> 
+	</settings>
+	<sets>
+		<set name="Idle">
+			<head>Emperor Hairpin</head>
+			<lear>Dodge Earring</lear>
+			<rear>Dodge Earring</rear>
+			<legs>Martial Slacks</legs>
+			<back>Nomad's Mantle +1</back>
+			<waist>Warrior's Belt +1</waist>
+		</set>
+		
+		<set name="INT" baseset="Idle">
+			<main>Astaroth Cane</main>
+			<sub>Bugard Strap +1</sub>
+			<ammo>Morion Tathlum</ammo>
+			<head>Seer's Crown +1</head>
+			<neck>Solon Torque</neck>
+			<lear>Morion Earring +1</lear>
+			<rear>Morion Earring +1</rear>
+			<body>Mage's Tunic</body>
+			<hands>Seer's Mitts +1</hands>
+			<lring>Eremite's Ring +1</lring>
+			<rring>Eremite's Ring +1</rring>
+			<back>Black Cape +1</back>
+			<waist>Shaman's Belt</waist>
+			<legs>Seer's Slacks +1</legs>
+			<feet>Garrison Boots</feet>
+		</set>
+		
+		<set name="Elemental" baseset="INT">
+			<main>Qi Staff +1</main>
+			<body>Channeling Robe</body>
+		</set>
+		
+		<set name="MND" baseset="Idle">
+			<main>Passaddhi Staff +1</main>
+			<sub>Raptor Strap +1</sub>
+			<ammo>Brio Dart</ammo>
+			<head>Circe's Hat</head>
+			<neck>Holy Phial</neck>
+			<body>Bishop's Robe +1</body>
+			<hands>Dvt. Mitts +1</hands>
+			<lring>Saintly Ring +1</lring>
+			<rring>Saintly Ring +1</rring>
+			<back>White Cape +1</back>
+			<waist>Friar's Rope</waist>
+			<legs>Savage Loincloth</legs>
+			<feet>Seer's Pumps +1</feet>
+		</set>
+		
+		<set name="Cure" baseset="MND">
+			<main>Melampus Staff</main>
+		</set>
+		
+		<set name="FastCast" baseset="Idle">
+			<waist>Headlong Belt</waist>
+		</set>
+		
+		<set name="SpellInterruptDown" baseset="Idle">
+			<main>Hermit's Wand</main>
+			<neck>Willpower Torque</neck>
+			<waist>Druid's Rope</waist>
+			<feet>Mountain Gaiters</feet>
+		</set>
+	</sets>
+
+	<idlegear>
+		<if p_status="engaged">
+			<equip set="Engaged" />
+		</if>
+		<else>
+			<equip set="Idle" />
+		</else>
+	</idlegear>
+
+	<premagic>
+		<equip set="FastCast" />
+	</premagic>
+		
+	<midmagic>
+		<if ad_type="WhiteMagic">
+			<if ad_name="Cure*|Curaga*">
+				<equip set="Cure" />
+			</if>
+			<else>
+				<equip set="MND" />
+			</else>
+		</if>
+		
+		<if ad_type="BlackMagic">
+			<equip set="INT" />
+			<if ad_skill="ElementalMagic">
+				<equip set="Elemental" />
+			</if>
+			<else>
+				<equip set="INT" />
+			</else>
+		</if>
+	</midmagic>
+
+</ashitacast>

@@ -70,6 +70,17 @@ CRangeState::CRangeState(CBattleEntity* PEntity, uint16 targid)
         throw CStateInitException(m_errorMsg->copy());
     }
 
+    // SINGLEPLAYER BEGIN
+    // Fire RANGE_STATE_ENTER BEFORE the delay computation below so listeners
+    // (e.g. ai_equip_swap.lua) can swap to preranged gear and have Snapshot /
+    // Velocity Shot mods take effect on THIS shot's aim time. Synchronous —
+    // charutils::EquipItem applies mods in-line — so when this returns the
+    // entity's mod table reflects the preranged gear and GetRangedDelayReduction
+    // picks up the reduced delay. RANGE_START fires later (after the delay is
+    // locked in) for the midranged swap on the damage calc.
+    m_PEntity->PAI->EventHandler.triggerListener("RANGE_STATE_ENTER", m_PEntity, PTarget);
+    // SINGLEPLAYER END
+
     // https://www.bg-wiki.com/ffxi/Delay#Ranged_Delay
     // GetRangedDelayReduction is 2 of the 3 steps of `Ranged Weapon Delay x (1 - Snapshot) x (1 - Velocity Shot) x (1 - Rapid Shot)`
     // If Rapid Shot fires it will do the third multiplicative step
@@ -273,7 +284,13 @@ bool CRangeState::CanUseRangedAttack(CBattleEntity* PTarget, bool isEndOfAttack)
         return false;
     }
 
-    if (!isEndOfAttack && !m_PEntity->CanSeeTarget(PTarget))
+    // SINGLEPLAYER: headless bots skip the LoS gate (see magic_state.cpp /
+    // weaponskill_state.cpp). Mobs and primary PCs are unaffected — the
+    // dynamic_cast picks out only CCharEntity, and isHeadless() narrows
+    // further to bot-only.
+    const auto* PCharShooter = dynamic_cast<const CCharEntity*>(m_PEntity);
+    const bool  isHeadlessBot = PCharShooter != nullptr && PCharShooter->isHeadless();
+    if (!isEndOfAttack && !isHeadlessBot && !m_PEntity->CanSeeTarget(PTarget))
     {
         m_errorMsg = std::make_unique<GP_SERV_COMMAND_BATTLE_MESSAGE>(m_PEntity, PTarget, 0, 0, MsgBasic::CannotPerformAction);
         return false;

@@ -25,13 +25,13 @@
 // Once the new TH logic has been applied to mobentity.cpp then this can be removed
 static const std::array<uint16, 9> RATE_PERCENTAGES = {
     0,    // NEVER         0.00%
-    1,    // ULTRA_RARE    0.10%
-    5,    // SUPER_RARE    0.50%
-    10,   // VERY_RARE     1.00%
-    50,   // RARE          5.00%
-    100,  // UNCOMMON     10.00%
-    150,  // COMMON       15.00%
-    240,  // VERY_COMMON  24.00%
+    300,    // ULTRA_RARE    0.10%
+    400,    // SUPER_RARE    0.50%
+    500,   // VERY_RARE     1.00%
+    600,   // RARE          5.00%
+    700,  // UNCOMMON     10.00%
+    800,  // COMMON       15.00%
+    900,  // VERY_COMMON  24.00%
     1000, // GUARANTEED  100.00%
 };
 

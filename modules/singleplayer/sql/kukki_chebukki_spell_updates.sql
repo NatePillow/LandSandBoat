@@ -1,0 +1,6 @@
+INSERT INTO `mob_spell_lists` VALUES ('TRUST_Kukki-Chebukki',374,245,12,255); -- drain (12~255)
+INSERT INTO `mob_spell_lists` VALUES ('TRUST_Kukki-Chebukki',374,247,25,255); -- aspir (25~255)
+INSERT INTO `mob_spell_lists` VALUES ('TRUST_Kukki-Chebukki',374,252,45,255); -- stun (45~255)
+INSERT INTO `mob_spell_lists` VALUES ('TRUST_Kukki-Chebukki',374,254,1,255); -- blind (1~255)
+INSERT INTO `mob_spell_lists` VALUES ('TRUST_Kukki-Chebukki',374,220,3,41);   -- poison (3~41)
+INSERT INTO `mob_spell_lists` VALUES ('TRUST_Kukki-Chebukki',374,221,43,255); -- poison_ii (43~255)

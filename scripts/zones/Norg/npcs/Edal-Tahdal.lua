@@ -67,36 +67,26 @@ entity.onEventFinish = function(player, csid, option, npc)
     elseif csid == 190 then
         npcUtil.giveKeyItem(player, xi.ki.TUNING_FORK_OF_WATER)
     elseif csid == 112 then
-        local item = 0
-        if option == 1 then
-            item = xi.item.LEVIATHANS_ROD
-        elseif option == 2 then
-            item = xi.item.WATER_BELT
-        elseif option == 3 then
-            item = xi.item.WATER_RING
-        elseif option == 4 then
-            item = xi.item.EYE_OF_NEPT
+        -- Singleplayer over-grant: deliver ALL 6 reward options at once.
+        local rewardItems = {
+            xi.item.LEVIATHANS_ROD,
+            xi.item.WATER_BELT,
+            xi.item.WATER_RING,
+            xi.item.EYE_OF_NEPT,
+        }
+        for _, id in ipairs(rewardItems) do
+            npcUtil.giveItem(player, id)
         end
-
-        if player:getFreeSlotsCount() == 0 and (option ~= 5 or option ~= 6) then
-            player:messageSpecial(ID.text.ITEM_CANNOT_BE_OBTAINED, item)
-        else
-            if option == 5 then
-                npcUtil.giveCurrency(player, 'gil', 10000)
-            elseif option == 6 then
-                player:addSpell(xi.magic.spell.LEVIATHAN) -- Avatar
-                player:messageSpecial(ID.text.AVATAR_UNLOCKED, 0, 0, 2)
-            else
-                player:addItem(item)
-                player:messageSpecial(ID.text.ITEM_OBTAINED, item) -- Item
-            end
-
-            player:addTitle(xi.title.HEIR_OF_THE_GREAT_WATER)
-            player:delKeyItem(xi.ki.WHISPER_OF_TIDES) --Whisper of Tides, as a trade for the above rewards
-            player:setCharVar('TrialByWater_date', JstMidnight())
-            player:addFame(xi.fameArea.NORG, 30)
-            player:completeQuest(xi.questLog.OUTLANDS, xi.quest.id.outlands.TRIAL_BY_WATER)
+        npcUtil.giveCurrency(player, 'gil', 10000)
+        if not player:hasSpell(xi.magic.spell.LEVIATHAN) then
+            player:addSpell(xi.magic.spell.LEVIATHAN)
+            player:messageSpecial(ID.text.AVATAR_UNLOCKED, 0, 0, 2)
         end
+        player:addTitle(xi.title.HEIR_OF_THE_GREAT_WATER)
+        player:delKeyItem(xi.ki.WHISPER_OF_TIDES)
+        player:setCharVar('TrialByWater_date', JstMidnight())
+        player:addFame(xi.fameArea.NORG, 30)
+        player:completeQuest(xi.questLog.OUTLANDS, xi.quest.id.outlands.TRIAL_BY_WATER)
     end
 end
 

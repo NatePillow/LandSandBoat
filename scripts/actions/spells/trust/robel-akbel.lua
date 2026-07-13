@@ -13,6 +13,10 @@ spellObject.onSpellCast = function(caster, target, spell)
 end
 
 spellObject.onMobSpawn = function(mob)
+    -- SINGLEPLAYER BEGIN
+    if xi.singleplayer and xi.singleplayer.trust
+       and xi.singleplayer.trust.maybeOverrideSpawn(mob, 'ROBEL_AKBEL') then return end
+    -- SINGLEPLAYER END
     xi.trust.message(mob, xi.trust.messageOffset.SPAWN)
 end
 

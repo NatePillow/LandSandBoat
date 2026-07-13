@@ -147,6 +147,11 @@ float CLuaSpell::getRadius()
     return m_PLuaSpell->getRadius();
 }
 
+float CLuaSpell::getRange()
+{
+    return m_PLuaSpell->getRange();
+}
+
 bool CLuaSpell::tookEffect()
 {
     return m_PLuaSpell->tookEffect();
@@ -203,6 +208,7 @@ void CLuaSpell::Register()
     SOL_REGISTER("setMPCost", CLuaSpell::setMPCost);
     SOL_REGISTER("isAoE", CLuaSpell::isAoE);
     SOL_REGISTER("getRadius", CLuaSpell::getRadius);
+    SOL_REGISTER("getRange", CLuaSpell::getRange);
     SOL_REGISTER("tookEffect", CLuaSpell::tookEffect);
     SOL_REGISTER("getMagicBurstMessage", CLuaSpell::getMagicBurstMessage);
     SOL_REGISTER("getElement", CLuaSpell::getElement);

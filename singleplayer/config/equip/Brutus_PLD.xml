@@ -1,0 +1,223 @@
+<ashitacast>
+	<settings>
+        <blockresends>false</blockresends>
+        <predictivepet>true</predictivepet>
+		<buffupdate>true</buffupdate>
+		<statusupdate>true</statusupdate>
+		<hpupdate>true</hpupdate> 
+		<autoupdate>true</autoupdate> 
+	</settings>
+	<sets>
+		<set name="Idle" baseset="VIT">
+			<body>Royal Cloak</body>
+			<ring1>Warp Ring</ring1>
+		</set>
+		
+		<set name="VIT">
+			<sub>Master Shield</sub>
+			<ammo>Tiphia Sting</ammo>
+			<head>Gilt Armet</head>
+			<neck>Hateful Collar</neck>
+			<ear1>Heims Earring</ear1>
+			<ear2>Mercen. Earring</ear2>
+			<body>Gilt Cuirass</body>
+			<hands>Gilt Gauntlets</hands>
+			<ring1>Vigor Ring +1</ring1>
+			<ring2>Vigor Ring +1</ring2>
+			<back>Amemet Mantle +1</back>
+			<waist>Speed Belt</waist>
+			<legs>Gilt Cuisses</legs>
+			<feet>Gilt Sabatons</feet>
+		</set>
+		
+		<set name="VIT_Night" baseset="VIT">
+			<ear1>Vampire Earring</ear1>
+			<ear2>Vampire Earring</ear2>
+		</set>
+
+		<set name="Yellow_VIT">
+			<ring1>Hercules' Ring</ring1>
+		</set>
+
+		<set name="MPHeal" baseset="Idle">
+			<ear1>Boroka Earring</ear1>
+		</set>
+		
+		<set name="FastCast" baseset="VIT">
+		</set>
+		
+		<set name="MND" baseset="VIT">
+			<neck>Promise Badge</neck>
+			<ear1>Harvest Earring</ear1>
+			<hands>Zealot's Mitts</hands>
+			<ring1>Serenity Ring</ring1>
+			<ring2>Serenity Ring</ring2>
+			<waist>Friar's Rope</waist>
+			<legs>Magic Cuisses</legs>
+		</set>
+		
+		<set name="Cure" baseset="MND">
+			<ear2>Hospitaler Earring</ear2>
+		</set>
+
+		<set name="VIT_20">
+			<sub>Lantern Shield</sub>
+			<ammo>Tiny Tathlum</ammo>
+			<head>Faceguard +1</head>
+			<neck>Armiger's Lace</neck>
+			<ear1>Bone Earring +1</ear1>
+			<ear2>Bone Earring +1</ear2>
+			<body>Garrison Tunica</body>
+			<hands>Guerilla Gloves</hands>
+			<ring1>Stamina Ring +1</ring1>
+			<ring2>Stamina Ring +1</ring2>
+			<back>Besieger Mantle</back>
+			<waist>Warrior's Belt +1</waist>
+			<legs>Solid Cuisses</legs>
+			<feet>Mtt. Leggings +1</feet>
+		</set>
+
+		<set name="VIT_30" baseset="VIT_20">
+			<sub>Kite Shield</sub>
+			<head>Kampfschaller</head>
+			<ear1>Giant's Earring</ear1>
+			<ear2>Mercen. Earring</ear2>
+			<body>Kampfbrust</body>
+			<back>Nomad's Mantle +1</back>
+			<legs>Kampfdiechlings</legs>
+			<feet>Kampfschuhs</feet>
+		</set>
+
+		<set name="VIT_40" baseset="VIT_30">
+			<sub>Balance Buckler</sub>
+			<neck>Medieval Collar</neck>
+			<ring1>Verve Ring +1</ring1>
+			<ring2>Verve Ring +1</ring2>
+			<feet>Mountain Gaiters</feet>
+		</set>
+
+		<set name="VIT_50" baseset="VIT_40">
+			<head>Rival Ribbon</head>
+			<neck>Hateful Collar</neck>
+			<ear1>Heims Earring</ear1>
+			<body>Stolid Breastplate</body>
+			<hands>Rush Gloves</hands>
+			<ring1>Verve Ring +1</ring1>
+			<ring2>Verve Ring +1</ring2>
+			<back>Templar's Mantle</back>
+			<legs>Luisant Brayettes</legs>
+		</set>
+
+		<set name="VIT_60" baseset="VIT_50">
+			<sub>Master Shield</sub>
+			<ammo>Tiphia Sting</ammo>
+			<body>Haubergeon +1</body>
+			<waist>Speed Belt</waist>
+		</set>
+
+		<set name="MND_20">
+			<neck>Justice Badge</neck>
+			<hands>Zealot's Mitts</hands>
+			<ring1>Saintly Ring +1</ring1>
+			<ring2>Saintly Ring +1</ring2>
+			<waist>Friar's Rope</waist>
+		</set>
+
+		<set name="MND_30" baseset="MND_20">
+			<neck>Holy Phial</neck>
+			<waist>Mrc.Cpt. Belt</waist>
+		</set>
+
+		<set name="MND_40" baseset="MND_30">
+		</set>
+
+		<set name="MND_50" baseset="MND_40">
+			<neck>Promise Badge</neck>
+			<ear1>Harvest Earring</ear1>
+			<legs>Magic Cuisses</legs>
+		</set>
+
+		<set name="MND_60" baseset="MND_50">
+			<ring1>Serenity Ring</ring1>
+			<ring2>Serenity Ring</ring2>
+		</set>
+
+		<set name="Gearlock" baseset="Idle">
+			<head>Gilt Armet</head>
+			<body>Gilt Cuirass</body>
+			<hands>Gilt Gauntlets</hands>
+			<legs>Gilt Cuisses</legs>
+			<feet>Gilt Sabatons</feet>
+		</set>
+
+	</sets>
+
+	<gearlock>
+		<equip set="Gearlock" />
+	</gearlock>
+		
+	<variables>
+		<var name="autows">0</var>
+	</variables>
+	
+	<inputcommands>
+		<cmd input="/wson">
+			<setvar name="autows" values="1"/>
+			<addtochat colo="50">Auto WS enabled!</addtochat>
+		</cmd>
+		<cmd input="/wsoff">
+			<setvar name="autows" values="0"/>
+			<addtochat colo="50">Auto WS disabled!</addtochat>
+		</cmd>
+	</inputcommands>
+
+	<idlegear>
+		<if p_status="engaged">
+			<if e_time="<6.00|>17.59">
+				<equip set="VIT_Night" />
+			</if>
+			<else>
+				<equip set="VIT" />
+			</else>
+			<if p_hpp="<50">
+				<equip set="Yellow_VIT" />
+			</if>
+			<if p_tp=">999">
+				<if advanced="$autows=1">
+					<command>/ws "Flat Blade" &lt;t&gt;</command>
+				</if>
+			</if>
+		</if>
+		<elseif p_status="resting">
+			<equip set="MPHeal" />
+		</elseif>
+		<else>
+			<equip set="Idle" />
+		</else>
+	</idlegear>
+	
+	<weaponskill>
+		<if e_time="<6.00|>17.59">
+			<equip set="STR_Night" />
+		</if>
+		<else>
+			<equip set="STR" />
+		</else>
+	</weaponskill>
+	
+	<premagic>
+		<equip set="FastCast" />
+	</premagic>
+		
+	<midmagic>
+		<if ad_type="WhiteMagic">
+			<if ad_name="Cure*|Curaga*">
+				<equip set="Cure" />
+			</if>
+			<else>
+				<equip set="MND" />
+			</else>
+		</if>
+	</midmagic>
+	
+</ashitacast>

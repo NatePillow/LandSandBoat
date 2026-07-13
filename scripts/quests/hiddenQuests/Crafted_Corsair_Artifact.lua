@@ -189,7 +189,10 @@ quest.sections =
                 end,
 
                 [944] = function(player, csid, option, npc)
+                    -- Singleplayer over-grant: deliver ALL 3 COR AF pieces.
                     if npcUtil.giveItem(player, xi.item.CORSAIRS_GANTS) then
+                        npcUtil.giveItem(player, xi.item.CORSAIRS_BOTTES)
+                        npcUtil.giveItem(player, xi.item.CORSAIRS_FRAC)
                         finishCommission(player)
                     end
                 end,
@@ -278,7 +281,10 @@ quest.sections =
                 end,
 
                 [522] = function(player, csid, option, npc)
+                    -- Singleplayer over-grant: deliver ALL 3 COR AF pieces.
                     if npcUtil.giveItem(player, xi.item.CORSAIRS_BOTTES) then
+                        npcUtil.giveItem(player, xi.item.CORSAIRS_GANTS)
+                        npcUtil.giveItem(player, xi.item.CORSAIRS_FRAC)
                         finishCommission(player)
                     end
                 end,
@@ -363,7 +369,10 @@ quest.sections =
                 end,
 
                 [756] = function(player, csid, option, npc)
+                    -- Singleplayer over-grant: deliver ALL 3 COR AF pieces.
                     if npcUtil.giveItem(player, xi.item.CORSAIRS_FRAC) then
+                        npcUtil.giveItem(player, xi.item.CORSAIRS_GANTS)
+                        npcUtil.giveItem(player, xi.item.CORSAIRS_BOTTES)
                         finishCommission(player)
                     end
                 end,

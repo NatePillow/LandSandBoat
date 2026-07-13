@@ -323,6 +323,11 @@ set(MAP_ONLY_EXTERNAL_LIBS
     earcut_hpp
     ryml
     zlibstatic
+    # SINGLEPLAYER: config_http_server.cpp serves config files to addons
+    # over loopback HTTP instead of the old chunked 0x17E packet path
+    # (kills the wire-zlib edge cases and ~50× speeds up large XML transfers).
+    httplib::httplib
+    nlohmann_json::nlohmann_json
 )
 
 set(SEARCH_ONLY_EXTERNAL_LIBS

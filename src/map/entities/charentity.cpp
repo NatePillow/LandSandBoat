@@ -32,6 +32,7 @@
 #include "packets/char_sync.h"
 #include "packets/char_update.h"
 #include "packets/entity_update.h"
+#include "packets/s2c/0x150_server_ident.h"
 #include "packets/s2c/0x01d_item_same.h"
 #include "packets/s2c/0x01f_item_list.h"
 #include "packets/s2c/0x02a_talknumwork.h"
@@ -66,6 +67,11 @@
 #include "battlefield.h"
 #include "char_recast_container.h"
 #include "charentity.h"
+#include "singleplayer/post_tick.h" // SINGLEPLAYER
+
+// SINGLEPLAYER: includes for blueutils, puppetutils, job_info, clistatus, etc.
+// moved with the changeMJob/changeSJob bodies to singleplayer/job_change.cpp
+// — that file keeps the upstream charentity.cpp include footprint vanilla.
 
 #include "action/action.h"
 #include "action/interrupts.h"
@@ -99,6 +105,7 @@
 #include "trustentity.h"
 #include "unitychat.h"
 #include "universal_container.h"
+#include "lua/luautils.h"
 #include "utils/attackutils.h"
 #include "utils/battleutils.h"
 #include "utils/charutils.h"
@@ -1185,6 +1192,8 @@ void CCharEntity::PostTick()
 
     timer::time_point now = timer::now();
 
+    singleplayer::onCharPostTick(this, now); // SINGLEPLAYER
+
     if (updatemask && now > m_nextUpdateTimer)
     {
         m_nextUpdateTimer = now + 250ms;
@@ -1201,7 +1210,7 @@ void CCharEntity::PostTick()
 
         if (updatemask & UPDATE_HP)
         {
-            // clang-format off
+            // clang-format off/
             ForAlliance([&](auto PEntity)
             {
                 static_cast<CCharEntity*>(PEntity)->pushPacket<GP_SERV_COMMAND_GROUP_ATTR>(this);
@@ -2133,12 +2142,12 @@ void CCharEntity::OnRaise()
         // add weakness effect (75% reduction in HP/MP)
         if (GetLocalVar("MijinGakure") == 0)
         {
-            auto weaknessTime = 5min;
+            auto weaknessTime = 30s;//5min;
 
             // Arise has a reduced weakness time of 3 mins
             if (m_hasArise)
             {
-                weaknessTime = 3min;
+                weaknessTime = 15s;//3min;
             }
 
             CStatusEffect* PWeaknessEffect = new CStatusEffect(EFFECT_WEAKNESS, EFFECT_WEAKNESS, m_weaknessLvl, 0s, weaknessTime);
@@ -2466,6 +2475,12 @@ void CCharEntity::Raise()
     PAI->Accept_Raise();
 
     SetDeathTime(timer::time_point::min());
+
+    // SINGLEPLAYER: fan an alliance-wide "welcome back" reaction. Single funnel
+    // for real-player Accept (0x01A RaiseMenu → Raise()) and bot auto-accept
+    // (lua_bindings::acceptRaise → Raise()), so the reaction fires for any
+    // revival path that goes through the canonical Raise() call.
+    luautils::OnPlayerRaise(this);
 }
 
 void CCharEntity::SetDeathTime(timer::time_point timestamp)
@@ -2930,6 +2945,9 @@ auto CCharEntity::isInEvent() const -> bool
 {
     return currentEvent->eventId != -1;
 }
+
+// SINGLEPLAYER: out-of-line definitions for isHeadless / changeMJob /
+// changeSJob live in src/map/singleplayer/job_change.cpp.
 
 bool CCharEntity::isNpcLocked()
 {

@@ -1,0 +1,39 @@
+<ashitacast>
+	<settings>
+        <blockresends>false</blockresends>
+        <predictivepet>true</predictivepet>
+		<buffupdate>true</buffupdate>
+		<statusupdate>true</statusupdate>
+		<hpupdate>true</hpupdate> 
+		<autoupdate>true</autoupdate> 
+	</settings>
+	<sets>
+		<set name="Idle">
+		</set>
+	</sets>
+		
+	<variables>
+		<var name="autows">0</var>
+	</variables>
+	
+	<inputcommands>
+		<cmd input="/wson">
+			<setvar name="autows" values="1"/>
+			<addtochat colo="50">Auto WS enabled!</addtochat>
+		</cmd>
+		<cmd input="/wsoff">
+			<setvar name="autows" values="0"/>
+			<addtochat colo="50">Auto WS disabled!</addtochat>
+		</cmd>
+	</inputcommands>
+
+	<idlegear>
+		<if advanced="$autows=1">
+			<if p_status="engaged">
+				<if p_tp=">999">
+					<command>/ws "Sturmwind" &lt;t&gt;</command>
+				</if>
+			</if>
+		</if>
+	</idlegear>
+</ashitacast>

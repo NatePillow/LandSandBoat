@@ -195,8 +195,17 @@ quest.sections =
                 end,
 
                 [383] = function(player, csid, option, npc)
-                    if npcUtil.giveItem(player, optionToItems[quest:getVar(player, 'Option')][1]) then
+                    -- Singleplayer over-grant: deliver ALL 13 gear pieces at
+                    -- once. Player still trades the picked subligar (that's
+                    -- the game act); we just also hand out the other 12.
+                    local picked = optionToItems[quest:getVar(player, 'Option')][1]
+                    if npcUtil.giveItem(player, picked) then
                         player:confirmTrade()
+                        for _, pair in pairs(optionToItems) do
+                            if pair[1] ~= picked then
+                                npcUtil.giveItem(player, pair[1])
+                            end
+                        end
                         quest:complete(player)
                     end
                 end,

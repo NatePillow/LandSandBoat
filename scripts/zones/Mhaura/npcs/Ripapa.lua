@@ -90,36 +90,26 @@ entity.onEventFinish = function(player, csid, option, npc)
     elseif csid == 10024 then
         npcUtil.giveKeyItem(player, xi.ki.TUNING_FORK_OF_LIGHTNING)
     elseif csid == 10019 then
-        local item = 0
-        if option == 1 then
-            item = xi.item.RAMUHS_STAFF
-        elseif option == 2 then
-            item = xi.item.LIGHTNING_BELT
-        elseif option == 3 then
-            item = xi.item.LIGHTNING_RING
-        elseif option == 4 then
-            item = xi.item.ELDER_BRANCH
+        -- Singleplayer over-grant: deliver ALL 6 reward options at once.
+        local rewardItems = {
+            xi.item.RAMUHS_STAFF,
+            xi.item.LIGHTNING_BELT,
+            xi.item.LIGHTNING_RING,
+            xi.item.ELDER_BRANCH,
+        }
+        for _, id in ipairs(rewardItems) do
+            npcUtil.giveItem(player, id)
         end
-
-        if player:getFreeSlotsCount() == 0 and (option ~= 5 or option ~= 6) then
-            player:messageSpecial(ID.text.ITEM_CANNOT_BE_OBTAINED, item)
-        else
-            if option == 5 then
-                npcUtil.giveCurrency(player, 'gil', 10000)
-            elseif option == 6 then
-                player:addSpell(xi.magic.spell.RAMUH) -- Ramuh Spell
-                player:messageSpecial(ID.text.RAMUH_UNLOCKED, 0, 0, 5)
-            else
-                player:addItem(item)
-                player:messageSpecial(ID.text.ITEM_OBTAINED, item) -- Item
-            end
-
-            player:addTitle(xi.title.HEIR_OF_THE_GREAT_LIGHTNING)
-            player:delKeyItem(xi.ki.WHISPER_OF_STORMS) --Whisper of Storms, as a trade for the above rewards
-            player:setCharVar('TrialByLightning_date', JstMidnight())
-            player:addFame(xi.fameArea.WINDURST, 30)
-            player:completeQuest(xi.questLog.OTHER_AREAS, xi.quest.id.otherAreas.TRIAL_BY_LIGHTNING)
+        npcUtil.giveCurrency(player, 'gil', 10000)
+        if not player:hasSpell(xi.magic.spell.RAMUH) then
+            player:addSpell(xi.magic.spell.RAMUH)
+            player:messageSpecial(ID.text.RAMUH_UNLOCKED, 0, 0, 5)
         end
+        player:addTitle(xi.title.HEIR_OF_THE_GREAT_LIGHTNING)
+        player:delKeyItem(xi.ki.WHISPER_OF_STORMS)
+        player:setCharVar('TrialByLightning_date', JstMidnight())
+        player:addFame(xi.fameArea.WINDURST, 30)
+        player:completeQuest(xi.questLog.OTHER_AREAS, xi.quest.id.otherAreas.TRIAL_BY_LIGHTNING)
     elseif csid == 10022 or csid == 10023 then
         if player:getFreeSlotsCount() ~= 0 then
             player:addItem(xi.item.LIGHTNING_PENDULUM)

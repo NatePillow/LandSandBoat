@@ -51,17 +51,18 @@ local function getRewardMask(player)
 end
 
 local function giveQuestReward(player, eventOption)
+    -- Singleplayer over-grant: deliver ALL 5 reward options at once.
     local wasRewarded = true
-
-    if eventOption <= 3 then
-        wasRewarded = npcUtil.giveItem(player, rewardItems[eventOption - 1])
-    elseif eventOption == 4 then
-        npcUtil.giveCurrency(player, 'gil', 10000)
-    elseif eventOption == 5 then
+    for _, itemId in pairs(rewardItems) do
+        if not npcUtil.giveItem(player, itemId) then
+            wasRewarded = false
+        end
+    end
+    npcUtil.giveCurrency(player, 'gil', 10000)
+    if not player:hasSpell(xi.magic.spell.ALEXANDER) then
         player:addSpell(xi.magic.spell.ALEXANDER)
         player:messageSpecial(ahtUrhganID.text.ALEXANDER_UNLOCKED, 0, 0, 1)
     end
-
     return wasRewarded
 end
 

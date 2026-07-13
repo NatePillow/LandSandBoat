@@ -45,12 +45,6 @@ class AHPaginationModule : public CPPModule
             return false;
         }
 
-        if (PChar->m_GMlevel == 0 && !PChar->loc.zone->CanUseMisc(MISC_AH))
-        {
-            ShowWarning("[AH PAGES] %s is trying to use the auction house in a disallowed zone [%s]", PChar->getName(), PChar->loc.zone->getName());
-            return true;
-        }
-
         const auto typedPacket = packet.as<GP_CLI_COMMAND_AUC>();
 
         // Only intercept for action 0x05: Open List Of Sales / Wait

@@ -6,6 +6,7 @@ add_subdirectory(enums)
 add_subdirectory(items)
 add_subdirectory(lua)
 add_subdirectory(packets)
+add_subdirectory(singleplayer) # SINGLEPLAYER: fork-specific extraction subdir
 add_subdirectory(utils)
 
 set(APP_SOURCES
@@ -22,6 +23,7 @@ set(SOURCES
     ${ITEM_SOURCES}
     ${LUA_SOURCES}
     ${PACKET_SOURCES}
+    ${SINGLEPLAYER_SOURCES} # SINGLEPLAYER: fork-specific extraction subdir
     ${UTIL_SOURCES}
     ${CMAKE_CURRENT_SOURCE_DIR}/ability.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ability.h

@@ -46,58 +46,74 @@ GP_SERV_COMMAND_GROUP_TBL::GP_SERV_COMMAND_GROUP_TBL(CParty* PParty, const bool 
             allianceid = PParty->m_PAlliance->m_AllianceID;
         }
 
-        uint8      i    = 0;
         const auto rset = db::preparedStmt("SELECT chars.charid, partyflag, pos_zone, pos_prevzone "
-                                           "FROM accounts_parties "
-                                           "LEFT JOIN chars ON accounts_parties.charid = chars.charid WHERE "
-                                           "IF (allianceid <> 0, allianceid = ?, partyid = ?) "
-                                           "ORDER BY partyflag & ?, timestamp",
-                                           allianceid,
-                                           PParty->GetPartyID(),
-                                           PARTY_SECOND | PARTY_THIRD);
+                                                   "FROM accounts_parties "
+                                                   "LEFT JOIN chars ON accounts_parties.charid = chars.charid WHERE "
+                                                   "IF (allianceid <> 0, allianceid = ?, partyid = ?) "
+                                                   "ORDER BY partyflag & ?, timestamp",
+                                                   allianceid,
+                                                   PParty->GetPartyID(),
+                                                   PARTY_SECOND | PARTY_THIRD);
+
+        uint8 i = 0;
+        uint16 current_party_bits = 0;
+        std::vector<CCharEntity*> partyLeaders;
+
         FOR_DB_MULTIPLE_RESULTS(rset)
         {
-            uint16 targid = 0;
-            if (const auto* PChar = zoneutils::GetChar(rset->get<uint32>("charid")))
+            uint32 charid = rset->get<uint32>("charid");
+            uint32 partyflag = rset->get<uint32>("partyflag");
+            uint16 row_party_bits = partyflag & (PARTY_SECOND | PARTY_THIRD);
+
+            // If we move to a new party in the alliance, process the PREVIOUS party's trusts first
+            if (row_party_bits != current_party_bits)
             {
-                targid = PChar->targid;
+            // Add trusts for the PREVIOUS party leaders before starting the next PC group
+                for (auto* PLeader : partyLeaders) {
+                    for (auto* PTrust : PLeader->PTrusts) {
+                        if (i >= 20) break;
+                        packet.GroupTbl[i].UniqueNo = PTrust->id;
+                        packet.GroupTbl[i].ActIndex = PTrust->targid;
+                        packet.GroupTbl[i].PartyNo  = (current_party_bits >> 0) & 0x03;
+                        packet.GroupTbl[i].ZoneNo   = PTrust->getZone();
+                        i++;
+                    }
+                }
+                current_party_bits = row_party_bits;
+                partyLeaders.clear();
             }
 
-            const auto pos_zone   = rset->getOrDefault<uint16>("pos_zone", 0);
-            const auto partyFlags = rset->get<uint32>("partyflag");
+            // 1. Add the Player (PCs always come first)
+            if (i < 20) {
+                packet.GroupTbl[i].UniqueNo          = charid;
+                packet.GroupTbl[i].PartyNo           = (partyflag >> 0) & 0x03;
+                packet.GroupTbl[i].PartyLeaderFlg    = (partyflag >> 2) & 0x01;
+                packet.GroupTbl[i].AllianceLeaderFlg = (partyflag >> 3) & 0x01;
+                packet.GroupTbl[i].PartyRFlg         = (partyflag >> 4) & 0x01;
+                packet.GroupTbl[i].AllianceRFlg      = (partyflag >> 5) & 0x01;
 
-            packet.GroupTbl[i].UniqueNo          = rset->get<uint32>("charid");
-            packet.GroupTbl[i].ActIndex          = targid;
-            packet.GroupTbl[i].PartyNo           = (partyFlags >> 0) & 0x03; // Bits 0-1
-            packet.GroupTbl[i].PartyLeaderFlg    = (partyFlags >> 2) & 0x01; // Bit 2
-            packet.GroupTbl[i].AllianceLeaderFlg = (partyFlags >> 3) & 0x01; // Bit 3
-            packet.GroupTbl[i].PartyRFlg         = (partyFlags >> 4) & 0x01; // Bit 4
-            packet.GroupTbl[i].AllianceRFlg      = (partyFlags >> 5) & 0x01; // Bit 5
-            packet.GroupTbl[i].unknown06         = (partyFlags >> 6) & 0x01; // Bit 6
-            packet.GroupTbl[i].unknown07         = (partyFlags >> 7) & 0x01; // Bit 7
-            packet.GroupTbl[i].ZoneNo            = pos_zone ? pos_zone : rset->get<uint16>("pos_prevzone");
-            i++;
+                auto pos_zone = rset->getOrDefault<uint16>("pos_zone", 0);
+                packet.GroupTbl[i].ZoneNo = pos_zone ? pos_zone : rset->get<uint16>("pos_prevzone");
+
+                // If this is a leader, track them to add their trusts later
+                if (packet.GroupTbl[i].PartyLeaderFlg) {
+                    if (auto* PLeader = (CCharEntity*)zoneutils::GetChar(charid)) {
+                        partyLeaders.push_back(PLeader);
+                    }
+                }
+                i++;
+            }
         }
 
-        if (loadTrust)
-        {
-            const auto* PLeader = static_cast<CCharEntity*>(PParty->GetLeader());
-            if (PLeader != nullptr)
-            {
-                for (const auto* PTrust : PLeader->PTrusts)
-                {
-                    packet.GroupTbl[i].UniqueNo          = PTrust->id;
-                    packet.GroupTbl[i].ActIndex          = PTrust->targid;
-                    packet.GroupTbl[i].PartyNo           = 0; // Trusts are in main party
-                    packet.GroupTbl[i].PartyLeaderFlg    = 0;
-                    packet.GroupTbl[i].AllianceLeaderFlg = 0;
-                    packet.GroupTbl[i].PartyRFlg         = 0;
-                    packet.GroupTbl[i].AllianceRFlg      = 0;
-                    packet.GroupTbl[i].unknown06         = 0;
-                    packet.GroupTbl[i].unknown07         = 0;
-                    packet.GroupTbl[i].ZoneNo            = PTrust->getZone();
-                    i++;
-                }
+        // Final cleanup: Add trusts for the last party in the result set
+        for (auto* PLeader : partyLeaders) {
+            for (auto* PTrust : PLeader->PTrusts) {
+                if (i >= 20) break;
+                packet.GroupTbl[i].UniqueNo = PTrust->id;
+                packet.GroupTbl[i].ActIndex = PTrust->targid;
+                packet.GroupTbl[i].PartyNo  = (current_party_bits >> 0) & 0x03;
+                packet.GroupTbl[i].ZoneNo   = PTrust->getZone();
+                i++;
             }
         }
     }

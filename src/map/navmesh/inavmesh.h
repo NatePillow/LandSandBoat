@@ -23,6 +23,7 @@
 
 #include "common/mmo.h"
 
+#include <cfloat>
 #include <utility>
 #include <vector>
 
@@ -38,6 +39,15 @@ public:
     virtual auto findClosestValidPoint(const position_t& position, float* validPoint) -> bool                                      = 0;
     virtual auto findFurthestValidPoint(const position_t& startPosition, const position_t& endPosition, float* validPoint) -> bool = 0;
     virtual void snapToValidPosition(position_t& position)                                                                         = 0;
+
+    // SINGLEPLAYER BEGIN
+    // Parametric distance (0..1) along [start, end] of the most recent
+    // raycast() call's first wall hit. FLT_MAX = no hit. Read by the bot AI's
+    // step-clamp logic to stop bots at wall surfaces instead of letting setPos
+    // teleport them through geometry. CNavMesh returns the real value; the
+    // null nav mesh (zone with missing nav data) returns FLT_MAX.
+    virtual auto lastRaycastT() const -> float = 0;
+    // SINGLEPLAYER END
 };
 
 class NullNavMesh final : public INavMesh
@@ -77,4 +87,13 @@ public:
     {
         // NOOP
     }
+
+    // SINGLEPLAYER BEGIN
+    auto lastRaycastT() const -> float override
+    {
+        // No nav data → no wall hit; bot step-clamp treats as "open" and uses
+        // the requested end position unmodified.
+        return FLT_MAX;
+    }
+    // SINGLEPLAYER END
 };

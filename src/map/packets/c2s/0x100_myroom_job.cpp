@@ -128,6 +128,7 @@ void GP_CLI_COMMAND_MYROOM_JOB::process(MapSession* PSession, CCharEntity* PChar
         }
     }
 
+    ShowInfo(fmt::format("[STYLELOCK] caller=0x100_myroom_job char={}", PChar->getName()));
     charutils::SetStyleLock(PChar, false);
     luautils::CheckForGearSet(PChar); // check for gear set on gear change
 

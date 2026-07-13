@@ -21,7 +21,7 @@ local hnmSystem = Module:new('era_HNM_System')
 -- Module enable/disable
 -----------------------------------
 -- Do not use along custom_HNM_System module. Choose one or the other.
-hnmSystem:setEnabled(false)
+hnmSystem:setEnabled(true)
 
 -----------------------------------
 -- Dragon's Aery: Fafnir, Nidhogg

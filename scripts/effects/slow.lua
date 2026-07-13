@@ -5,6 +5,11 @@
 local effectObject = {}
 
 effectObject.onEffectGain = function(target, effect)
+    -- Slow and Haste are mutually exclusive in retail FFXI — applying
+    -- Slow on a Hasted target removes Haste. Symmetric counterpart to
+    -- the delStatusEffect(SLOW) added to haste.lua.
+    target:delStatusEffect(xi.effect.HASTE)
+
     target:addMod(xi.mod.HASTE_MAGIC, -effect:getPower())
 
     -- Immunobreak reset.

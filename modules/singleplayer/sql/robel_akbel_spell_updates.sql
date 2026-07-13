@@ -1,0 +1,5 @@
+INSERT INTO `mob_spell_lists` VALUES ('TRUST_Robel-Akbel',390,245,12,255); -- drain (12~255)
+INSERT INTO `mob_spell_lists` VALUES ('TRUST_Robel-Akbel',390,247,25,255); -- aspir (25~255)
+INSERT INTO `mob_spell_lists` VALUES ('TRUST_Robel-Akbel',390,254,1,255); -- blind (1~255)
+INSERT INTO `mob_spell_lists` VALUES ('TRUST_Robel-Akbel',390,220,3,41);   -- poison (3~41)
+INSERT INTO `mob_spell_lists` VALUES ('TRUST_Robel-Akbel',390,221,43,255); -- poison_ii (43~255)

@@ -63,6 +63,7 @@ public:
     void showText(CLuaBaseEntity* entity, uint16 messageID, const sol::object& p0, const sol::object& p1, const sol::object& p2, const sol::object& p3, const sol::object& p4, const sol::object& p5);
     void messageText(CLuaBaseEntity* PLuaBaseEntity, uint16 messageID, const sol::object& arg2, const sol::object& arg3);
     void printToPlayer(const std::string& message, const sol::object& messageTypeObj, const sol::object& nameObj);
+    void pushAutoskillState(const std::string& botName, uint8 mode); // SINGLEPLAYER
     void printToArea(const std::string& message, const sol::object& arg1, const sol::object& arg2, const sol::object& arg3, const sol::object& arg4);
     void messageBasic(uint16 messageID, const sol::object& p0, const sol::object& p1, const sol::object& target);
     void messageName(uint16 messageID, const sol::object& entity, const sol::object& p0, const sol::object& p1, const sol::object& p2, const sol::object& p3, const sol::object& chat);
@@ -146,7 +147,7 @@ public:
     void clearTargID();
 
     bool  atPoint(sol::variadic_args va);                                          // is at given point
-    void  pathTo(float x, float y, float z, const sol::object& flags);             // set new path to point without changing action
+    bool  pathTo(float x, float y, float z, const sol::object& flags);             // returns false when WALLHACK is omitted and the target is off-mesh; true otherwise
     bool  pathThrough(const sol::table& pointsTable, const sol::object& flagsObj); // walk at normal speed through the given points
     bool  isFollowingPath();                                                       // checks if the entity is following a path
     void  clearPath(const sol::object& pauseObj);                                  // removes current pathfind and stops moving
@@ -379,8 +380,10 @@ public:
     void  unlockJob(uint8 JobID);
     bool  hasJob(uint8 job);
 
-    uint8 getMainLvl();
-    uint8 getSubLvl();
+    uint8  getMainLvl();
+    uint8  getSubLvl();
+    uint32 getCurrentJobExp();  // SINGLEPLAYER: main-job EXP for the autobots Status tab push
+    uint32 getRequiredJobExp(); // SINGLEPLAYER: main-job next-level EXP threshold
     uint8 getJobLevel(uint8 JobID); // Gets character job level for specified JOBTYPE
     void  setLevel(uint8 level);    // sets the character's mainjob level
     void  setsLevel(uint8 slevel);  // sets the character's subjob level
@@ -411,6 +414,7 @@ public:
 
     uint8  getRank(uint8 nation);
     void   setRank(uint8 rank);
+    void   setRankByNation(uint8 nation, uint8 rank);
     uint16 getRankPoints();
     void   addRankPoints(uint16 rankpoints);
     void   setRankPoints(uint16 rankpoints);
@@ -565,6 +569,7 @@ public:
     void   addSpell(uint16 spellID, const sol::optional<sol::table>& paramTable);
     bool   hasSpell(uint16 spellID);
     uint32 canLearnSpell(uint16 spellID);
+    bool   canUseSpell(uint16 spellID);
     void   delSpell(uint16 spellID, const sol::optional<sol::table>& paramTable);
     auto   getSetBlueSpells() -> sol::table;
 
@@ -589,6 +594,7 @@ public:
 
     auto  getAlliance() -> sol::table;
     uint8 getAllianceSize();
+    uint8 getAllianceParty() const;
 
     void reloadParty();
     void disableLevelSync();
@@ -790,6 +796,7 @@ public:
     void setJugRemainingTime(uint32 remainingSeconds);
 
     auto   spawnTrust(uint16 trustId) -> CBaseEntity*;
+    int32  summonTrustDirect(uint16 trustSpellId); // SINGLEPLAYER
     void   clearTrusts();
     uint32 getTrustID();
     void   trustPartyMessage(uint32 message_id) const;
@@ -929,6 +936,115 @@ public:
 
     void castSpell(const sol::object& spell, const sol::object& entity); // forces a mob to cast a spell (parameter = spell ID, otherwise picks a spell from its list)
     void useJobAbility(uint16 skillID, const sol::object& pet);          // forces a job ability use (players/pets only)
+    // SINGLEPLAYER BEGIN
+    void weaponSkill(uint16 wsId, const sol::object& target);            // headless: queue a weapon skill on the given target
+    void rangedAttack(const sol::object& target);                        // headless: queue a ranged attack on the given target
+    void useItem(uint8 location, uint8 slotId, const sol::object& target); // headless: queue an item use from the given container slot
+
+    // Bot mode + headless helpers for the bot_ai Lua module
+    bool   isHeadless() const;                 // true if this char's session has a non-zero parentCharId
+    uint32 getParentCharId() const;            // 0 if not headless; otherwise the primary char's id
+    uint8  getBotMode() const;                 // returns BotMode enum value (0=Off, 1=CombatOnly, 2=Full)
+    void   setBotMode(uint8 mode);             // toggles BotMode on this char
+    uint8  getAggroMode() const;               // headless mob-aggro mode: 0=Off (trust-like), 1=Full, 2=Engaged (vanilla once engaged)
+    void   setAggroMode(uint8 mode);           // sets m_aggroMode; read by shouldSkipMobAggro on every aggro decision
+    uint32 getLastClientMoveInputMs() const;   // ms since the last real (position-changing) 0x015 from this char's client
+
+    // Style Lock — drive the visual appearance independent of actual equipment.
+    // applyStyleLock(slotItemIds): a Lua table keyed by SLOTTYPE id (0=main,
+    //   1=sub, 2=range, 3=ammo, 4=head, 5=body, 6=hands, 7=legs, 8=feet) to
+    //   itemId. Slots not in the table are cleared to 0 (no item visible).
+    //   Sets m_isStyleLocked = true and pushes the new appearance to every
+    //   client that can see this entity. Used by autoequip gearlock to pin
+    //   the bot/primary's visual look while real gear may swap underneath
+    //   for stats. No-op on non-CCharEntity.
+    // clearStyleLock(): turn the lock off, restore the visible look to the
+    //   actual equipped items, push the appearance update.
+    void applyStyleLock(sol::table slotItemIds);
+    void clearStyleLock();
+
+    // Spawn a headless character with this char as parent. Resolves charId from
+    // name via DB, rejects self/already-live, returns the spawned bot as a
+    // CLuaBaseEntity (or nil on failure). Called from bot_spawn.lua.
+    auto spawnHeadless(const std::string& name, uint8 spawnIndex) -> sol::object;
+
+    // One-shot party + alliance formation, mirrors the 0x169 autoinvite C++
+    // logic. allianceSpec is a Lua table list of party specs, each shaped as
+    // { leader = "name", members = { "name", ... } }. Up to 3 parties. Validates
+    // every char is in-world and not already in a party; then forms parties and
+    // (if >1) chains them into an alliance via the first party's leader.
+    // Returns true on success, false if any precondition failed.
+    bool formAllianceFromSpec(sol::table allianceSpec);
+
+    // Treasure pool lot / pass actions for the bot_lot.lua server-side port of
+    // autolot. Wraps CTreasurePool::lotItem / passItem on this char's pool.
+    // lot value defaults to 999 (max); returning early if there's no pool.
+    void botLotItem(uint8 slotId, sol::object lotValue);
+    void botPassItem(uint8 slotId);
+
+    // PAI state queries used by bot_magic / bot_ai
+    bool isBotCasting() const;          // PAI->IsCurrentState<CMagicState>()
+    bool isBotRangedAttacking() const;  // PAI->IsCurrentState<CRangeState>()
+    bool isBotUsingAbility() const;     // PAI->IsCurrentState<CAbilityState>()
+    bool isBotWeaponSkilling() const;   // PAI->IsCurrentState<CWeaponSkillState>()
+    bool isBotResting() const;          // animation == ANIMATION_HEALING
+    void startBotResting();             // adds EFFECT_HEALING (server-side /heal on equivalent)
+    void stopBotResting();              // removes EFFECT_HEALING
+
+    // True iff this char actually has the given job ability available right now
+    // (mj or sj high enough, sub-allowed if main-only flag isn't set, etc.).
+    // Wraps charutils::hasAbility against PChar->m_Abilities, which is the
+    // authoritative bitset the action pipeline checks before letting an ability
+    // fire. Bot AI uses this to gate can_use_* polls — without it the AI tries
+    // useJobAbility every tick for abilities a char doesn't even own, the
+    // server silently rejects, no recast lands, and the can_use_X gate stays
+    // forever true → infinite loop in the role tick.
+    bool hasJobAbility(uint16 abilityId) const;
+    // Bot-step clamping. Given a target world coordinate, returns the
+    // navmesh-safe destination — the same target if the ray is clear, or a
+    // point just before the first wall hit if not. Bot AI calls this in
+    // stepToward so the bot stops at walls instead of teleporting through
+    // them. Returns target unchanged when the zone has no navmesh.
+    auto raycastClampTo(float tx, float ty, float tz) -> std::tuple<float, float, float>;
+    // Navmesh line-of-sight test between two ARBITRARY points (not the
+    // entity's own position). Returns true when the straight segment is
+    // unobstructed, or when the zone has no navmesh (callers degrade to
+    // "assume clear"). Used by the AoE mage-anchor sampler to score candidate
+    // stand-points it isn't standing on.
+    auto raycastClear(float ax, float ay, float az, float bx, float by, float bz) -> bool;
+    // Like equipItem, but searches every inventory copy of the requested
+    // item and prefers one that isn't currently equipped to a DIFFERENT
+    // equip slot. Fixes the two-of-same-item case (e.g. two Sniper's Ring +1
+    // → ring1 + ring2): plain equipItem's SearchItem returns the first
+    // match, so the second call moves the same ring between slots instead
+    // of grabbing the other copy. Falls back to first match (legacy
+    // behavior) when no unequipped instance is available.
+    void equipItemUnique(uint16 itemID, uint8 containerID, uint8 equipSlot) const;
+    // Accept a pending raise/tractor menu (CDeathState::acceptRaise). Used by
+    // bots_listeners to auto-accept on headless bots, which have no client to
+    // click the menu and would otherwise sit dead indefinitely after a WHM
+    // casts Raise on them. Safe to call when no raise is pending — Accept_Raise
+    // returns false in that case and the bot's state is unchanged.
+    void acceptRaise() const;
+    // Push S2C 0x1A4 PULLER_NEARBY_NAMES with the supplied list. `entries` is a
+    // Lua array of { name = "...", count = N } records. ai_puller.lua builds
+    // and sorts the list before calling this.
+    void pushPullerNearbyNames(const sol::table& entries) const;
+    // Publish the alliance-wide + per-bot state JSON to the loopback HTTP
+    // server's per-primary cache (botstate::publishSnapshot). The AutoBots
+    // addon fetches via GET /bot-state?for=<name>. Migrated off the legacy
+    // 0x1A5 BOT_STATE_SNAPSHOT packet which was at the 504-byte wire ceiling.
+    void publishBotState(const std::string& json) const;
+    // Party/alliance reshape primitives — diff-based "Update Alliance" path
+    // (#230). Thin wrappers around CParty / CAlliance methods that aren't
+    // otherwise surfaced to Lua. Used by bots_spawn.update_alliance_diff.
+    void formPartyAlone();
+    void partyAddMember(CLuaBaseEntity* other);
+    void partyRemoveMember(CLuaBaseEntity* other);
+    void attachToAlliance(CLuaBaseEntity* anchor);
+    void detachFromAlliance();
+    void destroyAsHeadless();
+    // SINGLEPLAYER END
     void useMobAbility(sol::variadic_args va);                           // forces a mob to use a mobability (parameter = skill ID)
     void usePetAbility(uint16 skillId, const sol::object& target) const; // forces a pet to use a pet ability
     auto getAbilityDistance(uint16 skillID) -> float;                    // Returns the specified distance for mob skill

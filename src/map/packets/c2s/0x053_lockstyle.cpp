@@ -57,6 +57,7 @@ void GP_CLI_COMMAND_LOCKSTYLE::process(MapSession* PSession, CCharEntity* PChar)
         {
             if (PChar->getStyleLocked())
             {
+                ShowInfo(fmt::format("[STYLELOCK] caller=0x053_Disable char={}", PChar->getName()));
                 charutils::SetStyleLock(PChar, false);
                 PChar->RequestPersist(CHAR_PERSIST::EQUIP);
                 updateClientAppearance(PChar);

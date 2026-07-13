@@ -1,0 +1,1 @@
+DELETE FROM `mob_skill_lists` WHERE `skill_list_name` = 'TRUST_Lion' AND `mob_skill_id` IN (3198, 3200, 3201);

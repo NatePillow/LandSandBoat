@@ -1,0 +1,73 @@
+<ashitacast>
+	<settings>
+        <blockresends>false</blockresends>
+        <predictivepet>true</predictivepet>
+		<buffupdate>true</buffupdate>
+		<statusupdate>true</statusupdate>
+		<hpupdate>true</hpupdate> 
+		<autoupdate>true</autoupdate> 
+	</settings>
+	<sets>
+		<set name="Idle">
+			
+		</set>
+		
+		<set name="Song">
+			<range>Maple Harp +1</range>
+		</set>
+		
+		<set name="MND">
+			
+		</set>
+		
+		<set name="Cure" baseset="MND">
+			
+		</set>
+		
+		<set name="FastCast" baseset="MND">
+			
+		</set>
+	</sets>
+
+	<idlegear>
+		<!--Same subnodes as command triggers, is processed whenever an action ends, your status changes, and once every 3 seconds if no actions done.-->
+	</idlegear>
+
+	<premagic>
+		<equip set="FastCast" />
+	</premagic>
+		
+	<midmagic>
+		<if ad_type="BardSong">
+			<equip set="Song" />
+			
+			<if ad_name="Knight's Minne*">
+				<equip>
+					<range>Maple Harp +1</range>
+				</equip>
+			</if>
+			
+			<elseif ad_name="Valor Minuet*">
+				<equip>
+					<range>Cornette +1</range>
+				</equip>
+			</elseif>
+				
+			<elseif ad_name="Foe Requiem*">
+				<equip>
+					<range>Flute +2</range>
+				</equip>
+			</elseif>
+		</if>
+		
+		<if ad_type="WhiteMagic">
+			<if ad_name="Cure*|Curaga*">
+				<equip set="Cure" />
+			</if>
+			<else>
+				<equip set="MND" />
+			</else>
+		</if>
+	</midmagic>
+
+</ashitacast>

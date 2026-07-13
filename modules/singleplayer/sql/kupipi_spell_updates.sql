@@ -1,0 +1,8 @@
+INSERT INTO `mob_spell_lists` VALUES ('TRUST_Kupipi',310,23,1,255); -- dia (1~255)
+INSERT INTO `mob_spell_lists` VALUES ('TRUST_Kupipi',310,7,16,255);   -- curaga (16~255)
+INSERT INTO `mob_spell_lists` VALUES ('TRUST_Kupipi',310,53,1,255);  -- blink (1~255)
+INSERT INTO `mob_spell_lists` VALUES ('TRUST_Kupipi',310,54,1,255);  -- stoneskin (1~255)
+INSERT INTO `mob_spell_lists` VALUES ('TRUST_Kupipi',310,12,25,255);  -- raise (25~255)
+INSERT INTO `mob_spell_lists` VALUES ('TRUST_Kupipi',310,13,56,255);  -- raise_ii (56~255)
+INSERT INTO `mob_spell_lists` VALUES ('TRUST_Kupipi',310,140,70,255); -- raise_iii (70~255)
+INSERT INTO `mob_spell_lists` VALUES ('TRUST_Kupipi',310,57,40,255);  -- haste (40~255)

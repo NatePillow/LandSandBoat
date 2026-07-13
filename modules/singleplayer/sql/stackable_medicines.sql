@@ -1,0 +1,1 @@
+UPDATE item_basic SET stackSize = 12 WHERE itemId BETWEEN 4112 AND 4147;

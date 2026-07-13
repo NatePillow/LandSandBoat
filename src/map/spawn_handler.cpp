@@ -191,7 +191,9 @@ void SpawnHandler::onTOTDChange(const vanadiel_time::TOTD totd) const
             zone_->ForEachMob(
                 [](CMobEntity* PMob)
                 {
-                    if (PMob->m_SpawnType & SPAWNTYPE_ATNIGHT)
+                    // SINGLEPLAYER: noAutoDespawn local var (set by modules/singleplayer/lua/
+                    // nullify_mob_spawn_conditions.lua) keeps mobs spawned across TOD.
+                    if (PMob->m_SpawnType & SPAWNTYPE_ATNIGHT && PMob->GetLocalVar("noAutoDespawn") == 0)
                     {
                         PMob->SetDespawnTime(1ms);
                     }
@@ -203,7 +205,9 @@ void SpawnHandler::onTOTDChange(const vanadiel_time::TOTD totd) const
             zone_->ForEachMob(
                 [](CMobEntity* PMob)
                 {
-                    if (PMob->m_SpawnType & SPAWNTYPE_ATEVENING)
+                    // SINGLEPLAYER: noAutoDespawn local var (set by modules/singleplayer/lua/
+                    // nullify_mob_spawn_conditions.lua) keeps mobs spawned across TOD.
+                    if (PMob->m_SpawnType & SPAWNTYPE_ATEVENING && PMob->GetLocalVar("noAutoDespawn") == 0)
                     {
                         PMob->SetDespawnTime(1ms);
                     }
@@ -240,57 +244,8 @@ void SpawnHandler::onWeatherChange(Weather weather) const
         });
 }
 
-// Ensures the mob meets all conditions for spawning on current wave: TOTD, Weather, Respawn disabled etc.
+// Ensures the mob is eligible for respawn (respawn not disabled).
 auto SpawnHandler::canSpawnNow(const CMobEntity* PMob) const -> bool
 {
-    if (!PMob || !PMob->m_AllowRespawn)
-    {
-        return false;
-    }
-
-    // Time-based spawn conditions
-    const auto totd = vanadiel_time::get_totd();
-    if (PMob->m_SpawnType & SPAWNTYPE_ATNIGHT)
-    {
-        // 20:00-04:00 (NIGHT, MIDNIGHT)
-        if (totd != vanadiel_time::TOTD::NIGHT && totd != vanadiel_time::TOTD::MIDNIGHT)
-        {
-            return false;
-        }
-    }
-
-    if (PMob->m_SpawnType & SPAWNTYPE_ATEVENING)
-    {
-        // 18:00-06:00 (EVENING, NIGHT, MIDNIGHT, NEWDAY)
-        if (totd != vanadiel_time::TOTD::EVENING &&
-            totd != vanadiel_time::TOTD::NIGHT &&
-            totd != vanadiel_time::TOTD::MIDNIGHT &&
-            totd != vanadiel_time::TOTD::NEWDAY)
-        {
-            return false;
-        }
-    }
-
-    // Weather-based spawn conditions
-    if (PMob->m_SpawnType & SPAWNTYPE_FOG)
-    {
-        if (zone_->GetWeather() != Weather::Fog)
-        {
-            return false;
-        }
-    }
-
-    if (PMob->m_SpawnType & SPAWNTYPE_WEATHER)
-    {
-        // Only for elementals without a master
-        if (PMob->m_EcoSystem == ECOSYSTEM::ELEMENTAL && PMob->PMaster == nullptr)
-        {
-            if (PMob->m_Element != zoneutils::GetWeatherElement(zone_->GetWeather()))
-            {
-                return false;
-            }
-        }
-    }
-
-    return true;
+    return PMob && PMob->m_AllowRespawn;
 }

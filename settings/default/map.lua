@@ -113,7 +113,7 @@ xi.settings.map =
     ALL_JOBS_WIDESCAN = true,
 
     -- Base player movement speed
-    BASE_SPEED = 50,
+    BASE_SPEED = 60,
 
     -- Player movement speed limit
     SPEED_LIMIT = 80,
@@ -150,7 +150,7 @@ xi.settings.map =
     CRAFT_COMMON_CAP = 700,
 
     -- Amount of points allowed in crafts over the level defined above. Points are shared across all crafting skills. (Retail = 400; All skills can go to max = 3200)
-    CRAFT_SPECIALIZATION_POINTS = 400,
+    CRAFT_SPECIALIZATION_POINTS = 3200,
 
     -- Multiplier applied to high quality chance
     CRAFT_HQ_CHANCE_MULTIPLIER = 1.0,
@@ -290,7 +290,7 @@ xi.settings.map =
     DELIVERY_BOX_MAX_INFLIGHT = 128,
 
     -- Seconds between healing ticks. Default is 10
-    HEALING_TICK_DELAY = 10,
+    HEALING_TICK_DELAY = 3,
 
     -- Enable/disable keeping jug pets through zoning
     KEEP_JUGPET_THROUGH_ZONING = false,

@@ -53,6 +53,7 @@ public:
     bool   canTargetEnemy();
     uint8  isAoE();
     float  getRadius();
+    float  getRange();
     bool   tookEffect();
     uint16 getTotalTargets();
     auto   getMagicBurstMessage() const -> MsgBasic;

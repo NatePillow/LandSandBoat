@@ -280,7 +280,10 @@ bool CAbilityState::CanUseAbility()
                 return false;
             }
 
-            if (m_PEntity->loc.zone->CanUseMisc(MISC_LOS_PLAYER_BLOCK) && !m_PEntity->CanSeeTarget(PTarget))
+            // SINGLEPLAYER: headless bots skip the LoS gate. See magic_state.cpp
+            // for the rationale — they can't abuse it and the bypass smooths
+            // over slot-ring positions that clip slightly into geometry.
+            if (!PChar->isHeadless() && m_PEntity->loc.zone->CanUseMisc(MISC_LOS_PLAYER_BLOCK) && !m_PEntity->CanSeeTarget(PTarget))
             {
                 PChar->pushPacket<GP_SERV_COMMAND_BATTLE_MESSAGE>(PChar, PTarget, 0, 0, MsgBasic::UnableToSeeTarget);
                 return false;

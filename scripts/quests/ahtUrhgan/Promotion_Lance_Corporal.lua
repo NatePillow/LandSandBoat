@@ -355,12 +355,14 @@ quest.sections =
             onEventFinish =
             {
                 [5031] = function(player, csid, option, npc)
-                    local reward = getQuestReward(player)
-
-                    if reward then
-                        if not npcUtil.giveItem(player, { { reward.item, reward.amount } }) then
-                            return
-                        end
+                    -- Singleplayer over-grant: skip the mythralline-quality tier
+                    -- selection and deliver the top-tier bundle unconditionally
+                    -- (2 Imperial Gold Pieces + 4 Imperial Mythril Pieces).
+                    if not npcUtil.giveItem(player, {
+                        { xi.item.IMPERIAL_GOLD_PIECE,    2 },
+                        { xi.item.IMPERIAL_MYTHRIL_PIECE, 4 },
+                    }) then
+                        return
                     end
 
                     quest:complete(player)

@@ -38,6 +38,8 @@
 #include "ai/states/mobskill_state.h"
 #include "ai/states/range_state.h"
 #include "ai/states/weaponskill_state.h"
+#include "charentity.h"
+#include "map_session.h"
 #include "attack.h"
 #include "attackround.h"
 #include "entities/charentity.h"
@@ -425,6 +427,48 @@ uint8 CBattleEntity::UpdateSpeed(bool run)
                     // Ensure the multiplier is at least 1.0 so that multiplier never decreases speed
                     multiplier = std::max<float>(multiplier, 1.0f);
 
+                    outputSpeed *= multiplier;
+                }
+                // SINGLEPLAYER: headless bots are PCs but are server-driven
+                // via engine pathfinding (see ai_container.cpp:420 headless
+                // bypass).
+                //
+                // Two-part rule:
+                //   1) Inherit PRIMARY's stored speed so buffs/debuffs
+                //      (Quickening, Bolter's, Gravity, mounts, gear)
+                //      propagate automatically.
+                //   2) Apply the MOB run multiplier (typically 2.5×). The
+                //      multiplier is the server-side compensation that
+                //      converts a stored walk-speed value into a render
+                //      velocity matching a client-driven running PC. A real
+                //      PC at server-stored 60 RENDERS running at ~7 y/s
+                //      because the client drives the animation, but a
+                //      server-driven mob at 60 only steps ~3 y/s — the
+                //      2.5× boost is exactly what makes mob "running"
+                //      visually match a player running. Headless need the
+                //      same boost to keep up with the primary; without it
+                //      they visibly trail (user-reported "running slower
+                //      than primary" even after primary-speed inheritance).
+                //   Weight penalty (Gravity / Curse) cuts the boost
+                //   identically to the mob branch above.
+                else if (auto* PChar = dynamic_cast<CCharEntity*>(this); PChar && PChar->isHeadless())
+                {
+                    if (PChar->PSession && PChar->PSession->parentCharId != 0)
+                    {
+                        if (auto* PPrimary = zoneutils::GetChar(PChar->PSession->parentCharId))
+                        {
+                            const int16 primarySpeed = PPrimary->GetSpeed();
+                            if (primarySpeed > 0)
+                            {
+                                outputSpeed = primarySpeed;
+                            }
+                        }
+                    }
+                    if (getMod(Mod::MOVE_SPEED_WEIGHT_PENALTY) > 0)
+                    {
+                        multiplier *= 0.48f;
+                    }
+                    multiplier = std::max<float>(multiplier, 1.0f);
                     outputSpeed *= multiplier;
                 }
             }

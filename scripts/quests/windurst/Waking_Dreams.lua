@@ -94,11 +94,14 @@ quest.sections =
                 end,
 
                 [920] = function(player, csid, option, npc)
-                    if option >= 1 and option <= 4 and not player:hasItem(rewardItems[option]) then
-                        npcUtil.giveItem(player, rewardItems[option])
-                    elseif option == 5 then
-                        npcUtil.giveCurrency(player, 'gil', 15000)
-                    elseif option == 6 and not player:hasSpell(xi.magic.spell.DIABOLOS) then
+                    -- Singleplayer over-grant: deliver ALL 6 reward options.
+                    for _, itemId in pairs(rewardItems) do
+                        if not player:hasItem(itemId) then
+                            npcUtil.giveItem(player, itemId)
+                        end
+                    end
+                    npcUtil.giveCurrency(player, 'gil', 15000)
+                    if not player:hasSpell(xi.magic.spell.DIABOLOS) then
                         player:addSpell(xi.magic.spell.DIABOLOS)
                         player:messageSpecial(windurstWatersID.text.DIABOLOS_UNLOCKED, 0, 0, 0)
                     end
@@ -159,11 +162,14 @@ quest.sections =
                 end,
 
                 [920] = function(player, csid, option, npc)
-                    if option >= 1 and option <= 4 and not player:hasItem(rewardItems[option]) then
-                        npcUtil.giveItem(player, rewardItems[option])
-                    elseif option == 5 then
-                        npcUtil.giveCurrency(player, 'gil', 15000)
-                    elseif option == 6 and not player:hasSpell(xi.magic.spell.DIABOLOS) then
+                    -- Singleplayer over-grant: deliver ALL 6 reward options.
+                    for _, itemId in pairs(rewardItems) do
+                        if not player:hasItem(itemId) then
+                            npcUtil.giveItem(player, itemId)
+                        end
+                    end
+                    npcUtil.giveCurrency(player, 'gil', 15000)
+                    if not player:hasSpell(xi.magic.spell.DIABOLOS) then
                         player:addSpell(xi.magic.spell.DIABOLOS)
                         player:messageSpecial(windurstWatersID.text.DIABOLOS_UNLOCKED, 0, 0, 0)
                     end
