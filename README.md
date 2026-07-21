@@ -17,6 +17,7 @@ This is a level 75 cap era version of FFXI updated to provide a single player ex
 - [Utility Addons](#utility-addons)
   - [automog](#automog)
   - [autowarp](#autowarp)
+- [Item Updates](#item-updates)
 - [Changelog](#changelog)
 
 ---
@@ -100,7 +101,7 @@ The autobots Controls tab carries three progression-cascade buttons. These will 
 | Button             | What it copies                                                                                                                                                          |
 |--------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **Sync Quests**    | Primary's completed quests (recipe-driven), plus the AF1 coffer item set.                                                                                               |
-| **Sync Missions**  | Nation / Zilart / CoP mission completion bits.                                                                                                                          |
+| **Sync Missions**  | Primary's completed nation / Zilart / CoP / ToAU missions (recipe-driven), including mission rewards and cross-nation rank.                                               |
 | **Sync Teleports** | All 13 `TELEPORT_TYPE` bitfields — home points, survival guides, waypoints, Eschan portals, Abyssea conflux, Runic portal, Past Maw, Campaign zones, Outpost teleports. |
 
 ---
@@ -372,6 +373,23 @@ Debug tool with no plans to include in the full release. Teleport a named player
 
 ---
 
+# Item Updates
+
+Item changes and additions specific to this fork (defined under `modules/singleplayer/`):
+
+| Item | Change |
+|------|--------|
+| **Kupo Shield** | Recipe added (the item already existed) — Lvl 60 in all 8 crafts: one each of Tiger Leather, Glass Fiber, Silk Cloth, Platinum Ingot, Darksteel Ingot, Ebony Lumber, Kitron Macaron, Demon Arrowhead. |
+| **Craftmaster's Ring** | +10% synthesis HQ rate; obtained via a high-level one-per-craft recipe. |
+| **Royal Cloak** | +2 MP per tick. |
+| **Flute / Flute +1 / Flute +2** | Now equippable by mage jobs. |
+| **Medicines** | Now stack (to 12) — potions, ethers, elixirs, and the rest of the range. |
+
+### Crafting HQ
+A flat **+10% HQ rate** applies to every synthesis *and* desynthesis — flat percentage points on top of your skill, HQ gear (the Craftmaster's Ring, etc.), and the HQ multiplier, still capped at the game's 80% maximum. Tunable via `map.CRAFT_HQ_RATE_BONUS` (`0` disables).
+
+---
+
 # Changelog
 
 TODO: This is very outdated and full of AI edits on top of a human rough draft. It needs a human deep dive. Also need to revert some changes now that a progression cascade system is in place.
@@ -432,8 +450,6 @@ TODO: This is very outdated and full of AI edits on top of a human rough draft. 
     * Crafting skill cap is 2× your character's highest job level (anti-grind for early game)
     * Increased GP redemption ceiling
     * Guild items reset every Vana'diel day
-    * Craftmaster Ring granted at start (+10% HQ rate) *(settings-gated)*
-    * Kupo Shield is a craftable item — Lvl 60 in all 8 crafts; one each of Tiger Leather, Glass Fiber, Silk Cloth, Platinum Ingot, Darksteel Ingot, Ebony Lumber, Kitron Macaron, Demon Arrowhead
     * automog brings recipe favorites, skill / equipment filters, "Buy Ingredients" one-shot, and an HQ-N mode (stop after N distinct HQ results)
 * Drop Rates
     * Increased drop rates across the board to respect the player's time
@@ -455,16 +471,13 @@ TODO: This is very outdated and full of AI edits on top of a human rough draft. 
     * Mob spawn conditions nullified — no need to align weather / time / moon
     * Ship-bound mob spawn conditions also nullified
     * automog **NM Hunter** tab browses NMs by zone with respawn-window and key-item gating info, with a one-click spawn
-* Item Updates
-    * Royal Cloak now gives +2 MP/tick
-    * Flute (NQ / +1 / +2) equippable by mage jobs
+* Starting Inventory
     * Warp Ring in starting inventory *(settings-gated)*
     * All three nation rings at start *(settings-gated)*
 * Treasure Chests & Coffers
     * Every possible spawn location active simultaneously
     * 3-minute respawn at each location
 * Medicine
-    * Many medicines now stack (stack count is not shown in UI but they do stack)
     * Medicine no longer causes the medicated status
 * Limit Breaks
     * Key items for fetch-style limit break quests granted at start *(settings-gated)*

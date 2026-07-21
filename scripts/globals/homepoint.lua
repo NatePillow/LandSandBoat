@@ -130,6 +130,9 @@ local homepointData =
     [121] = { group = 6, fee = 1, dest = {    73.59, -36.149,   38.87,   0, xi.zone.TAVNAZIAN_SAFEHOLD     } }, -- Tavnazian Safehold #3
 }
 
+-- Exposed for the "grant all teleports on zone entry" module (modules/singleplayer/lua).
+xi.homepoint.data = homepointData
+
 local selection =
 {
     SET_HOMEPOINT = 1,

@@ -134,6 +134,10 @@ auto   AddItem(CCharEntity* PChar, uint8 LocationID, std::unique_ptr<CItem> PIte
 uint8  AddItem(CCharEntity* PChar, uint8 LocationID, uint16 itemID, uint32 quantity = 1, bool silence = false);
 uint8  MoveItem(CCharEntity* PChar, uint8 LocationID, uint8 SlotID, uint8 NewSlotID);
 uint32 UpdateItem(CCharEntity* PChar, uint8 LocationID, uint8 slotID, int32 quantity, bool force = false);
+// Merge same-item partial stacks in a container into the minimum number of
+// slots (the same consolidation the 0x03A client "sort" performs), parameterized
+// by target so it works on a char with no client (e.g. a headless bot).
+void   ConsolidateContainerStacks(CCharEntity* PChar, CItemContainer* PContainer);
 void   DropItem(CCharEntity* PChar, uint8 container, uint8 slotID, int32 quantity, uint16 ItemID);
 void   CheckValidEquipment(CCharEntity* PChar);
 void   SaveJobChangeGear(CCharEntity* PChar);

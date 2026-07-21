@@ -10,6 +10,7 @@
 
 #include "auction_http.h"
 #include "bot_state_cache.h"
+#include "char_create.h"
 #include "char_http.h"
 #include "config_cache.h"
 
@@ -232,38 +233,75 @@ namespace config_http_server
         // GET /nms/<mobid>/drops — drop list for a single NM. Resolves
         // mobid → mob_groups → mob_droplist via the same zoneid-masked
         // JOIN as handleListNMs. Filters to dropType=0 (kill drops; steal /
-        // despoil are separate mechanics, excluded). Grouped rare-or-ex rows
-        // (groupId > 0) ARE included now — an NM's signature loot frequently
-        // lives in a "rolls one of this pool" group, so excluding them hid
-        // real drops. DISTINCT collapses fanout from multiple spawn-point rows
-        // sharing a group. itemRate is sent raw — the addon formats it (/10.0);
-        // for grouped rows that's the within-group weight, not an absolute rate.
+        // despoil are separate mechanics, excluded) and itemId<>0 (skips the
+        // gil / empty placeholder rows that rendered as blank lines).
+        //
+        // `rate` is the EFFECTIVE drop chance in per-1000 (the addon divides
+        // by 10 to show a percent), computed to match the engine's roll in
+        // CMobEntity::DropItems:
+        //   - ungrouped (groupId = 0): chance = itemRate/1000.
+        //   - grouped   (groupId > 0): the group passes at groupRate/1000 AND
+        //     then each item independently passes at itemRate/1000, so the
+        //     item's absolute chance = groupRate * itemRate / 1000 (per-1000).
+        // Sending the raw itemRate (as before) made grouped rows — where an
+        // NM's signature loot usually lives — show a meaningless number.
+        // DISTINCT collapses fanout from multiple spawn-point rows sharing a
+        // group; results are sorted by the effective rate, highest first.
         void handleNMDrops(const httplib::Request& req, httplib::Response& res)
         {
             uint32 mobid = 0;
             try { mobid = static_cast<uint32>(std::stoul(req.matches[1])); }
             catch (...) { res.status = 400; return; }
 
-            json arr = json::array();
+            struct DropRow
+            {
+                uint32 itemId;
+                double rate; // effective per-1000
+            };
+            std::vector<DropRow> rows;
+
             const auto rset = db::preparedStmt(
-                "SELECT DISTINCT md.itemId AS itemId, md.itemRate AS rate "
+                "SELECT DISTINCT md.itemId AS itemId, md.groupId AS groupId, "
+                "md.groupRate AS groupRate, md.itemRate AS itemRate "
                 "FROM mob_spawn_points msp "
                 "JOIN mob_groups   mg ON mg.groupid = msp.groupid "
                 "                    AND mg.zoneid  = ((msp.mobid >> 12) & 0xFFF) "
                 "JOIN mob_droplist md ON md.dropid  = mg.dropid "
                 "WHERE msp.mobid    = ? "
                 "  AND md.dropType  = 0 "
-                "ORDER BY md.itemRate DESC, md.itemId",
+                "  AND md.itemId   <> 0 ",
                 mobid);
             if (rset)
             {
                 while (rset->next())
                 {
-                    json entry;
-                    entry["itemId"] = rset->get<uint32>("itemId");
-                    entry["rate"]   = rset->get<uint32>("rate");
-                    arr.push_back(entry);
+                    const uint32 itemId    = rset->get<uint32>("itemId");
+                    const uint32 groupId   = rset->get<uint32>("groupId");
+                    const uint32 groupRate = rset->get<uint32>("groupRate");
+                    const uint32 itemRate  = rset->get<uint32>("itemRate");
+
+                    const double perMille = (groupId == 0)
+                        ? static_cast<double>(itemRate)
+                        : (static_cast<double>(groupRate) * itemRate / 1000.0);
+
+                    rows.push_back({ itemId, perMille });
                 }
+            }
+
+            std::sort(rows.begin(), rows.end(),
+                      [](const DropRow& a, const DropRow& b)
+                      {
+                          if (a.rate != b.rate) { return a.rate > b.rate; }
+                          return a.itemId < b.itemId;
+                      });
+
+            json arr = json::array();
+            for (const auto& row : rows)
+            {
+                json entry;
+                entry["itemId"] = row.itemId;
+                entry["rate"]   = row.rate;
+                arr.push_back(entry);
             }
             res.set_content(arr.dump(), "application/json");
             res.set_header("Cache-Control", "no-cache");
@@ -535,6 +573,12 @@ namespace config_http_server
         // packet inventory fetches. Read is a plain DB query on this thread;
         // the sort enqueues an op drained on the main thread. See char_http.cpp.
         char_http::registerRoutes(*gServer);
+
+        // POST /chars/create — mint a new account + character (headless roster
+        // member) without the retail login/char-create screens. Validates on
+        // this thread, enqueues the account/char INSERT + LoadChar + charCreate
+        // onto the main thread. See char_create.cpp.
+        char_create::registerRoutes(*gServer);
 
         // Body cap. Largest configs today are autoequip XMLs (~100 KB);
         // 4 MB is a generous ceiling that still rejects pathological

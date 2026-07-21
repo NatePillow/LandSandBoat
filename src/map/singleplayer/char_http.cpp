@@ -292,57 +292,6 @@ namespace singleplayer::char_http
             return PTarget;
         }
 
-        // Same stack-consolidation loop 0x03A ITEM_STACK::process runs, but
-        // parameterized by target so it works on a headless with no client to
-        // send 0x03A. 0x03A's LIGHTLUGGAGE_BLOCK timer guard is deliberately
-        // skipped: this is server-initiated consolidation, not a client-spam
-        // vector. charutils::UpdateItem writes char_inventory through, so the
-        // DB is consistent by the time this returns.
-        void consolidateContainerStacks(CCharEntity* PTarget, CItemContainer* PContainer)
-        {
-            const uint8 size = PContainer->GetSize();
-            for (uint8 slotId = 1; slotId <= size; ++slotId)
-            {
-                const CItem* PItem = PContainer->GetItem(slotId);
-                if (!PItem ||
-                    PItem->getReserve() > 0 ||
-                    PItem->isSubType(ITEM_LOCKED) ||
-                    PItem->getQuantity() >= PItem->getStackSize())
-                {
-                    continue;
-                }
-
-                for (uint8 slotID2 = slotId + 1; slotID2 <= size; ++slotID2)
-                {
-                    const CItem* PItem2 = PContainer->GetItem(slotID2);
-                    if (!PItem2 ||
-                        PItem2->getID() != PItem->getID() ||
-                        PItem2->getReserve() > 0 ||
-                        PItem2->isSubType(ITEM_LOCKED) ||
-                        PItem2->getQuantity() >= PItem2->getStackSize())
-                    {
-                        continue;
-                    }
-
-                    const uint32 totalQty = PItem->getQuantity() + PItem2->getQuantity();
-                    uint32       moveQty  = 0;
-                    if (totalQty >= PItem->getStackSize())
-                    {
-                        moveQty = PItem->getStackSize() - PItem->getQuantity();
-                    }
-                    else
-                    {
-                        moveQty = PItem2->getQuantity();
-                    }
-                    if (moveQty > 0)
-                    {
-                        charutils::UpdateItem(PTarget, static_cast<uint8>(PContainer->GetID()), slotId, moveQty);
-                        charutils::UpdateItem(PTarget, static_cast<uint8>(PContainer->GetID()), slotID2, -static_cast<int32>(moveQty));
-                    }
-                }
-            }
-        }
-
         void applySort(const std::string& opId, const SortOp& op)
         {
             CCharEntity* PRequester = findChar(op.requesterCharId);
@@ -363,7 +312,7 @@ namespace singleplayer::char_http
                 op_registry::markFailed(opId, "target has no such container");
                 return;
             }
-            consolidateContainerStacks(PTarget, PContainer);
+            charutils::ConsolidateContainerStacks(PTarget, PContainer);
             op_registry::markSuccess(opId, "sorted");
         }
     } // namespace

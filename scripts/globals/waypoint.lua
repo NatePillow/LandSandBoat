@@ -119,6 +119,9 @@ local waypointInfo =
     [303] = { 131, 11, nil, {     -148, -170,      27, 192, xi.zone.OUTER_RAKAZNAR }, 54 }, -- Outer Ra'Kaznar
 }
 
+-- Exposed for the "grant all teleports on zone entry" module (modules/singleplayer/lua).
+xi.waypoint.info = waypointInfo
+
 local function buildTeleportLookup()
     local tableLookup = {}
 

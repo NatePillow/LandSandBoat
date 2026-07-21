@@ -496,13 +496,15 @@ ashita.register_event('render', function()
             swap_logic_tab.on_xml_loaded();
         end
     end
-    -- Seed size uniform across tabs (580×580). Gear is the reference
+    -- Seed size uniform across tabs (580 wide). Gear is the reference
     -- layout — two 260-wide cols + 30 gap + ~26 chrome = 576 rounded to
-    -- 580. Swap Logic used to seed larger (640×800) to give the XML
-    -- editor room, but users can drag-resize whenever they need more
-    -- and a stable default size avoids the window jumping on tab switch.
+    -- 580. Height seeds at 680 so the Gear "slots" column shows ~4 more
+    -- equip rows by default (each ~= GetFrameHeight + spacing) without a
+    -- drag-resize. Swap Logic used to seed larger (640×800) for the XML
+    -- editor, but a stable default avoids the window jumping on tab switch
+    -- (users can still drag-resize whenever they need more).
     local seed_w = 580;
-    local seed_h = 580;
+    local seed_h = 680;
     imgui.SetNextWindowSize(seed_w, seed_h, ImGuiSetCond_FirstUseEver);
     -- Re-fit on tab change (Gear / Swap Logic differ in horizontal density).
     autoutil.resize_on_tab_change('AutoEquip', active_tab, seed_w, seed_h);

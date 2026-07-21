@@ -15,6 +15,7 @@
 
 #include "auction_bot.h"
 #include "auction_http.h"
+#include "char_create.h"
 #include "char_http.h"
 #include "config_cache.h"
 #include "entities/charentity.h"
@@ -80,6 +81,7 @@ namespace singleplayer
             gNextOpDrain = now + kOpDrainInterval;
             auction_http::drainOps();
             char_http::drainOps();
+            char_create::drainOps();
         }
 
         const bool isHeadless = PChar->isHeadless();

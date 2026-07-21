@@ -41,6 +41,19 @@ ai_lot.groups = ai_lot.groups or {}
 
 local CONFIG_DIR = 'singleplayer/config/lot/'
 
+-----------------------------------
+-- "Everything" pseudo-group: a RESERVED group name with no config file behind
+-- it. It deliberately rides the normal per-char assignment plumbing
+-- (activeGroups / POST /lot/assignment / the addon's per-char checkbox grid),
+-- because "which chars lot everything?" is exactly the shape that path already
+-- has -- a boolean on bot state would mean rebuilding all of it to carry one
+-- bit. should_lot short-circuits on it instead of enumerating ids.
+--
+-- The addon MUST refuse to create a real lot group with this name; a file
+-- named __all__.json would give load_group a second source of truth for it.
+-----------------------------------
+ai_lot.ALL_GROUP = '__all__'
+
 local function load_group(groupName)
     if groupName == nil or groupName == '' then return nil end
     -- Pull body + mtime from the server cache. Store mtime alongside the
@@ -99,6 +112,14 @@ local function list_contains_str(list, value)
 end
 
 local function should_lot(bot, state, itemId)
+    -- "Everything" pseudo-group. No config file exists for it, so load_group
+    -- would return nil and the loop below would silently skip it -- this
+    -- short-circuit IS the whole implementation. Inventory-full is handled by
+    -- the caller (tick), not here, so it applies to every lot path uniformly.
+    if state.activeGroups[ai_lot.ALL_GROUP] then
+        return true
+    end
+
     -- Group match (lazy-load the group's config file on first reference).
     -- Groups are id-only — name matching was dropped in favor of the addon's
     -- search-by-name picker which resolves names → ids before saving.
@@ -281,6 +302,13 @@ function ai_lot.lot_list_ready(primaryId, itemId, botName)
     return (os.clock() - (entry.modified or 0)) >= LOT_LIST_GRACE_S
 end
 
+-- Headless auto-sort cadence, in bot ticks. The tick is ~400ms-1s, so this is
+-- roughly every 12-30s -- often enough that inventories stay tidy on their own
+-- (no manual sort button needed), rare enough that the O(n^2) stack merge is
+-- negligible. A merge only writes when it actually consolidates, so an
+-- already-sorted bag is a cheap read.
+local AUTO_SORT_TICKS = 30
+
 -----------------------------------
 -- Tick entry point. Called from xi.singleplayer.bots.onBotTick once per second per bot.
 -- Walks the bot's treasure pool, lots wanted items, passes unwanted ones.
@@ -293,10 +321,32 @@ function ai_lot.tick(bot)
     -- lot anything they care about that wasn't pre-configured).
     local s = get_state(bot)
 
+    -- Auto-sort headless inventory: consolidate same-item partial stacks so the
+    -- bag stays tidy with no manual sort (primaries sort via their own client).
+    -- Throttled to keep the merge cheap; forced immediately when out of space
+    -- so lotting can reclaim slots a merge would free before the full-inventory
+    -- guard below gives up on an item.
+    if bot:isHeadless() then
+        s.sortTicks = (s.sortTicks or 0) + 1
+        local full = (bot:getFreeSlotsCount() or 0) == 0
+        if full or s.sortTicks >= AUTO_SORT_TICKS then
+            bot:sortInventory(0)
+            s.sortTicks = 0
+        end
+    end
+
     local pool = bot:getTreasurePool()
     if pool == nil then return end
     local items = pool:getItems()
     if items == nil then return end
+
+    -- Never lot into a full inventory: we'd win an item we have no room for and
+    -- the drop is destroyed when the pool times out. A full bot is treated as
+    -- "wants nothing" -- it still PASSES below when someone else has lotted, so
+    -- the pool resolves to a member who can actually hold the item, rather than
+    -- stalling. Applies to every lot path (groups, named items, lot lists), not
+    -- just the Everything group.
+    local hasSpace = (bot:getFreeSlotsCount() or 0) > 0
 
     for _, entry in ipairs(items) do
         local itemId  = entry.id or 0
@@ -328,7 +378,7 @@ function ai_lot.tick(bot)
             end
 
             if not alreadyActed then
-                if should_lot(bot, s, itemId) then
+                if hasSpace and should_lot(bot, s, itemId) then
                     local nm = name_for_id(itemId)
                     if nm ~= '' and list_contains_str(s.namedItems, nm) and s.activeLots[nm] == nil then
                         s.activeLots[nm] = slotId

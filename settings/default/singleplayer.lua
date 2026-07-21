@@ -10,16 +10,9 @@ xi.settings = xi.settings or {}
 
 xi.settings.singleplayer =
 {
-    -- NOTE: HEADLESS_MOB_AGGRO was removed — replaced by a runtime alliance
-    -- toggle that the autobots addon's Quick Menu / Controls tab manipulates
-    -- via 0x176 SET_AGGRO_MODE (cascades to each headless's m_aggroMode).
-    -- Default behavior is unchanged: trust-like (no aggro) until the user
-    -- flips the picker to Full. See bots_spawn.set_alliance_aggro_mode.
-
     -- Loopback config HTTP server (src/map/singleplayer/config_http_server.cpp).
     -- Map process spawns a cpp-httplib listener at boot; addons hit it for
-    -- config CRUD over GET/PUT/DELETE. Replaced the chunked 0x17E/0x180/...
-    -- packet pipeline that was triggering wire-zlib errors on big XMLs.
+    -- config CRUD over GET/PUT/DELETE.
     --
     -- CONFIG_HTTP_BIND_ADDR:
     --   '127.0.0.1'  loopback only — server and client on the same machine
@@ -62,7 +55,7 @@ xi.settings.singleplayer =
     -- it (0 = restock immediately, the default). e.g. 900 = wait 15 min. Only
     -- delays the bot re-listing its own sold-out stock; buying items players
     -- list on the AH is unaffected and still happens on the next tick.
-    AUCTION_BOT_RESTOCK_DELAY_S       = 0,
+    AUCTION_BOT_RESTOCK_DELAY_S       = 900,
 
     -- New-character headstart flags. All default true. Set to false to walk
     -- the normal questing path on a fresh char.
@@ -71,26 +64,13 @@ xi.settings.singleplayer =
     NEW_CHAR_TELEPORT_HEADSTART = false, -- start with all homepoint + survival teleports AND all 6 gate-crystal KIs (Holla/Dem/Mea/Vahzl/Yhoator/Altepa). Set false to earn them naturally.
     NEW_CHAR_LB_HEADSTART       = false, -- start with all Limit Break fetch KIs (Orcish/Quadav/Yagudo Crests + Smiling/Scowling/Somber/Spirited Stones). Set false to do the LB chain normally.
 
-    -- (BOT_STUN_PERSIST_UNTIL_FIRED removed - now alliance.stunMode, exposed
-    -- via the AutoBots AI Settings > Stun Behavior toggle. See user-facing
-    -- comment in settings/singleplayer.lua for migration details.)
-
-    -- (BOT_CURE_PARTY_ONLY removed - the toggle was superseded by the
-    -- per-bot healScope setting on role_heal / role_rdm, exposed via the
-    -- AutoBots status-tab "Heal" dropdown. Shared cure helpers in
-    -- ai_magic.lua now default to party-only; alliance-scope cures
-    -- dispatch from the role's own healScope='allianceMain' / 'allianceAssist'
-    -- branches.)
-
     -- When true (default), the fork's custom trust spawn logic in
     -- modules/singleplayer/lua/trust_overrides/<name>.lua fires in place of
     -- upstream's spellObject.onMobSpawn for every fork-customized trust
     -- (Curilla, Joachim, Ayame, etc. — see directory listing). When false,
     -- the SINGLEPLAYER hook at the top of each upstream trust file falls
     -- through to vanilla LSB behavior, restoring upstream's gambit/mod
-    -- priority ordering exactly as shipped. Toggle for A/B testing fork
-    -- enhancements vs vanilla, or to "audit upstream" without ripping the
-    -- override files out.
+    -- priority ordering exactly as shipped.
     CUSTOM_TRUST_LOGIC = true,
 
     -- When true, bot movement clamps each per-tick step at the first wall hit
@@ -102,10 +82,8 @@ xi.settings.singleplayer =
     -- When false (default), the fork still uses navmesh for path PLANNING
     -- (pathTo picks routes around major obstacles) but skips the per-tick
     -- step-clamp — bots can pass through walls when they need to. Trades
-    -- realism for robustness; matches the fork's pre-rebase behavior where
-    -- the engine had no navmesh data and bots straight-line-walked. Best
-    -- choice when you'd rather have bots in the right spot ugly than stuck
-    -- in the wrong spot pretty.
+    -- realism for robustness. Best choice when you'd rather have bots in the
+    -- right spot ugly than stuck in the wrong spot pretty.
     BOT_RESPECT_GEOMETRY = false,
 
     -- When true, bot AI role-tick decisions are logged to the primary's chat

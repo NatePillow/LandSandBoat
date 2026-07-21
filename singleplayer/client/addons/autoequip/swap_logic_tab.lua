@@ -379,20 +379,25 @@ function M.draw()
 
     imgui.BeginChild('##sl_pane', pane_w, pane_h, false)
 
+    -- Save / Discard are always present so the pane's controls don't shift as
+    -- the section flips dirty<->clean; when clean they dim (alpha 0.35) and go
+    -- inert -- clicks only fire while dirty.
     local dirty = is_dirty(active_section)
+    if not dirty then imgui.PushStyleVar(ImGuiStyleVar_Alpha, 0.35) end
+    if imgui.Button('Save##save_active') and dirty then
+        save_section(active_section)
+    end
+    imgui.SameLine(0, 6)
+    if imgui.Button('Discard##discard_active') and dirty then
+        discard_section(active_section)
+    end
+    if not dirty then imgui.PopStyleVar() end
     if dirty then
-        if imgui.Button('Save##save_active') then
-            save_section(active_section)
-        end
-        imgui.SameLine(0, 6)
-        if imgui.Button('Discard##discard_active') then
-            discard_section(active_section)
-        end
         imgui.SameLine(0, 12)
         imgui.TextDisabled('unsaved changes')
-        imgui.Separator()
-        imgui.Dummy(0, 4)
     end
+    imgui.Separator()
+    imgui.Dummy(0, 4)
     if pending_nav ~= nil and is_dirty(active_section) then
         imgui.TextColored(1.0, 0.7, 0.2, 1.0,
             string.format('Unsaved changes in %s - Save or Discard to switch to %s.',

@@ -544,13 +544,16 @@ end
 --
 -- max_range filters out members the caster can't reach (#192); nil = no filter.
 -----------------------------------
-function ai_magic.get_player_with_lowest_hpp(bot, max_range, party_only)
+-- use_effective (cure paths only): compare on HP% AFTER in-flight cures so
+-- healers spread to the next-neediest target instead of piling on the lowest.
+function ai_magic.get_player_with_lowest_hpp(bot, max_range, party_only, use_effective)
     local members = party_only and ai_magic.get_party_members(bot)
                                 or ai_magic.get_alliance_members(bot)
     local lowest, lowestHpp = nil, 101
     for _, member in ipairs(members) do
-        local hpp = member:getHPP()
-        if hpp > 0 and hpp < lowestHpp
+        local realHpp = member:getHPP()
+        local hpp     = use_effective and ai_magic.effective_hpp(member) or realHpp
+        if realHpp > 0 and hpp < lowestHpp
            and (max_range == nil or bot:checkDistance(member) <= max_range)
         then
             lowest, lowestHpp = member, hpp
@@ -617,8 +620,11 @@ function ai_magic.get_cure_tier(bot)
     local members = ai_magic.get_party_members(bot)
     local lowestHpp, under60 = 100, 0
     for _, member in ipairs(members) do
-        local hpp = member:getHPP()
-        if hpp > 0 then
+        local realHpp = member:getHPP()
+        if realHpp > 0 then
+            -- effective HP%: discount targets already being cured this window so
+            -- a claimed low member stops triggering the tier for the next healer.
+            local hpp = ai_magic.effective_hpp(member)
             if hpp < lowestHpp then lowestHpp = hpp end
             if hpp < 60 then under60 = under60 + 1 end
         end
@@ -639,7 +645,7 @@ function ai_magic.cast_healing_spell(bot, spellList)
     -- char). Alliance-scope cures live on the explicit cast_alliance_cure
     -- helper, dispatched from role_heal / role_rdm based on the per-bot
     -- healScope toggle. (Legacy BOT_CURE_PARTY_ONLY removed.)
-    local target = ai_magic.get_player_with_lowest_hpp(bot, ai_magic.spell_range(xi.magic.spell.CURE), true)
+    local target = ai_magic.get_player_with_lowest_hpp(bot, ai_magic.spell_range(xi.magic.spell.CURE), true, true)
     if target == nil then return end
     -- Prefer the "most efficient" tier (sized to the actual missing HP). If
     -- it's up, cast it and stop — server-side the cast queues; piling on the
@@ -648,6 +654,7 @@ function ai_magic.cast_healing_spell(bot, spellList)
     local efficient = ai_magic.get_most_efficient_cure_spell(target)
     if ai_magic.spell_is_up(bot, efficient, false) then
         ai_magic.cast_party_spell(bot, efficient, target)
+        ai_magic.reserve_cure(target:getID(), bot:getID(), efficient)
         return
     end
     -- Efficient pick unavailable (e.g. on recast); fall back to whatever
@@ -655,6 +662,7 @@ function ai_magic.cast_healing_spell(bot, spellList)
     for _, spellId in ipairs(spellList) do
         if ai_magic.spell_is_up(bot, spellId, false) then
             ai_magic.cast_party_spell(bot, spellId, target)
+            ai_magic.reserve_cure(target:getID(), bot:getID(), spellId)
             return
         end
     end
@@ -939,8 +947,12 @@ end
 function ai_magic.get_alliance_cure_tier(bot)
     local lowestHpp = 100
     for _, member in ipairs(ai_magic.get_alliance_members(bot)) do
-        local hpp = member:getHPP()
-        if hpp > 0 and hpp < lowestHpp then lowestHpp = hpp end
+        if member:getHPP() > 0 then
+            -- effective HP%: a target already claimed this window stops tripping
+            -- the tier, so a second alliance healer moves to the next-neediest.
+            local hpp = ai_magic.effective_hpp(member)
+            if hpp < lowestHpp then lowestHpp = hpp end
+        end
     end
     if lowestHpp < 40 then return 'Cure_P1' end
     if lowestHpp < 60 then return 'Cure_P2' end
@@ -954,16 +966,18 @@ end
 -- spell-availability check. cast_alliance_cure picks the most-efficient
 -- Cure tier for the target's missing HP automatically.
 function ai_magic.cast_alliance_cure(bot)
-    local target = ai_magic.get_player_with_lowest_hpp(bot, ai_magic.spell_range(xi.magic.spell.CURE), false)
+    local target = ai_magic.get_player_with_lowest_hpp(bot, ai_magic.spell_range(xi.magic.spell.CURE), false, true)
     if target == nil then return end
     local efficient = ai_magic.get_most_efficient_cure_spell(target)
     if efficient and ai_magic.spell_is_up(bot, efficient, false) then
         ai_magic.cast_party_spell(bot, efficient, target)
+        ai_magic.reserve_cure(target:getID(), bot:getID(), efficient)
         return
     end
     for _, spellId in ipairs(cureSpells) do
         if ai_magic.spell_is_up(bot, spellId, false) then
             ai_magic.cast_party_spell(bot, spellId, target)
+            ai_magic.reserve_cure(target:getID(), bot:getID(), spellId)
             return
         end
     end
@@ -1036,8 +1050,12 @@ end
 function ai_magic.get_alliance_blm_cure_tier(bot)
     local lowestHpp = 100
     for _, member in ipairs(ai_magic.get_alliance_members(bot)) do
-        local hpp = member:getHPP()
-        if hpp > 0 and hpp < lowestHpp then lowestHpp = hpp end
+        if member:getHPP() > 0 then
+            -- effective HP%: don't fire an emergency BLM cure on a target a
+            -- higher-priority healer already claimed (unless still low after it).
+            local hpp = ai_magic.effective_hpp(member)
+            if hpp < lowestHpp then lowestHpp = hpp end
+        end
     end
     if lowestHpp < 30 then return 'Cure_P1' end
     return 'None'
@@ -1871,6 +1889,102 @@ function ai_magic.clear_sleep_reservation(targetId)
     local alliance = xi.singleplayer.bots.alliance
     if alliance == nil or alliance.sleepInFlight == nil then return end
     alliance.sleepInFlight[targetId] = nil
+end
+
+-----------------------------------
+-- Cure claim ledger (amount-aware)
+--
+-- A healer records its projected heal on a victim when it commits a single-
+-- target cure; other healers read the summed incoming HP and pick the next-
+-- neediest target instead of piling on. Because char ticks run in role order
+-- (m_botTickPriority sort in CZoneEntities::ZoneServer), earlier healers write
+-- their claims before later ones read -- observation, not simulation. Entries
+-- stack, so a target one cure won't top off stays eligible (effective_hpp).
+-----------------------------------
+local CURE_RESERVATION_BUFFER_MS = 1500
+
+-- Approximate soft-cap heal per cure tier, mirroring the missing-HP buckets in
+-- get_most_efficient_cure_spell so "which tier covers how much" is one source.
+local CURE_SOFT_CAP = {
+    [xi.magic.spell.CURE]     = 60,
+    [xi.magic.spell.CURE_II]  = 140,
+    [xi.magic.spell.CURE_III] = 290,
+    [xi.magic.spell.CURE_IV]  = 540,
+    [xi.magic.spell.CURE_V]   = 750,
+    [xi.magic.spell.CURE_VI]  = 1200,
+}
+
+function ai_magic.is_cure_spell(spellId)
+    return CURE_SOFT_CAP[spellId] ~= nil
+end
+
+-- Record a committed single-target cure so other healers see the incoming HP.
+function ai_magic.reserve_cure(victimId, casterId, spellId)
+    if victimId == nil or victimId == 0 then return end
+    local alliance = xi.singleplayer.bots.alliance
+    if alliance == nil then return end
+    alliance.cureInFlight = alliance.cureInFlight or {}
+    local castMs = ai_magic.get_cast_time_in_seconds(spellId) * 1000
+    local now    = xi.singleplayer.bots.ai_util.get_ms_since_epoch()
+    local list   = alliance.cureInFlight[victimId] or {}
+    table.insert(list, { by = casterId, expiry = now + castMs + CURE_RESERVATION_BUFFER_MS, amount = CURE_SOFT_CAP[spellId] or 60 })
+    alliance.cureInFlight[victimId] = list
+end
+
+-- Drop this caster's claim on a victim (its cure landed or was interrupted).
+function ai_magic.clear_cure_reservation(victimId, casterId)
+    if victimId == nil or victimId == 0 then return end
+    local alliance = xi.singleplayer.bots.alliance
+    if alliance == nil or alliance.cureInFlight == nil then return end
+    local list = alliance.cureInFlight[victimId]
+    if list == nil then return end
+    local kept = {}
+    for _, entry in ipairs(list) do
+        if entry.by ~= casterId then
+            table.insert(kept, entry)
+        end
+    end
+    if #kept == 0 then
+        alliance.cureInFlight[victimId] = nil
+    else
+        alliance.cureInFlight[victimId] = kept
+    end
+end
+
+-- Summed live projected heal on a victim, pruning expired entries inline.
+function ai_magic.incoming_heal(victimId)
+    local alliance = xi.singleplayer.bots.alliance
+    if alliance == nil or alliance.cureInFlight == nil then return 0 end
+    local list = alliance.cureInFlight[victimId]
+    if list == nil then return 0 end
+    local now   = xi.singleplayer.bots.ai_util.get_ms_since_epoch()
+    local total = 0
+    local kept  = {}
+    for _, entry in ipairs(list) do
+        if entry.expiry > now then
+            total = total + entry.amount
+            table.insert(kept, entry)
+        end
+    end
+    if #kept == 0 then
+        alliance.cureInFlight[victimId] = nil
+    else
+        alliance.cureInFlight[victimId] = kept
+    end
+    return total
+end
+
+-- HP% after in-flight cures projected onto this member, clamped to 100. Healers
+-- compare on this so they spread instead of all curing the same low target.
+function ai_magic.effective_hpp(member)
+    local hpp = member:getHPP()
+    if hpp <= 0 then return hpp end
+    local incoming = ai_magic.incoming_heal(member:getID())
+    if incoming <= 0 then return hpp end
+    local currentHP = member:getHP()
+    local maxHP     = currentHP / (hpp / 100)
+    local effHP     = math.min(maxHP, currentHP + incoming)
+    return (effHP / maxHP) * 100
 end
 
 -----------------------------------
@@ -2820,8 +2934,11 @@ function ai_magic.get_blm_cure_tier(bot)
     -- another party's WHM should be handling.
     local lowestHpp, under30 = 100, 0
     for _, member in ipairs(ai_magic.get_party_members(bot)) do
-        local hpp = member:getHPP()
-        if hpp > 0 then
+        local realHpp = member:getHPP()
+        if realHpp > 0 then
+            -- effective HP%: don't panic-cure a target a higher-priority healer
+            -- already claimed this window (unless it's still low after their heal).
+            local hpp = ai_magic.effective_hpp(member)
             if hpp < lowestHpp then lowestHpp = hpp end
             if hpp < 30 then under30 = under30 + 1 end
         end
@@ -2891,19 +3008,23 @@ function ai_magic.get_heal_target_index(bot)
     -- multi-engagement (per-party mobs) lands, switch this and the two
     -- consumers (get_pld_cure_tier, cast_pld_healing_spell) to party-scope
     -- behind a flag — the cure-enmity then WOULD pull hate from other tanks.
-    local myHPP = bot:getHPP()
+    -- effective HP% throughout so a target the WHM (tick-priority 0) already
+    -- claimed this window reads as topped-off; the PLD backup-heal then skips
+    -- it. Alive-check stays on real HP% so a downed member isn't picked.
+    local myHPP = ai_magic.effective_hpp(bot)
     local mageIndex, meleeIndex = 0, 0
     local members = ai_magic.get_alliance_members(bot)
     local cureRange = ai_magic.DEFAULT_SPELL_RANGE
     for x, member in ipairs(members) do
         if member ~= bot then
-            local hpp = member:getHPP()
+            local realHpp = member:getHPP()
+            local hpp = ai_magic.effective_hpp(member)
             local job = ai_magic.job_string(member:getMainJob())
             local name = member:getName()
             local inRange = bot:checkDistance(member) <= cureRange
-            if inRange and name and name ~= '' and hpp > 0 and hpp < 80 and xi.singleplayer.bots.ai_util.table_contains(ai_magic.mageJobs, job) then
+            if inRange and name and name ~= '' and realHpp > 0 and hpp < 80 and xi.singleplayer.bots.ai_util.table_contains(ai_magic.mageJobs, job) then
                 mageIndex = x
-            elseif inRange and name and name ~= '' and hpp > 0 and hpp < 60 then
+            elseif inRange and name and name ~= '' and realHpp > 0 and hpp < 60 then
                 meleeIndex = x
             end
         end
@@ -2921,11 +3042,13 @@ end
 function ai_magic.get_pld_cure_tier(bot)
     -- ALLIANCE-scope: see get_heal_target_index — single shared mob means
     -- PLD cure-enmity stacks on own tank target; backup-heal alliance is free.
-    local myHPP = bot:getHPP()
+    -- effective HP% (mirrors get_heal_target_index) so the tier gate and the
+    -- target picker agree AND both discount cures already in flight.
+    local myHPP = ai_magic.effective_hpp(bot)
     local meleeHPP, mageHPP = 100, 100
     for _, member in ipairs(ai_magic.get_alliance_members(bot)) do
         if member ~= bot then
-            local hpp = member:getHPP()
+            local hpp = ai_magic.effective_hpp(member)
             local job = ai_magic.job_string(member:getMainJob())
             if xi.singleplayer.bots.ai_util.table_contains(ai_magic.mageJobs, job) then mageHPP = hpp else meleeHPP = hpp end
         end
@@ -2968,9 +3091,9 @@ function ai_magic.cast_pld_healing_spell(bot)
     local target = (idx == 0) and bot or members[idx]
     if target == nil then return end
     local efficient = ai_magic.get_most_efficient_cure_spell(target)
-    if ai_magic.spell_is_up(bot, efficient, false) then ai_magic.cast_party_spell(bot, efficient, target); return end
+    if ai_magic.spell_is_up(bot, efficient, false) then ai_magic.cast_party_spell(bot, efficient, target); ai_magic.reserve_cure(target:getID(), bot:getID(), efficient); return end
     for _, spellId in ipairs(cureSpells) do
-        if ai_magic.spell_is_up(bot, spellId, false) then ai_magic.cast_party_spell(bot, spellId, target); return end
+        if ai_magic.spell_is_up(bot, spellId, false) then ai_magic.cast_party_spell(bot, spellId, target); ai_magic.reserve_cure(target:getID(), bot:getID(), spellId); return end
     end
 end
 
@@ -3273,9 +3396,12 @@ function ai_magic.process_pre_cast_checks(bot)
         -- and HEALING tick regens HP too so the self case self-corrects.
         if role == Role.Healer
            and xi.singleplayer.bots.ai_util.current_mp_percent(bot) >= 20 then
+            -- Effective HP%: with two resting WHMs (both tick-priority 0), the
+            -- first to commit claims the <=25% target; the second then reads it
+            -- as covered and stays resting instead of both standing up for it.
             local lowest = ai_magic.get_player_with_lowest_hpp(
-                bot, ai_magic.spell_range(xi.magic.spell.CURE), true)
-            urgentCure = lowest ~= nil and lowest:getHPP() <= 25
+                bot, ai_magic.spell_range(xi.magic.spell.CURE), true, true)
+            urgentCure = lowest ~= nil and ai_magic.effective_hpp(lowest) <= 25
         end
         if xi.singleplayer.bots.ai_util.current_mp_percent(bot) > 95
            or (activeTarget and scCasterRole

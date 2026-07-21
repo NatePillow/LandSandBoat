@@ -7,6 +7,7 @@ local alliance_tab  = require('alliance_tab');
 local status_tab    = require('status_tab');
 local autoskill_tab = require('autoskill_tab');
 local role_ai_tab   = require('role_ai_tab');
+local create_tab    = require('create_tab');
 local autobots_ui = {};
 
 -- Active main-window tab. 'quick' is the default — a single-row strip of the
@@ -677,6 +678,35 @@ function autobots_ui.on_start(name, cfg)
     autoutil.activeAllianceConfig = cfg;
 end
 
+-- True if charName sits anywhere in an alliance config body (any pt leader or
+-- member). The requesting primary MUST be in the config it spawns: the server
+-- excludes the primary by name and wires only the names it finds in the spec,
+-- so a primary that isn't listed would spawn a full headless alliance it's not
+-- a member of and be left solo. We gate Spawn on this and surface an actionable
+-- message. Note: this only gates the SPAWN action -- creating/editing configs
+-- your current primary isn't in stays fully allowed (that's a normal authoring
+-- case). Defined on the module table (already captured) to avoid adding a new
+-- upvalue to the render closure (Lua 5.1's 60-upvalue cap -- see header notes).
+function autobots_ui.primary_in_alliance_body(body, charName)
+    if type(body) ~= 'table' or type(body.alliance) ~= 'table'
+        or type(charName) ~= 'string' or charName == '' then
+        return false;
+    end
+    for _, party in ipairs(body.alliance) do
+        if party.ptLeader == charName then
+            return true;
+        end
+        if type(party.members) == 'table' then
+            for _, member in ipairs(party.members) do
+                if member == charName then
+                    return true;
+                end
+            end
+        end
+    end
+    return false;
+end
+
 -- Called when autobots is stopped.
 function autobots_ui.on_stop()
     partyConfig = nil;
@@ -857,19 +887,36 @@ end
     -- true and the rest of the UI gates light up.
     local function spawn_selected_config()
         if not selectedAllianceConfig then return; end
-        autoutil.send_spawn_headless(selectedAllianceConfig);
         local cfgName = selectedAllianceConfig;
         local http    = require('http_client');
+        -- Fetch the body BEFORE sending the spawn packet so we can (a) reject a
+        -- config the current primary isn't in with a clear message, and (b) only
+        -- flip the UI to "running" (on_start) on a spawn that actually happens.
+        -- If the body doesn't load, fall through and let the server's own
+        -- membership guard reject it.
         http.get('/configs/alliance/' .. cfgName, function(code, body)
-            if code ~= 200 or body == nil then return; end
-            local ok, parsed = pcall(json.decode, json, body);
-            if not ok or type(parsed) ~= 'table' then return; end
-            if type(parsed.roles) == 'table' then
+            local parsed = nil;
+            if code == 200 and body ~= nil then
+                local ok, p = pcall(json.decode, json, body);
+                if ok and type(p) == 'table' then parsed = p; end
+            end
+            if parsed ~= nil and type(parsed.roles) == 'table' then
                 for k, v in pairs(parsed.roles) do
                     if parsed[k] == nil then parsed[k] = v; end
                 end
             end
-            autobots_ui.on_start(cfgName, parsed);
+            if parsed ~= nil then
+                local party  = AshitaCore:GetDataManager():GetParty();
+                local myName = party and party:GetMemberName(0) or '';
+                if not autobots_ui.primary_in_alliance_body(parsed, myName) then
+                    autoutil.log('AutoBots', string.format(
+                        'Cannot spawn "%s": %s is not in this alliance. Select it and click Edit to add yourself, or spawn a config you are in.',
+                        cfgName, myName ~= '' and myName or 'you'));
+                    return;
+                end
+            end
+            autoutil.send_spawn_headless(cfgName);
+            if parsed ~= nil then autobots_ui.on_start(cfgName, parsed); end
         end);
     end
 
@@ -1130,6 +1177,17 @@ local function render_controls_management(ctx)
         autoutil.send_bot_despawn_all();
         autobots_ui.on_stop();
     end, BTN_W);
+
+    -- Why Spawn is dimmed when the selected config doesn't include you, plus how
+    -- to fix it: add yourself via Edit, or pick a config you're a member of.
+    if ctx.spawn_excluded then
+        imgui.PushTextWrapPos(imgui.GetCursorPosX() + (2 * BTN_W + 8));
+        imgui.TextColored(0.95, 0.6, 0.4, 1.0, string.format(
+            '%s is not in "%s". Select it and click Edit to add yourself, or pick a config you are in.',
+            ctx.spawn_excluded_you ~= '' and ctx.spawn_excluded_you or 'You',
+            ctx.spawn_excluded_cfg or ''));
+        imgui.PopTextWrapPos();
+    end
 
     imgui.Spacing();
     -- Summon Trusts / Give Signet.
@@ -1731,29 +1789,6 @@ local function render_ai_right(ctx)
         end
 
         imgui.Dummy(0, 8);
-        imgui.Text('Pull Difficulty Range:');
-        imgui.Dummy(0, 2);
-        imgui.Text('Min');
-        for i, label in ipairs(PULLER_CON_LABELS) do
-            imgui.SameLine(0, 4);
-            if imgui.RadioButton(label .. '##puller_min', puller_state.min_con == (i - 1)) then
-                puller_state.min_con = i - 1;
-                if puller_state.max_con < puller_state.min_con then puller_state.max_con = puller_state.min_con; end
-                autoutil.send_bot_set_puller_con_range(puller_state.min_con, puller_state.max_con);
-            end
-        end
-        imgui.Dummy(0, 2);
-        imgui.Text('Max');
-        for i, label in ipairs(PULLER_CON_LABELS) do
-            imgui.SameLine(0, 4);
-            if imgui.RadioButton(label .. '##puller_max', puller_state.max_con == (i - 1)) then
-                puller_state.max_con = i - 1;
-                if puller_state.min_con > puller_state.max_con then puller_state.min_con = puller_state.max_con; end
-                autoutil.send_bot_set_puller_con_range(puller_state.min_con, puller_state.max_con);
-            end
-        end
-
-        imgui.Dummy(0, 8);
         -- Resume-MP gate: the puller holds the next pull until the party's heal
         -- role (Healer, or RDM backup) is at least this MP% — and never pulls
         -- while that healer is dead. Auto-sends when the buffer settles (750ms).
@@ -1773,6 +1808,29 @@ local function render_ai_right(ctx)
             if settled and v ~= nil and v >= 0 and v <= 100 and v ~= (puller_state.last_sent_mpp or -1) then
                 puller_state.last_sent_mpp = v;
                 autoutil.send_bot_set_puller_resume_mpp(v);
+            end
+        end
+
+        imgui.Dummy(0, 8);
+        imgui.Text('Pull Difficulty Range:');
+        imgui.Dummy(0, 2);
+        imgui.Text('Min');
+        for i, label in ipairs(PULLER_CON_LABELS) do
+            imgui.SameLine(0, 4);
+            if imgui.RadioButton(label .. '##puller_min', puller_state.min_con == (i - 1)) then
+                puller_state.min_con = i - 1;
+                if puller_state.max_con < puller_state.min_con then puller_state.max_con = puller_state.min_con; end
+                autoutil.send_bot_set_puller_con_range(puller_state.min_con, puller_state.max_con);
+            end
+        end
+        imgui.Dummy(0, 2);
+        imgui.Text('Max');
+        for i, label in ipairs(PULLER_CON_LABELS) do
+            imgui.SameLine(0, 4);
+            if imgui.RadioButton(label .. '##puller_max', puller_state.max_con == (i - 1)) then
+                puller_state.max_con = i - 1;
+                if puller_state.min_con > puller_state.max_con then puller_state.min_con = puller_state.max_con; end
+                autoutil.send_bot_set_puller_con_range(puller_state.min_con, puller_state.max_con);
             end
         end
 
@@ -2046,7 +2104,14 @@ local function render_config_info(ctx)
             header      = 'Selected Config Info';
         end
 
+        -- Skill Ups: drop ONLY the label 4px. Offset just the render with
+        -- SetCursorPosY, then pull the cursor back 4 so the rows land exactly
+        -- where Controls' do. (A Dummy can't do this: it's an extra item, so
+        -- imgui adds an ItemSpacing gap that shifts the whole column down.)
+        local _label_y = imgui.GetCursorPosY();
+        if active_tab == 'skill' then imgui.SetCursorPosY(_label_y + 3); end
         imgui.Text(header);
+        if active_tab == 'skill' then imgui.SetCursorPosY(imgui.GetCursorPosY() - 3); end
         imgui.Dummy(0, 6);
 
         local tank, healStr, nukeStr, rdmStr, soloStr = '--', '--', '--', '--', '--';
@@ -2226,14 +2291,41 @@ ashita.register_event('render', function()
     -- others are narrower. height=0 because AlwaysAutoResize below fits the
     -- vertical axis to content anyway. FirstUseEver = only on first open;
     -- subsequent frames let resize_on_tab_change govern.
-    local tab_w = (active_tab == 'status') and 920 or 660;
+    -- Per-tab pinned width. With the width pinned (SetNextWindowSizeConstraints
+    -- below) each tab renders at exactly this width: no AlwaysAutoResize shrink,
+    -- so no tab-change flicker, and each tab can be tightened to hug its own
+    -- content (no dead space) without touching the others. CAUTION: the window
+    -- has NoScrollbar, so a width narrower than a tab's content will CLIP it --
+    -- tighten conservatively. Falls back to 660.
+    local TAB_WIDTHS = {
+        status   = 866,  -- hugs the 4-col card grid: 4*CARD_W(210) + 3*gap(6) = 858 + 8 padding (4/side)
+
+        quick    = 660,
+        controls = 660,
+        ai       = 660,
+        skill    = 660,
+        create   = 660,
+    };
+    local tab_w = TAB_WIDTHS[active_tab] or 660;
     imgui.SetNextWindowSize(tab_w, 0, ImGuiSetCond_FirstUseEver);
     -- Force the window to re-fit its content when the tab changes - otherwise
     -- it stays sized to whichever tab grew it widest. Same per-tab width,
     -- height=0 = no constraint (AlwaysAutoResize fits vertically).
     autoutil.resize_on_tab_change('AutoBots', active_tab, tab_w, 0);
+    -- Pin the window WIDTH to tab_w so AlwaysAutoResize can't shrink it down to
+    -- each tab's content width -- that per-tab width difference is the remaining
+    -- tab-change flicker (window snaps 660 -> narrow content and back). Height
+    -- stays free (0..big) so vertical auto-fit is kept. Guarded + pcall'd so it
+    -- no-ops harmlessly if this imgui binding doesn't expose the call.
+    if imgui.SetNextWindowSizeConstraints ~= nil then
+        pcall(imgui.SetNextWindowSizeConstraints, tab_w, 0, tab_w, 100000);
+    end
     autoutil.push_solid_window_bg();
-    if not imgui.Begin('AutoBots', ui_open, ImGuiWindowFlags_AlwaysAutoResize) then
+    -- NoScrollbar suppresses the one-frame scrollbar flash on tab change: the
+    -- forced resize_on_tab_change + AlwaysAutoResize briefly mismatch window vs
+    -- content size for a frame. AlwaysAutoResize always fits content, so a real
+    -- scrollbar is never needed anyway.
+    if not imgui.Begin('AutoBots', ui_open, bit.bor(ImGuiWindowFlags_AlwaysAutoResize, ImGuiWindowFlags_NoScrollbar)) then
         imgui.End();
         autoutil.pop_solid_window_bg();
         return;
@@ -2251,6 +2343,7 @@ ashita.register_event('render', function()
         if active then imgui.PopStyleColor(); end
     end
     tab_button('Quick Menu', 'quick');     imgui.SameLine();
+    tab_button('Create Char', 'create');   imgui.SameLine();
     tab_button('Controls', 'controls');    imgui.SameLine();
     tab_button('Skill Ups', 'skill');      imgui.SameLine();
     tab_button('Alliance AI', 'ai');       imgui.SameLine();
@@ -2265,7 +2358,8 @@ ashita.register_event('render', function()
     if active_tab == 'setup'    then active_tab = 'controls'; end
     if active_tab == 'instance' then active_tab = 'controls'; end
     if active_tab ~= 'quick' and active_tab ~= 'controls' and active_tab ~= 'ai'
-       and active_tab ~= 'roleai' and active_tab ~= 'status' and active_tab ~= 'skill' then
+       and active_tab ~= 'roleai' and active_tab ~= 'status' and active_tab ~= 'skill'
+       and active_tab ~= 'create' then
         active_tab = 'controls';
     end
 
@@ -2278,6 +2372,13 @@ ashita.register_event('render', function()
 
     if active_tab == 'roleai' then
         role_ai_tab.render();
+        imgui.End();
+        autoutil.pop_solid_window_bg();
+        return;
+    end
+
+    if active_tab == 'create' then
+        create_tab.render();
         imgui.End();
         autoutil.pop_solid_window_bg();
         return;
@@ -2335,9 +2436,11 @@ ashita.register_event('render', function()
     -- everyone's alive. Slot 0 is the primary; primary can self-resurrect via
     -- the same flow (homepoint /welcome) so include them.
     local has_dead_member = false;
+    local primary_own_name = '';
     do
         local party = AshitaCore:GetDataManager():GetParty();
         if party ~= nil then
+            primary_own_name = party:GetMemberName(0) or '';
             for slot = 1, 17 do
                 local nm = party:GetMemberName(slot);
                 if nm ~= nil and nm ~= '' then has_groupmate = true; break; end
@@ -2351,15 +2454,25 @@ ashita.register_event('render', function()
             end
         end
     end
-    local can_spawn_fresh = can_start and not has_groupmate;
+    -- Spawn membership gate: block spawning a config the current primary isn't
+    -- in. Only decidable once the selected config's body has loaded; while it's
+    -- nil (loading) or no config is selected we leave the button live and let
+    -- the on-click / server guards backstop. Editing such configs stays allowed.
+    local spawn_excluded = selectedAllianceConfig ~= nil and selectedAllianceBody ~= nil
+        and primary_own_name ~= ''
+        and not autobots_ui.primary_in_alliance_body(selectedAllianceBody, primary_own_name);
+    local can_spawn_fresh = can_start and not has_groupmate and not spawn_excluded;
     local ctx = {
-        running           = running,
-        can_start         = can_start,
-        can_food          = can_food,
-        can_summon_trusts = can_summon_trusts,
-        has_groupmate     = has_groupmate,
-        has_dead_member   = has_dead_member,
-        can_spawn_fresh   = can_spawn_fresh,
+        running            = running,
+        can_start          = can_start,
+        can_food           = can_food,
+        can_summon_trusts  = can_summon_trusts,
+        has_groupmate      = has_groupmate,
+        has_dead_member    = has_dead_member,
+        can_spawn_fresh    = can_spawn_fresh,
+        spawn_excluded     = spawn_excluded,
+        spawn_excluded_you = primary_own_name,
+        spawn_excluded_cfg = selectedAllianceConfig,
     }
 
     if active_tab == 'quick' then
@@ -2369,13 +2482,23 @@ ashita.register_event('render', function()
         return
     end
 
+    local right_col_top = imgui.GetCursorPosY();
     render_left_column(ctx)
-    imgui.SameLine(0, 6);
+    -- Pin the divider (and thus the right column) to an ABSOLUTE x rather than
+    -- SameLine-after-the-left-group. The left group's rendered width varies a
+    -- few px between tabs (Controls' button rows vs Skill Ups' roster), which
+    -- shifted the right column's "Active Config Info" label. 304 = the left
+    -- column's fixed width (see the Dummy(304,0) markers) + 6px gap.
+    imgui.SameLine(304 + 6);
     imgui.PushStyleColor(ImGuiCol_ChildWindowBg, _uc(imgui.GetColorU32(ImGuiCol_Button)));
     imgui.BeginChild('##col_divider', 1, 0, false);
     imgui.EndChild();
     imgui.PopStyleColor();
     imgui.SameLine(0, 6);
+    -- Anchor the right column's Y to the body top (keeping the X from SameLine
+    -- above) so it doesn't inherit the left group's shared-line baseline, which
+    -- differs by tab (Controls' left starts a touch higher than Skill Ups').
+    imgui.SetCursorPosY(right_col_top);
     render_right_column(ctx)
 
     -- Form-editor modals stay alive across frames. Each tab manages its own

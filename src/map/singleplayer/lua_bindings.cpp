@@ -188,6 +188,16 @@ void CLuaBaseEntity::setBotMode(uint8 mode)
     }
 }
 
+// Role-order tick priority (lower ticks earlier). Set at role assignment; the
+// zone char-tick loop stable_sorts by it so healers resolve WHM->...->BLM.
+void CLuaBaseEntity::setBotTickPriority(uint8 priority)
+{
+    if (auto* PChar = dynamic_cast<CCharEntity*>(m_PBaseEntity))
+    {
+        PChar->m_botTickPriority = priority;
+    }
+}
+
 uint8 CLuaBaseEntity::getAggroMode() const
 {
     if (auto* PChar = dynamic_cast<CCharEntity*>(m_PBaseEntity))

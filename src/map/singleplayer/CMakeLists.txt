@@ -5,6 +5,8 @@ set(SINGLEPLAYER_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/auction_http.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/char_http.h
     ${CMAKE_CURRENT_SOURCE_DIR}/char_http.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/char_create.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/char_create.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/op_registry.h
     ${CMAKE_CURRENT_SOURCE_DIR}/op_registry.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/bot_sessions.h

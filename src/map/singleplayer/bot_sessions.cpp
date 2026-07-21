@@ -21,6 +21,7 @@
 #include "map_networking.h"
 #include "map_session.h"
 #include "packets/s2c/0x192_autoskill_state.h"
+#include "item_container.h"
 #include "status_effect_container.h"
 
 #include "common/database.h"
@@ -200,6 +201,93 @@ auto MapSessionContainer::createHeadlessSession(uint32 charId, CCharEntity* pare
                           result->PChar->name, charId, parentChar->name, parentChar->id));
 
     return result;
+}
+
+auto MapSessionContainer::provisionNewCharacter(uint32 charId) -> bool
+{
+    TracyZoneScoped;
+
+    // LoadChar runs OnZoneIn + OnGameIn; playtime == 0 makes OnGameIn take the
+    // firstLogin branch → xi.player.charCreate (base + the singleplayer override).
+    // loc.zone stays null (no IncreaseZoneCounter): charCreate's grants don't need
+    // a live zone, and this char must NOT become a visible entity.
+    auto owned = charutils::LoadChar(scheduler_, config_, charId);
+    if (owned == nullptr)
+    {
+        ShowWarning(fmt::format("provisionNewCharacter: LoadChar returned null for charId {}", charId));
+        return false;
+    }
+    CCharEntity* PChar = owned.get();
+
+    // Drop the OnZoneIn/OnGameIn packet burst nobody will read.
+    PChar->clearPacketList();
+
+    // Reproduce the end-state of the newCharacterCS intro cutscene so first login
+    // is silent: drop the char at its city's CS-exit spot, set the home point
+    // there, ensure the Adventurer's Coupon, and clear the CS charvar. The coords
+    // are the per-city CS-exit positions from the newCharacterCS hidden quest, for
+    // the one canonical city per nation that char_create.cpp's nationStartZone
+    // assigns. Keyed off the char's actual zone (== that pos_zone).
+    switch (PChar->getZone())
+    {
+        case 234: PChar->loc.p.x = -45.0f;  PChar->loc.p.y = 0.0f; PChar->loc.p.z = 25.0f;  PChar->loc.p.rotation = 192; break; // Bastok Mines
+        case 241: PChar->loc.p.x = 30.0f;   PChar->loc.p.y = 2.0f; PChar->loc.p.z = -40.0f; PChar->loc.p.rotation = 128; break; // Windurst Woods
+        default:  PChar->loc.p.x = -100.0f; PChar->loc.p.y = 1.0f; PChar->loc.p.z = -40.0f; PChar->loc.p.rotation = 224; break; // Southern San d'Oria
+    }
+
+    // Home point at the CS-exit spot. Mirrors CLuaBaseEntity::setHomePoint — there
+    // is no C++ CCharEntity::setHomePoint, the home-point write lives only in that
+    // Lua binding, so we replicate its few lines here.
+    PChar->profile.home_point.p           = PChar->loc.p;
+    PChar->profile.home_point.destination = PChar->getZone();
+    db::preparedStmt("UPDATE chars "
+                     "SET home_zone = ?, home_rot = ?, home_x = ?, home_y = ?, home_z = ? "
+                     "WHERE charid = ? LIMIT 1",
+                     PChar->profile.home_point.destination,
+                     PChar->loc.p.rotation,
+                     PChar->loc.p.x, PChar->loc.p.y, PChar->loc.p.z,
+                     charId);
+
+    // charCreate only grants the coupon when the intro CS is disabled; ensure it
+    // here so the state matches "cutscene just ended" regardless of the setting.
+    if (!charutils::HasItem(PChar, 536)) // ADVENTURER_COUPON
+    {
+        charutils::AddItem(PChar, LOC_INVENTORY, 536, 1);
+    }
+
+    // The CS sets notSeen = 0 on completion; do the same so it never plays.
+    PChar->setCharVar("HQuest[newCharacterCS]notSeen", 0);
+
+    // Persist everything charCreate + the stamp granted. Items / spells / teleports
+    // / homepoint / charvars already wrote through their own paths; the battery
+    // below covers the in-memory-only grants (equip+look, position and effects via
+    // the persist bits, plus key items, titles, missions, stats, exp).
+    PChar->RequestPersist(CHAR_PERSIST::EQUIP);
+    PChar->RequestPersist(CHAR_PERSIST::POSITION);
+    PChar->RequestPersist(CHAR_PERSIST::EFFECTS);
+    PChar->PersistData();
+    charutils::SaveKeyItems(PChar);
+    charutils::SaveTitles(PChar);
+    charutils::SaveMissionsList(PChar);
+    charutils::SaveQuestsList(PChar);
+    charutils::SaveEminenceData(PChar);
+    charutils::SaveCharInventoryCapacity(PChar);
+    charutils::SaveCharStats(PChar);
+    charutils::SaveCharExp(PChar, PChar->GetMJob());
+    charutils::SaveLastLogout(PChar);
+
+    // Bump playtime NONZERO so charCreate never re-fires on the next load/spawn.
+    // SavePlayTime alone would write 0 — the entity only lived a few milliseconds.
+    PChar->SetPlayTime(std::chrono::seconds(1));
+    charutils::SavePlayTime(PChar);
+
+    ShowDebug(fmt::format("provisionNewCharacter: created '{}' (charId {})", PChar->name, charId));
+
+    // Release. The entity was never inserted into a zone, so there is nothing to
+    // Decrease/remove. NEVER call removeCharFromZone here — it dereferences the
+    // (null) PSession of a LoadChar'd-but-unsessioned char and crashes.
+    owned.reset();
+    return true;
 }
 
 auto MapSessionContainer::destroyHeadlessForParent(uint32 parentCharId) -> uint32

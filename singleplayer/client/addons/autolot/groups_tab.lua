@@ -26,6 +26,20 @@ local dirty_groups     = {}    -- name → true if has unsaved changes
 local pending_change   = nil   -- group user clicked but was blocked from
 local pending_fetch    = {}    -- name → true while we wait for 0x17F to land
 
+-- Reserved pseudo-group: lots EVERY item. It has no config file behind it --
+-- the server short-circuits on the name in ai_lot.should_lot (ai_lot.ALL_GROUP),
+-- so there is no id list to edit. It exists purely as an assignment target, and
+-- rides the normal per-char assignment plumbing for free. Keep these in sync
+-- with ai_lot.ALL_GROUP. It must never be creatable as a real group: a real
+-- __all__.json would give the server a second source of truth for the name.
+local ALL_GROUP       = '__all__'
+local ALL_GROUP_LABEL = 'Everything'
+
+local function display_name(name)
+    if name == ALL_GROUP then return ALL_GROUP_LABEL end
+    return name
+end
+
 -- Local mirror of per-char group assignments. Pure UI state — server is the
 -- authority (assignments only apply to currently-spawned chars). When the
 -- user toggles a checkbox we update this mirror AND fire 0x178; the next
@@ -193,12 +207,22 @@ local function refresh_group_list()
         local ok, parsed = pcall(json.decode, json, body)
         local names = (ok and parsed and parsed.names) or {}
         groups_list = {}
-        for _, n in ipairs(names) do table.insert(groups_list, n) end
+        for _, n in ipairs(names) do
+            -- Defensive: the reserved name is synthetic and has no file. If one
+            -- somehow exists on disk, ignore it so there is exactly one entry.
+            if n ~= ALL_GROUP then table.insert(groups_list, n) end
+        end
         table.sort(groups_list)
+        -- Built-in "Everything" always first; it never comes back from the
+        -- server's file listing because no file backs it.
+        table.insert(groups_list, 1, ALL_GROUP)
     end)
 end
 
 local function fetch_group(name, after)
+    -- The built-in Everything group has no config file behind it -- never try
+    -- to fetch one. Guarded here (single point) rather than at each call site.
+    if name == ALL_GROUP then return end
     -- pending_fetch still serves as a "request in flight" guard so concurrent
     -- callers don't dispatch multiple fetches for the same group.
     if pending_fetch[name] then return end
@@ -292,12 +316,21 @@ end
 -- Fetches the group body if not already cached, then appends + saves.
 -- ============================================================
 
+-- Real, EDITABLE groups only. Deliberately excludes the built-in Everything
+-- group: it's an assignment target, not an id list, so it must not show up in
+-- the other tabs' "add item to group" picker -- adding an id to it is
+-- meaningless and would try to create a real __all__.json.
 function M.get_group_names()
-    return groups_list
+    local out = {}
+    for _, n in ipairs(groups_list) do
+        if n ~= ALL_GROUP then table.insert(out, n) end
+    end
+    return out
 end
 
 function M.add_id_to_group_and_save(group_name, item_id)
     if group_name == nil or group_name == '' or item_id == nil or item_id <= 0 then return end
+    if group_name == ALL_GROUP then return end  -- built-in: has no id list
 
     local function append_and_save()
         local body = group_bodies[group_name]
@@ -325,6 +358,13 @@ end
 
 local function create_group(name)
     if name == nil or name == '' then return false end
+    if name == ALL_GROUP then
+        -- Reserved. A real __all__.json would shadow the built-in and give the
+        -- server two sources of truth for the name.
+        autoutil.log('AutoLot', string.format(
+            'create_group: "%s" is reserved for the built-in %s group.', ALL_GROUP, ALL_GROUP_LABEL))
+        return false
+    end
     for _, existing in ipairs(groups_list) do
         if existing == name then return false end  -- duplicate
     end
@@ -408,7 +448,58 @@ local function draw_new_group_popup()
     end
 end
 
+-- One checkbox per alliance member (primary + party + trusts). Toggling fires
+-- 0x178 SET_LOT_ASSIGNMENT immediately and updates the local mirror so the box
+-- reflects on the next frame. Server is spawned-only -- toggling a row for a
+-- char that isn't a live PC is a no-op at receive. State is NOT persisted
+-- across addon reloads or bot despawns; the user re-applies as needed.
+-- Shared by the normal group pane and the built-in Everything pane.
+local function draw_assigned_to()
+    imgui.Dummy(0, 6)
+    imgui.Text('Assigned to')
+    imgui.Separator()
+    imgui.Dummy(0, 2)
+    local members = get_alliance_members()
+    if #members == 0 then
+        imgui.TextDisabled('(no alliance members visible)')
+    else
+        for i, nm in ipairs(members) do
+            local col = (i - 1) % 3
+            if col > 0 then imgui.SameLine(col * 155) end -- 3 columns, aligned
+            local on  = is_assigned(nm, active_group)
+            local var = assign_var_for(nm, active_group)
+            imgui.SetVarValue(var, on)
+            imgui.Checkbox('##lot_assign_' .. nm, var)
+            imgui.SameLine()
+            imgui.Text(nm)
+            local nv = imgui.GetVarValue(var)
+            if nv ~= on then
+                set_assigned(nm, active_group, nv)
+                autoutil.send_set_lot_assignment(nm, active_group, nv)
+            end
+        end
+    end
+end
+
 local function draw_active_group_pane()
+    -- Built-in "Everything": no config body, nothing to edit. It exists purely
+    -- as an assignment target (the server short-circuits should_lot on the
+    -- name), so render the explainer + the same Assigned-to grid and bail out
+    -- before any of the id-list / search / save machinery below.
+    if active_group == ALL_GROUP then
+        imgui.Text(ALL_GROUP_LABEL)
+        imgui.Dummy(0, 6)
+        imgui.Separator()
+        imgui.Dummy(0, 6)
+        imgui.TextWrapped('Built-in group: lots every item that drops. There is no item list to edit -- assign it to a character below and they will lot everything.')
+        imgui.Dummy(0, 4)
+        imgui.PushTextWrapPos(0)
+        imgui.TextDisabled('A character with a full inventory stops lotting and passes instead, so drops are not lost to a full bag.')
+        imgui.PopTextWrapPos()
+        draw_assigned_to()
+        return
+    end
+
     local body = group_bodies[active_group]
     if body == nil then
         if pending_fetch[active_group] then
@@ -435,7 +526,7 @@ local function draw_active_group_pane()
         imgui.TextDisabled('unsaved changes')
         if pending_change ~= nil then
             imgui.SameLine(0, 12)
-            imgui.TextColored(1.0, 0.7, 0.2, 1.0, string.format('-> switch to %s', pending_change))
+            imgui.TextColored(1.0, 0.7, 0.2, 1.0, string.format('-> switch to %s', display_name(pending_change)))
             imgui.SameLine(0, 8)
             if imgui.Button('Cancel##cancel_nav') then pending_change = nil end
         end
@@ -473,36 +564,7 @@ local function draw_active_group_pane()
         imgui.EndChild()
     end
 
-    -- Assigned-to section. One checkbox per alliance member (primary +
-    -- party + trusts). Toggling fires 0x178 SET_LOT_ASSIGNMENT immediately
-    -- and updates the local mirror so the box reflects on the next frame.
-    -- Server is spawned-only — toggling a row for a char that isn't a live
-    -- PC is a no-op at receive. State is NOT persisted across addon reloads
-    -- or bot despawns; the user re-applies as needed.
-    imgui.Dummy(0, 6)
-    imgui.Text('Assigned to')
-    imgui.Separator()
-    imgui.Dummy(0, 2)
-    local members = get_alliance_members()
-    if #members == 0 then
-        imgui.TextDisabled('(no alliance members visible)')
-    else
-        for i, nm in ipairs(members) do
-            local col = (i - 1) % 3
-            if col > 0 then imgui.SameLine(col * 155) end -- 3 columns, aligned
-            local on  = is_assigned(nm, active_group)
-            local var = assign_var_for(nm, active_group)
-            imgui.SetVarValue(var, on)
-            imgui.Checkbox('##lot_assign_' .. nm, var)
-            imgui.SameLine()
-            imgui.Text(nm)
-            local nv = imgui.GetVarValue(var)
-            if nv ~= on then
-                set_assigned(nm, active_group, nv)
-                autoutil.send_set_lot_assignment(nm, active_group, nv)
-            end
-        end
-    end
+    draw_assigned_to()
 
     imgui.Dummy(0, 6)
     imgui.Text('Item IDs')
@@ -512,7 +574,12 @@ local function draw_active_group_pane()
     local res_mgr = AshitaCore:GetResourceManager()
     for _, id in ipairs(body.ids) do
         local res = res_mgr:GetItemById(id)
-        local nm  = (res and res.Name) and tostring(res.Name[0]):gsub('%z', '') or ('item#' .. id)
+        -- Truncate at the FIRST NUL: the resource Name is a fixed char buffer
+        -- whose bytes after the terminator are uninitialized garbage. Stripping
+        -- NUL bytes instead splices that garbage onto the name.
+        local raw = (res and res.Name) and tostring(res.Name[0]) or ''
+        local nm  = raw:match('^%Z*') or ''
+        if nm == '' then nm = 'item#' .. id end
         if imgui.Button('x##rmid_' .. id) then remove_id(id) end
         imgui.SameLine(0, 8)
         imgui.Text(string.format('%5d  %s', id, nm))
@@ -537,8 +604,11 @@ function M.draw()
         imgui.TextDisabled('(no groups defined)')
     else
         for _, name in ipairs(groups_list) do
-            local label = dirty_groups[name] and ('* ' .. name) or name
-            if imgui.Selectable(label, name == active_group) then
+            local base  = display_name(name)
+            local label = dirty_groups[name] and ('* ' .. base) or base
+            -- Explicit imgui id: the visible label can collide (a user is free
+            -- to name a real group "Everything"), so key off the raw name.
+            if imgui.Selectable(label .. '##grp_' .. name, name == active_group) then
                 if name ~= active_group then
                     if dirty_groups[active_group] then
                         pending_change = name

@@ -78,6 +78,9 @@ local outposts =
     [xi.region.TAVNAZIANARCH]    = { zone = xi.zone.LUFAISE_MEADOWS,        ki = xi.ki.TAVNAZIAN_ARCHIPELAGO_SUPPLIES, cp = 70, lvl = 30, fee = 300 },
 }
 
+-- Exposed for the "grant all teleports on zone entry" module (modules/singleplayer/lua).
+xi.conquest.outposts = outposts
+
 local function hasOutpost(player, region)
     local hasOP = player:hasTeleport(player:getNation(), region + 5)
 

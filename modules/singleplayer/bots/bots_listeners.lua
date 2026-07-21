@@ -67,6 +67,13 @@ function bots_listeners.register(bot)
            and xi.singleplayer.bots.magic.is_sleep_spell(spellId) then
             xi.singleplayer.bots.magic.clear_sleep_reservation(target:getID())
         end
+        -- Cure cast finished (landed/missed) → drop this caster's claim; the
+        -- victim's HP now reflects the heal, so the ledger no longer projects it.
+        if target and xi.singleplayer.bots.magic
+           and xi.singleplayer.bots.magic.is_cure_spell
+           and xi.singleplayer.bots.magic.is_cure_spell(spellId) then
+            xi.singleplayer.bots.magic.clear_cure_reservation(target:getID(), caster:getID())
+        end
         -- SC close detection lives on the onActionResult chokepoint instead —
         -- CLuaAction has no scType getter; the addEffectMessage is per-result
         -- inside the action_t, which onActionResult exposes as a Lua table.
@@ -83,6 +90,13 @@ function bots_listeners.register(bot)
            and xi.singleplayer.bots.magic.is_sleep_spell
            and xi.singleplayer.bots.magic.is_sleep_spell(spellId) then
             xi.singleplayer.bots.magic.clear_sleep_reservation(target:getID())
+        end
+        -- Cure interrupted → free this caster's claim immediately so another
+        -- healer can re-target the (still-low) victim on the next tick.
+        if target and xi.singleplayer.bots.magic
+           and xi.singleplayer.bots.magic.is_cure_spell
+           and xi.singleplayer.bots.magic.is_cure_spell(spellId) then
+            xi.singleplayer.bots.magic.clear_cure_reservation(target:getID(), caster:getID())
         end
     end)
 

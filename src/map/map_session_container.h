@@ -51,6 +51,14 @@ public:
     //   when multiple headless chars spawn in the same packet.
     // Returns the new session, or nullptr on failure (DB miss, parent zone null, etc.).
     auto createHeadlessSession(uint32 charId, CCharEntity* parentChar, uint8 spawnIndex) -> MapSession*;
+
+    // Provision a brand-new character (rows already INSERTed by char_create) into
+    // its finished starting state, WITHOUT a client login or a live zone: LoadChar
+    // runs xi.player.charCreate (playtime == 0 → firstLogin), then the post-cutscene
+    // stamp + persist battery + playtime bump run and the entity is released. Needs
+    // this container's scheduler_/config_ for LoadChar, so it lives here rather than
+    // in the char_create free-function applier. Returns false on LoadChar failure.
+    auto provisionNewCharacter(uint32 charId) -> bool;
     // SINGLEPLAYER END
 
     auto getSessionByIPP(IPP ipp) -> MapSession*;

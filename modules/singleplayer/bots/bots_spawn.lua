@@ -102,6 +102,28 @@ local function derive_spawn_list(allianceArr, primaryName)
     return out
 end
 
+-- True if charName sits anywhere in the alliance spec (any pt leader or member).
+-- The requesting primary MUST be in the config it spawns: derive_spawn_list
+-- excludes the primary by name and formAllianceFromSpec only wires the names it
+-- finds in the spec, so a primary that isn't listed spawns a full headless
+-- alliance it is not a member of and is left solo -- with runtime state still
+-- naming it mainCharId. We reject that up front instead.
+local function config_includes(allianceArr, charName)
+    for _, party in ipairs(allianceArr) do
+        if party.ptLeader == charName then
+            return true
+        end
+        if type(party.members) == 'table' then
+            for _, member in ipairs(party.members) do
+                if member == charName then
+                    return true
+                end
+            end
+        end
+    end
+    return false
+end
+
 -----------------------------------
 -- Spawn every trust in `trustNames` on `leader` immediately (no cast time, no
 -- MP cost, no animation) — mirrors the Summon Trusts button's path through
@@ -329,6 +351,11 @@ function xi.singleplayer.bots.bots_spawn_from_config(primary, configName)
 
     if type(cfg.alliance) ~= 'table' or #cfg.alliance == 0 then
         primary:printToPlayer(string.format('bot_spawn: config "%s" has no alliance array.', configName))
+        return
+    end
+
+    if not config_includes(cfg.alliance, primary:getName()) then
+        primary:printToPlayer(string.format('bot_spawn: config "%s" does not include you (%s); spawn a config you are a member of.', configName, primary:getName()))
         return
     end
 

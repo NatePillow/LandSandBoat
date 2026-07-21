@@ -1,53 +1,57 @@
 ---
 name: feedback-bot-ai-assist-target
-description: In bot AI code, "the mob" = assist:getTarget() — NEVER primary.currentTargetId. They can diverge and conflating them causes silent bugs (RDM casting Haste long after mob died, bots focusing wrong target, etc.)
+description: In bot AI, the alliance's current target is an INDEPENDENT state field (xi.singleplayer.bots.alliance.allianceTarget, a serverId) — NOT derived live from primary.currentTargetId, nor from the assist/tank's getTarget(). This is a payoff of the backend port (bot AI moved server-side, out of the old client-side Ashita addon). Read it via get_alliance_target_id() / ai_threat.alliance_target(bot). assist:getTarget() is only a SEED source now.
 metadata:
   type: feedback
 ---
 
-## The rule
+## The rule (current)
 
-In `modules/singleplayer/lua/auto*.lua` bot AI code, "the mob the alliance is fighting" is whatever the **assist** is engaged with, accessed via `assist:getTarget()` (the engine's BattleTarget).
+In bot AI code (`modules/singleplayer/bots/*.lua`), "the mob the alliance is fighting" is a **single, independent piece of state**:
 
-**`primary.currentTargetId` is NOT the same thing** — it's the user's commanded target (set by `/autobots attack`). The two can diverge:
-- User picks mob A → `primary.currentTargetId = A`
-- Assist can't engage A (out of range, dead, etc.) → assist's actual target is nil or something else
-- All other headless follow the assist, not primary's command
+- `xi.singleplayer.bots.alliance.allianceTarget` — a serverId (0 = none).
 
-So per-mob logic (combat detection, range checks against "the mob", sleep_add excluding the main mob, etc.) MUST resolve through the assist.
+Read it, do not re-derive it:
+- `xi.singleplayer.bots.get_alliance_target_id()` → the id (bots.lua) — returns 0 when none.
+- `ai_threat.alliance_target(bot)` → the resolved entity (`GetEntityByID(id)`, nil when 0).
 
-## How to look up "the mob" from a bot
+Write it only through the intended writers:
+- `xi.singleplayer.bots.set_alliance_target(id)` (bots.lua) — also clears open interrupt / stun windows when clearing to 0.
+- The player command path (`/be-attack`) — an explicit user pick always wins.
+- The puller handoff (`ai_puller` calls `set_alliance_target` when it drops a pulled mob).
+- `ai_threat.ensure_alliance_target(bot)` — the auto-populate path (below).
 
-```lua
-function automagic.assist_target(bot)
-    local primary = GetPlayerByID(bot:getParentCharId())
-    local assist  = _resolve_assist(primary)  -- looks up assist name from primary.config.assist[1]
-    if assist == nil or not assist:isEngaged() then return nil end
-    local target = assist.getTarget and assist:getTarget() or nil
-    if target == nil or target:isDead() then return nil end
-    return target
-end
-```
+## What the backend port changed
 
-Lives in `modules/singleplayer/lua/automagic.lua` (added in #193). Other modules should call through this.
+"BE" = **backend**. This whole bot AI stack used to live client-side in the ffxi-ashita addon; it was ported to run server-side in LSB (`modules/singleplayer/bots/`). That backend port is what let us handle alliance targeting properly — the target now lives in server-authoritative state, **decoupled from any single character**:
 
-## Why this happens repeatedly
+- ORIGINAL (client-side Ashita): the addon packet-sniffed the assist's swing events to figure out "the mob" — no server state, no authority.
+- EARLY PORT (wrong): "the mob" was read live from `primary.currentTargetId`.
+- INTERIM (better, but still per-character): resolve it live from the assist's `getTarget()`.
+- NOW: `alliance.allianceTarget` is its own field. It is NOT `primary.currentTargetId`, and it is NOT "whatever the assist/tank is swinging at" read live. Those characters only *seed* the field; once set, the state is authoritative and independent.
 
-The existing port code uses `primary.currentTargetId` heavily because it's the field that's most obvious in the per-primary state table. It got copy-pasted into role files and helpers during the port. When refactoring, easy to grab the same field without realizing it's the wrong abstraction.
+`primary.currentTargetId` is still the user's commanded target and can diverge — never use it as "the mob."
 
-**Defensive habit:** when writing bot-AI code that needs "the mob being fought," ask "should this still work if user clicked a mob that assist can't engage?" If the answer is yes, use `assist_target(bot)`, not `primary.currentTargetId`.
+## How the field gets populated
 
-## Original ffxi-ashita parallel
+`ai_threat.ensure_alliance_target(bot)` only writes when `allianceTarget == 0` (so a player command / puller handoff always wins). In priority order:
+1. Player command already set it → left alone.
+2. Assist is engaged → seed from `assist:getTarget()` (the "assist pulled something, fan out" case). This is the ONLY place assist:getTarget() feeds in now — as a seed, not the live source.
+3. Otherwise → promote the most-vulnerable off-target threat (mage > low melee > medium > healthy > tank) so adds going for the back line get focused first.
 
-Original packet-sniffed for the assist's swing events to populate `automagic.activeTargets[1]`. BE equivalent IS the assist's `getTarget()` — engine-authoritative, clears naturally on mob death (the engine disengages the assist).
+It clears naturally on mob death (`bots_listeners` zeroes it when the dead id matches; `set_alliance_target(0)` also tears down interrupt windows).
+
+## Why this matters / defensive habit
+
+When writing bot-AI code that needs "the mob being fought," READ the alliance-target state (`get_alliance_target_id()` / `ai_threat.alliance_target(bot)`). Do NOT re-derive it from `primary.currentTargetId` and do NOT reach into the assist/tank to read their live `getTarget()` — that reintroduces the per-character coupling the port removed, and the two can diverge from the authoritative alliance target.
 
 ## Symptoms when you get this wrong
 
-- RDM/WHM casts Haste/Cure long after mob died (currentTargetId stale; assist already disengaged)
-- Headless bots don't focus the right mob when user commands a target the assist couldn't engage
-- Range checks pass against a stale `currentTargetId` pointing at a corpse
-- Sleep_add tries to sleep the actual main mob because exclusion check uses wrong reference
+- RDM/WHM casts Haste/Cure long after the mob died (stale per-character target; alliance target already cleared)
+- Headless don't focus the right mob when the user commands a target the assist couldn't engage
+- Range checks pass against a corpse
+- Sleep/AoE exclusion sleeps the actual main mob because the exclusion used the wrong reference instead of `allianceTarget`
 
 ## Linked
 
-[[feedback-build-cadence]], [[feedback-singleplayer-rules]]
+[[feedback-lsb-party-vs-alliance-scope]], [[feedback-build-cadence]], [[feedback-singleplayer-rules]]

@@ -328,6 +328,9 @@ set(MAP_ONLY_EXTERNAL_LIBS
     # (kills the wire-zlib edge cases and ~50× speeds up large XML transfers).
     httplib::httplib
     nlohmann_json::nlohmann_json
+    # SINGLEPLAYER: char_create.cpp hashes the new account password with
+    # BCrypt::generateHash, the same as the login server's account create.
+    bcrypt
 )
 
 set(SEARCH_ONLY_EXTERNAL_LIBS

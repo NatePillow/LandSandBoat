@@ -22,6 +22,8 @@
 #include "zone_entities.h"
 #include "common/utils.h"
 #include "singleplayer/lifecycle_hooks.h" // SINGLEPLAYER
+
+#include <algorithm> // SINGLEPLAYER: std::stable_sort for role-ordered char ticks
 #include "enmity_container.h"
 #include "instance.h"
 #include "latent_effect_container.h"
@@ -1926,11 +1928,27 @@ auto CZoneEntities::ZoneServer(timer::time_point tick) -> Task<void>
     // Char tick logic
     //
 
+    // SINGLEPLAYER: tick chars in bot role-priority order (m_botTickPriority) so
+    // healer bots resolve WHM->SMN->BRD->RDM->BLM within the sweep, letting the
+    // cure ledger observe earlier claims rather than simulate them. Char ticks run
+    // to completion synchronously (empty CBattleEntity::Tick etc.), so spawn order
+    // == execution order. stable_sort keeps same-priority/non-bot chars in their
+    // original (targid) order; non-bots default to 255 and tick last, harmlessly.
+    std::vector<CCharEntity*> orderedChars;
+    orderedChars.reserve(m_charList.size());
+    FOR_EACH_PAIR_CAST_SECOND(CCharEntity*, PChar, m_charList)
+    {
+        orderedChars.push_back(PChar);
+    }
+    std::stable_sort(orderedChars.begin(), orderedChars.end(),
+                     [](const CCharEntity* a, const CCharEntity* b)
+                     { return a->m_botTickPriority < b->m_botTickPriority; });
+
     co_await Scheduler::TaskGroup(
-        m_charList.size(),
+        orderedChars.size(),
         [&](auto& add)
         {
-            FOR_EACH_PAIR_CAST_SECOND(CCharEntity*, PChar, m_charList)
+            for (CCharEntity* PChar : orderedChars)
             {
                 add(charTick(PChar, tick));
             }

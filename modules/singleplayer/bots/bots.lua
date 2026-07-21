@@ -130,6 +130,16 @@ bots.alliance = {
     -- frees the slot in bounded time without needing a death listener.
     sleepInFlight = {},
 
+    -- Amount-aware cure claim ledger. victim charId -> list of
+    -- { by = casterId, expiry, amount }. A healer records its projected heal here
+    -- on cast; other healers read the summed incoming HP (ai_magic.incoming_heal /
+    -- effective_hpp) and spread to the next-neediest target. Entries stack, so a
+    -- very-low target one cure won't top off stays eligible for a second healer.
+    -- Cleared on the caster's MAGIC_USE / MAGIC_INTERRUPTED + lazy expiry prune.
+    -- Correct because char ticks now run in role order (m_botTickPriority sort in
+    -- CZoneEntities::ZoneServer), so earlier healers write before later ones read.
+    cureInFlight = {},
+
     -- Dynamic state. Single per-bot table keyed by charId. Holds ALL per-bot
     -- scratch — ticker dispatch fields, ability state, magic state, role
     -- state, lot state, rest state, movement state. bots.ensure_bot(charId)
@@ -513,6 +523,24 @@ local function roleModule(role)
     return nil
 end
 
+-- Char decision-tick order within a zone sweep, by role. Pushed to the C++
+-- CCharEntity::m_botTickPriority (setBotTickPriority) at role assignment;
+-- CZoneEntities::ZoneServer stable_sorts the char tick list by it so healers
+-- resolve WHM(Healer) -> Smn -> Brd -> Rdm -> Nuker(BLM). Only the heal-capable
+-- roles' relative order matters for the cure ledger; the rest just set overall
+-- tick order. Non-listed / non-bot chars default to 255 (tick last).
+local ROLE_TICK_PRIORITY = {
+    [xi.singleplayer.bots.Role.Healer]  = 0,
+    [xi.singleplayer.bots.Role.Tank]    = 1,
+    [xi.singleplayer.bots.Role.Smn]     = 2,
+    [xi.singleplayer.bots.Role.Brd]     = 3,
+    [xi.singleplayer.bots.Role.Rdm]     = 4,
+    [xi.singleplayer.bots.Role.Nuker]   = 5,
+    [xi.singleplayer.bots.Role.Melee]   = 6,
+    [xi.singleplayer.bots.Role.Skillup] = 7,
+    [xi.singleplayer.bots.Role.Idle]    = 255,
+}
+
 -- 0x176 SET_ROLE on a named bot. Updates the bot's role; dispatch via
 -- runCombatTick + roleModule() handles which module's tick to run.
 --
@@ -533,6 +561,12 @@ m:addOverride('xi.singleplayer.bots.onSetRole', function(botEntity, role, opts)
 
     local state = xi.singleplayer.bots.get_bot_state(botEntity)
     state.role = role
+
+    -- Push the role's tick priority to the engine so the zone char-tick loop
+    -- resolves healers in order (feeds the cure ledger).
+    if botEntity.setBotTickPriority ~= nil then
+        botEntity:setBotTickPriority(ROLE_TICK_PRIORITY[role] or 255)
+    end
 
     if activate then
         state.on_load_fired = true

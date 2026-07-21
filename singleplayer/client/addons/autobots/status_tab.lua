@@ -36,7 +36,7 @@ local icon_cache = require('icon_cache');
 local status_tab = {};
 
 -- Status-effect icons keyed by effectId (e.g. 142.png).
-local icons = icon_cache.new(_addon and (_addon.path .. 'icons/') or 'icons/');
+local icons = icon_cache.new(_addon and (_addon.path .. '../libs/icons/') or '../libs/icons/');
 
 -- Per-party member lists keyed by partyNumber (1..3). Each entry:
 --   { name, effects, race, face, expCurrent, expToNext, updatedMs }

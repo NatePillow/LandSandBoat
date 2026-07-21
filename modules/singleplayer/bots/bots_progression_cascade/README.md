@@ -133,6 +133,22 @@ Two heuristics for classification:
 - If the KI/item is `delKeyItem`'d or `confirmTrade`'d before `quest:complete` fires → SETUP.
 - If the grant fires in the SAME `onEventFinish` handler as `quest:complete(player)` → REWARD-ACT.
 
+### 2a. Helper-class quests (rewards live in the helper, not the file)
+
+Some quests are defined via `xi.jeuno.helpers.<Class>:new(...)` — their base rewards come from the helper class in `scripts/quests/jeuno/helpers.lua`, not the quest file. Read the helper, resolve the constructor args, and transcribe what it grants:
+
+- `UnlockingAMyth` — sets **no** `quest.reward`; grants a job-specific `player:addLearnedWeaponskill(...)` in the `quest:complete` block (the traded vigil weapon is kept — net zero). Cascade the WS unlock.
+- `BorghertzQuests` — `quest.reward.item = params.handAFId` (AF gloves per job). The 2 optional AF pieces come from Treasure Coffers (`xi.treasure.onTrade`), not `quest.reward` — those are NOT a cascade reward here.
+- `GobbiebagQuest` — `quest.reward` carries only fame/title; the bag expansion is `player:changeContainerSize(xi.inv.INVENTORY, +N)` (and MOGSATCHEL) in the `quest:complete` block. Cascade the container-size delta.
+
+### 2b. Special cases to classify carefully
+
+- **Dominion ops** (`scripts/quests/abyssea/*Dominion_Op*.lua`): `quest.reward = {}` and completion fires from `xi.abyssea.dominionOnMobDeath`, not `quest:complete` — nothing to cascade beyond the completion bit.
+- **Direct `player:completeQuest(...)`** without a `Quest:complete` block: the runtime still records the completion; there are no static rewards to transcribe.
+- **Repeatable quests** (e.g. `Ducal_Hospitality`): capture the FIRST-TIME reward only — headless never run the repeat path.
+- **Disabled completion** (e.g. `Unlisted_Qualities` with its `quest:complete` commented out): no reward to cascade now; a future pass picks it up if the code is re-enabled.
+- **Mog House / world-flag side effects** (e.g. `setMoghouseFlag`): out of cascade scope — don't transcribe.
+
 ### 3. Handle branching / player-choice rewards per singleplayer-rules
 
 The [[singleplayer-rules]] memory says "over-grant on variants of a single reward act." When the source quest gives ONE of several options (branching gil/item choices, race-based RSE, gender-based DNC AF, ring choice, augmented earring picker), the recipe should give ALL variants to headless — not pick one. Applies to:

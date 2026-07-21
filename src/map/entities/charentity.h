@@ -644,6 +644,13 @@ public:
     // sets headless chars to Full. PostTick gates the OnBotTick Lua callback on this.
     BotMode m_botMode = BotMode::Off;
 
+    // Bot decision-tick order within a zone sweep. Lower = ticks earlier. Set from
+    // Lua at role assignment (onSetRole -> setBotTickPriority) via the role->priority
+    // table. CZoneEntities::ZoneServer stable_sorts the char tick list by this so
+    // healer bots resolve WHM->SMN->BRD->RDM->BLM and the cure ledger sees earlier
+    // claims. Non-bots keep the default (tick last, harmless).
+    uint8 m_botTickPriority = 255;
+
     // Headless mob-aggro toggle. 0 = Off (trust-like: mobs ignore this char for
     // proximity aggro decisions — read by singleplayer::shouldSkipMobAggro).
     // 1 = Full (mobs aggro headless like real players). 2 = Engaged (invisible

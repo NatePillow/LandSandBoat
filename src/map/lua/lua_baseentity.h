@@ -280,6 +280,7 @@ public:
     uint8 getContainerSize(uint8 locationID);
     void  changeContainerSize(uint8 locationID, int8 newSize); // Increase/Decreases container size
     uint8 getFreeSlotsCount(const sol::object& locID);         // Gets value of free slots in Entity inventory
+    void  sortInventory(const sol::object& locID);             // Consolidates same-item stacks in a container (server-side 0x03A sort)
     void  confirmTrade() const;                                // Complete trade with an npc, only removing confirmed items
     void  tradeComplete() const;                               // Complete trade with an npc
     auto  getTrade() -> CTradeContainer*;
@@ -946,6 +947,7 @@ public:
     uint32 getParentCharId() const;            // 0 if not headless; otherwise the primary char's id
     uint8  getBotMode() const;                 // returns BotMode enum value (0=Off, 1=CombatOnly, 2=Full)
     void   setBotMode(uint8 mode);             // toggles BotMode on this char
+    void   setBotTickPriority(uint8 priority); // role-order tick priority (lower = earlier); ZoneServer sorts by it
     uint8  getAggroMode() const;               // headless mob-aggro mode: 0=Off (trust-like), 1=Full, 2=Engaged (vanilla once engaged)
     void   setAggroMode(uint8 mode);           // sets m_aggroMode; read by shouldSkipMobAggro on every aggro decision
     uint32 getLastClientMoveInputMs() const;   // ms since the last real (position-changing) 0x015 from this char's client

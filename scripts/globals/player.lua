@@ -147,6 +147,28 @@ xi.player.charCreate = function(player)
     player:setNewPlayer(true)                           -- apply new player flag
 end
 
+-- Starting gear a new character of (race, mainJob) WOULD receive, without creating
+-- anything. Reads the SAME startingRaceInfo / startingJobGear tables charCreate
+-- applies above, so the create-character UI preview stays in sync when starting
+-- gear is altered for the single-player fork. Consumed by /chars/create-preview.
+-- Returns { equipped = { itemId, ... }, inventory = { itemId, ... } }.
+xi.player.charCreatePreview = function(race, mainJob)
+    local result   = { equipped = {}, inventory = {} }
+    local raceInfo = startingRaceInfo[race]
+    if raceInfo ~= nil then
+        for _, itemId in pairs(raceInfo.gear) do
+            table.insert(result.equipped, itemId)
+        end
+    end
+    local jobGear = startingJobGear[mainJob]
+    if jobGear ~= nil then
+        for _, itemId in pairs(jobGear) do
+            table.insert(result.inventory, itemId)
+        end
+    end
+    return result
+end
+
 -- called by core after a player logs into the server or zones
 xi.player.onGameIn = function(player, firstLogin, zoning)
     if not zoning then

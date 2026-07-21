@@ -5248,6 +5248,28 @@ uint8 CLuaBaseEntity::getFreeSlotsCount(const sol::object& locID)
 }
 
 /************************************************************************
+ *  Function: sortInventory(locID)
+ *  Purpose : Merge same-item partial stacks in a container into the fewest
+ *            slots (the server-side equivalent of the client's 0x03A sort).
+ *  Example : bot:sortInventory()  -- LOC_INVENTORY by default
+ *  Notes   : Mainly for headless bots, which have no client to emit 0x03A.
+ ************************************************************************/
+
+void CLuaBaseEntity::sortInventory(const sol::object& locID)
+{
+    if (m_PBaseEntity->objtype != TYPE_PC)
+    {
+        ShowWarning("Invalid entity type calling function (%s).", m_PBaseEntity->getName());
+        return;
+    }
+
+    auto* PChar = static_cast<CCharEntity*>(m_PBaseEntity);
+
+    uint8 locationID = (locID != sol::lua_nil) ? locID.as<CONTAINER_ID>() : LOC_INVENTORY;
+    charutils::ConsolidateContainerStacks(PChar, PChar->getStorage(locationID));
+}
+
+/************************************************************************
  *  Function: confirmTrade()
  *  Purpose : Completes a trade and takes ONLY confirmed items
  *  Example : player:confirmTrade()
@@ -20540,6 +20562,7 @@ void CLuaBaseEntity::Register()
     SOL_REGISTER("getContainerSize", CLuaBaseEntity::getContainerSize);
     SOL_REGISTER("changeContainerSize", CLuaBaseEntity::changeContainerSize);
     SOL_REGISTER("getFreeSlotsCount", CLuaBaseEntity::getFreeSlotsCount);
+    SOL_REGISTER("sortInventory", CLuaBaseEntity::sortInventory);
     SOL_REGISTER("confirmTrade", CLuaBaseEntity::confirmTrade);
     SOL_REGISTER("tradeComplete", CLuaBaseEntity::tradeComplete);
     SOL_REGISTER("getTrade", CLuaBaseEntity::getTrade);
@@ -21201,6 +21224,7 @@ void CLuaBaseEntity::Register()
     SOL_REGISTER("getParentCharId", CLuaBaseEntity::getParentCharId);
     SOL_REGISTER("getBotMode", CLuaBaseEntity::getBotMode);
     SOL_REGISTER("setBotMode", CLuaBaseEntity::setBotMode);
+    SOL_REGISTER("setBotTickPriority", CLuaBaseEntity::setBotTickPriority);
     SOL_REGISTER("getAggroMode", CLuaBaseEntity::getAggroMode);
     SOL_REGISTER("setAggroMode", CLuaBaseEntity::setAggroMode);
     SOL_REGISTER("getLastClientMoveInputMs", CLuaBaseEntity::getLastClientMoveInputMs);

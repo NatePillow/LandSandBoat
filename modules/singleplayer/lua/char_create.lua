@@ -185,16 +185,32 @@ local function setupTrustSpells(player)
     player:addSpell(xi.magic.spell.RAINEMARD, addSpellConfig)
 end
 
+local function setting(name, default)
+    if xi.settings.singleplayer == nil then return default end
+    local v = xi.settings.singleplayer[name]
+    if v == nil then return default end
+    return v
+end
+
 m:addOverride('xi.player.charCreate', function(player)
     print('char_create start')
     super(player)
 
-    -- Gate ONLY the mission-progress headstart behind xi.settings.singleplayer.NEW_CHAR_MISSION_HEADSTART.
-    -- Defaults to true to preserve the existing free-grant behavior. Flip to false in
-    -- settings/singleplayer.lua for a "play from M1" playthrough — fresh chars then start at rank 1
-    -- with no nation/RoZ/CoP progress, but still get trusts, teleports, rings, and KIs below.
-    local missionHeadstart = xi.settings.singleplayer and xi.settings.singleplayer.NEW_CHAR_MISSION_HEADSTART
-    if missionHeadstart == nil then missionHeadstart = true end
+    -- Add Satchel
+    player:changeContainerSize(xi.inv.MOGSATCHEL, xi.settings.main.START_INVENTORY)
+
+     -- Utility rings
+    player:addItem(xi.item.WARP_RING)
+
+    -- Nation rings
+    player:addItem(xi.item.SAN_DORIAN_RING)
+    player:addItem(xi.item.BASTOKAN_RING)
+    player:addItem(xi.item.WINDURSTIAN_RING)
+
+    local missionHeadstart  = setting('NEW_CHAR_MISSION_HEADSTART',  false)
+    local trustsHeadstart   = setting('NEW_CHAR_TRUSTS_HEADSTART',   false)
+    local teleportHeadstart = setting('NEW_CHAR_TELEPORT_HEADSTART', false)
+    local lbHeadstart       = setting('NEW_CHAR_LB_HEADSTART',       false)
 
     if missionHeadstart then
         -- Finish all nation missions (rank 10 each)
@@ -206,31 +222,6 @@ m:addOverride('xi.player.charCreate', function(player)
     else
         print('char_create: NEW_CHAR_MISSION_HEADSTART = false; skipping mission headstart (trusts/teleports/KIs still granted below)')
     end
-
-    -- Add Satchel
-    player:changeContainerSize(xi.inv.MOGSATCHEL, xi.settings.main.START_INVENTORY)
-
-     -- Utility rings
-    player:addItem(xi.item.WARP_RING)
-    player:addItem(28586) -- Craftmaster's ring
-
-    -- Nation rings
-    player:addItem(xi.item.SAN_DORIAN_RING)
-    player:addItem(xi.item.BASTOKAN_RING)
-    player:addItem(xi.item.WINDURSTIAN_RING)
-
-    -- Each headstart bucket has its own bool. All default true (current behavior).
-    -- Resolve once with defensive defaults so an old settings file without these
-    -- entries still gets the headstart.
-    local function setting(name, default)
-        if xi.settings.singleplayer == nil then return default end
-        local v = xi.settings.singleplayer[name]
-        if v == nil then return default end
-        return v
-    end
-    local trustsHeadstart   = setting('NEW_CHAR_TRUSTS_HEADSTART',   true)
-    local teleportHeadstart = setting('NEW_CHAR_TELEPORT_HEADSTART', true)
-    local lbHeadstart       = setting('NEW_CHAR_LB_HEADSTART',       true)
 
     -- Add trust spells (20 trusts)
     if trustsHeadstart then

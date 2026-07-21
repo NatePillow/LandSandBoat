@@ -155,6 +155,11 @@ xi.settings.map =
     -- Multiplier applied to high quality chance
     CRAFT_HQ_CHANCE_MULTIPLIER = 1.0,
 
+    -- SINGLEPLAYER: flat percentage points added to every synth/desynth HQ chance.
+    -- Stacks with skill/tier, the Craftmaster ring (and any SYNTH_HQ_RATE gear),
+    -- and the multiplier above; still capped at the 80% max. 0 disables.
+    CRAFT_HQ_RATE_BONUS = 10.0,
+
     -- Enable/disable all fishing, including quests. ENABLE AT YOUR OWN RISK.
     FISHING_ENABLE = false,
 

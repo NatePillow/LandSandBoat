@@ -1,6 +1,6 @@
 ---
 name: feedback-build-cadence
-description: "For multi-task code work the user wants ONE final build at the end, not a build per task or interleaved builds. Reason: CPU usage."
+description: "Dev workflow batches many changes (ideas/fixes/requirements) then verifies them together in dedicated testing sessions — code sits written-but-unbuilt between, that's normal. ONE build at the end of a series, never interleaved/background; don't nag about building. Reason: CPU usage + workflow."
 metadata: 
   node_type: memory
   type: feedback
@@ -8,6 +8,8 @@ metadata:
 ---
 
 When pushing through a multi-task workstream (server-side packet plumbing, Lua edits, addon changes, etc.), do not fire interleaved builds after each piece — run ONE build at the very end, after every Lua + C++ edit across all the planned tasks is in.
+
+**Dev workflow — why builds are rare and why that's fine:** The user works in batches — bang out a bunch of ideas / bug fixes / requirements across a working session, THEN verify them together in dedicated, longer testing sessions later (which may be a while off). So code is *expected* to sit written-but-unbuilt for a stretch; that is the normal state, not a loose end to resolve. Do NOT push to build or test between changes, do NOT treat "unverified" as a problem to fix now, and do NOT nag about building. When a series of edits is done, note it's ready to verify whenever the next testing session happens, and move on to the next item in the batch.
 
 **Why:** The user explicitly flagged it as chewing up CPU when I kicked off a verify build after #110's server-side edits before moving to #110's addon edits / #111 / #112 / etc. ("do one build at the end, stop running them off in parallel, its chewing up CPU"). LSB's xi_map link step is heavy and each rebuild redoes a lot of work even with incremental.
 

@@ -967,6 +967,12 @@ function M.draw()
                     if sn.text and sn.text ~= '' then owned_tag[sn.tag] = true end
                 end
             end
+            -- Rows with the remove [x] button are one frame-height tall; rows
+            -- without it (empty / inherited) must reserve the same height so the
+            -- slot list stays evenly spaced regardless of which slots are filled.
+            local row_h = (imgui.GetFrameHeight and imgui.GetFrameHeight())
+                or (imgui.GetTextLineHeightWithSpacing and imgui.GetTextLineHeightWithSpacing())
+                or 22
             for _, slot in ipairs(SLOT_ORDER) do
                 local item  = gear[slot] or (xml_tag and gear[xml_tag[slot]])
                 local label = SLOT_LABEL[slot] or slot
@@ -985,7 +991,7 @@ function M.draw()
                         dirty_sets[ui_selected] = true
                     end
                 else
-                    imgui.Dummy(22, 0)
+                    imgui.Dummy(22, row_h)
                 end
                 imgui.SameLine(0, 6)
                 if inherited then imgui.PushStyleColor(ImGuiCol_Text, 0.55, 0.55, 0.55, 1.0) end

@@ -9,4 +9,4 @@ When writing a new memory file for this project:
 
 Addon-specific memories (Ashita API, specific addon bugs) go in `singleplayer/client/addons/.claude/memory/` instead, and are indexed in `~/.claude/projects/-home-nate-Desktop-git-LandSandBoat/memory/MEMORY.md` with their absolute paths as well.
 
-Note: client-side artifacts (Ashita addons, eventually any other launcher copies) live under `singleplayer/client/` — **never** under `modules/`, which is the server's hot-reload watch root. The wider `singleplayer/` root also holds `config/`, `data/`, `docs/`, `scripts/Default.txt`, and the project README; only `modules/singleplayer/{lib,lua,sql}/` remains in `modules/` (proper LSB module content).
+Note: client-side artifacts (Ashita addons, eventually any other launcher copies) live under `singleplayer/client/` — **never** under `modules/`, which is the server's hot-reload watch root. The wider `singleplayer/` root also holds `config/` and `docs/`; launcher assets like `Default.txt` live under `singleplayer/client/scripts/`. Only `modules/singleplayer/{lib,lua,sql}/` remains in `modules/` (proper LSB module content).

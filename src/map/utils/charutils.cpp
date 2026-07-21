@@ -2043,6 +2043,62 @@ uint32 UpdateItem(CCharEntity* PChar, uint8 LocationID, uint8 slotID, int32 quan
     return ItemID;
 }
 
+// Merge same-item partial stacks in a container into the minimum number of
+// slots. This is the same consolidation the 0x03A client "sort" runs
+// (ITEM_STACK::process), but parameterized by target so it works on a char with
+// no client to emit 0x03A (e.g. a headless bot). Reserved / locked / already-
+// full stacks are skipped. UpdateItem writes char_inventory through, so the DB
+// is consistent by the time this returns.
+void ConsolidateContainerStacks(CCharEntity* PChar, CItemContainer* PContainer)
+{
+    if (PChar == nullptr || PContainer == nullptr)
+    {
+        return;
+    }
+
+    const uint8 size = PContainer->GetSize();
+    for (uint8 slotID = 1; slotID <= size; ++slotID)
+    {
+        const CItem* PItem = PContainer->GetItem(slotID);
+        if (!PItem ||
+            PItem->getReserve() > 0 ||
+            PItem->isSubType(ITEM_LOCKED) ||
+            PItem->getQuantity() >= PItem->getStackSize())
+        {
+            continue;
+        }
+
+        for (uint8 slotID2 = slotID + 1; slotID2 <= size; ++slotID2)
+        {
+            const CItem* PItem2 = PContainer->GetItem(slotID2);
+            if (!PItem2 ||
+                PItem2->getID() != PItem->getID() ||
+                PItem2->getReserve() > 0 ||
+                PItem2->isSubType(ITEM_LOCKED) ||
+                PItem2->getQuantity() >= PItem2->getStackSize())
+            {
+                continue;
+            }
+
+            const uint32 totalQty = PItem->getQuantity() + PItem2->getQuantity();
+            uint32       moveQty  = 0;
+            if (totalQty >= PItem->getStackSize())
+            {
+                moveQty = PItem->getStackSize() - PItem->getQuantity();
+            }
+            else
+            {
+                moveQty = PItem2->getQuantity();
+            }
+            if (moveQty > 0)
+            {
+                UpdateItem(PChar, static_cast<uint8>(PContainer->GetID()), slotID, moveQty);
+                UpdateItem(PChar, static_cast<uint8>(PContainer->GetID()), slotID2, -static_cast<int32>(moveQty));
+            }
+        }
+    }
+}
+
 // A wrapper around UpdateItem, with some packets
 void DropItem(CCharEntity* PChar, uint8 container, uint8 slotID, int32 quantity, uint16 ItemID)
 {

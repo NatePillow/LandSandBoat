@@ -224,7 +224,13 @@ function M.ensure_inventory(charName)
     -- player the retail delta packets (0x020 / 0x01E) keep it fresh without an
     -- explicit refetch. A cross-char target has no delta source, so callers
     -- that need current data for a headless must send_inv_request themselves.
-    if entry and not entry.loading and next(entry.bags) ~= nil then
+    -- Require caps too, not just bags. The passive delta packets (0x020/0x01E)
+    -- populate bags but never caps, so a cache warmed only by deltas has empty
+    -- caps -> container availability (get_container_max) is unknown and owned
+    -- containers render dimmed/non-selectable until a manual Reload. Treating
+    -- the cache as warm only when caps are also present forces the one fetch
+    -- that fills them in on first open.
+    if entry and not entry.loading and next(entry.bags) ~= nil and next(entry.caps) ~= nil then
         return true
     end
     -- Currently in-flight (someone else already asked) → don't double-send.

@@ -613,6 +613,11 @@ auto calculateSynthResult(CCharEntity* PChar) -> uint8
     // See: https://www.bluegartr.com/threads/130586-CraftyMath-v2-Post-September-2017-Update page 3.
     chanceHQ = (chanceHQ + 100.0f * PChar->getMod(Mod::SYNTH_HQ_RATE) / 512.0f) * settings::get<float>("map.CRAFT_HQ_CHANCE_MULTIPLIER");
 
+    // SINGLEPLAYER: flat additive HQ bonus (percentage points). Stacks on top of
+    // skill/tier, the SYNTH_HQ_RATE mod (Craftmaster ring etc.), and the
+    // multiplier above. Applied before the 80% clamp so it still respects the cap.
+    chanceHQ += settings::get<float>("map.CRAFT_HQ_RATE_BONUS");
+
     // limit max hq chance
     if (chanceHQ > 80.0f)
     {
@@ -715,6 +720,9 @@ auto calculateDesynthResult(CCharEntity* PChar) -> uint8
 
     // See: https://www.bluegartr.com/threads/130586-CraftyMath-v2-Post-September-2017-Update page 3.
     float chanceHQ = (60.0f + 100.0f * PChar->getMod(Mod::SYNTH_HQ_RATE) / 512.0f) * settings::get<float>("map.CRAFT_HQ_CHANCE_MULTIPLIER");
+
+    // SINGLEPLAYER: flat additive HQ bonus (percentage points), same as synthesis.
+    chanceHQ += settings::get<float>("map.CRAFT_HQ_RATE_BONUS");
 
     // Limit max hq chance
     if (chanceHQ > 80.0f)
