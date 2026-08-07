@@ -958,8 +958,8 @@ function M.draw()
             local xml_tag = autoequip.SLOT_XML_TAG
             -- Slots this set OWNS (a direct child with an item) vs slots merged
             -- in from the base set. Only owned slots get the remove [x]; base
-            -- rows render dimmed with a (base) marker and no remove — you edit
-            -- those in the base set itself.
+            -- rows render dimmed (the dimmed color is the "from base" signal)
+            -- with no remove — you edit those in the base set itself.
             local owned_tag = {}
             local own_node  = set_node_for(ui_selected)
             if own_node then
@@ -981,7 +981,6 @@ function M.draw()
                 local owned     = has_item and owned_tag[tag] == true
                 local inherited = has_item and not owned
                 local row   = string.format('%-6s  %s', label, has_item and item or '(empty)')
-                if inherited then row = row .. '  (base)' end
                 -- Remove [x] only for owned slots (X-on-left so it doesn't fight
                 -- the Selectable for the click); inherited/empty rows pad with a
                 -- Dummy to keep the row text aligned.

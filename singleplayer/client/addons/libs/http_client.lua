@@ -40,32 +40,28 @@ local socket = require('socket');
 local http_client = {};
 
 -- =====================================================================
--- END-USER CONFIG: edit HOST/PORT here to match your deployment.
+-- Connection to the map server's config HTTP service.
 -- =====================================================================
--- These have to agree with the server's CONFIG_HTTP_BIND_ADDR /
--- CONFIG_HTTP_PORT in settings/singleplayer.lua — same port on both
--- sides, and HOST is an IP the server is actually bound on AND that
--- this client machine can reach.
---
--- HOST: the IP/hostname where the map server is reachable from THIS
--- machine (the client's machine).
---   - Same machine as server         → '127.0.0.1'
---   - Win10 VM on the Linux host
---     - VirtualBox/QEMU NAT (default) → '10.0.2.2'
---     - VirtualBox bridged adapter   → the host's LAN IP (`route print 0.0.0.0` in cmd)
---     - VMware NAT                   → '192.168.x.1' (varies)
---   - Different physical machine     → the server's LAN IP
--- If unsure, the rule of thumb: use the same address you use in your
--- FFXI client to connect to the map server, or run `route print 0.0.0.0`
--- in the VM cmd and take the Gateway column.
---
--- PORT: must match settings/singleplayer.lua CONFIG_HTTP_PORT.
---
--- Curl sanity check from inside the client machine:
---   curl http://<HOST>:<PORT>/healthz   # should return "ok"
+-- HOST/PORT are configured in the top-level user_config.lua (the addons
+-- root, next to the autobots/automog/autoequip folders) so they're easy
+-- to find on a fresh install. See that file for what the values should
+-- be for your setup. The values below are only FALLBACK DEFAULTS used if
+-- user_config.lua is missing or malformed.
 -- =====================================================================
 http_client.HOST = '192.168.40.92';
 http_client.PORT = 51220;
+
+do
+    -- user_config.lua sits one directory above this addon (the addons
+    -- root). Add that dir to the require path, then apply HOST/PORT.
+    local base = (_addon and _addon.path) or '';
+    package.path = package.path .. ';' .. base .. '..\\?.lua;' .. base .. '../?.lua';
+    local ok, cfg = pcall(require, 'user_config');
+    if ok and type(cfg) == 'table' then
+        if cfg.HOST ~= nil then http_client.HOST = cfg.HOST; end
+        if cfg.PORT ~= nil then http_client.PORT = cfg.PORT; end
+    end
+end
 
 -- Per-step deadline (seconds since start). A request that doesn't complete
 -- by this much wall-clock time gets killed with err = 'timeout'. Counts

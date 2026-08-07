@@ -152,179 +152,25 @@ local GRID_ROWS = 4;
 -- 920px first-use window width.
 -----------------------------------
 local CARD_W        = 210;
--- 200 (was 170) so the tallest card — RDM, which stacks Heal Scope + Nuke
--- Rotation + MB Spells (3 combos) below the divider — fits without an in-card
--- scrollbar. The Status window auto-fits height (SetNextWindowSize height 0),
--- so the taller grid just grows the window. Empty-slot placeholders share this
--- constant, keeping the 4x4 grid aligned.
+-- View-only card: name + exp + 2-row status-icon strip. The per-bot controls
+-- moved to the Role AI tab, but the card keeps its original 200 height (a
+-- rectangle, not a square) so the Status grid reads the same as before.
 local CARD_H        = 200;
-local ICON_SIZE     = 18;
+local ICON_SIZE     = 22;  -- larger than the old 18, tuned down from 27
 local ICON_GAP      = 2;
-local ICONS_PER_ROW = 8;
-local MAX_ICON_ROWS = 2;
+-- Per-row count keeps a full row within the 210px card interior
+-- (7 * 22 + 6 * 2 = 166, within the padded content width).
+local ICONS_PER_ROW = 7;
+local MAX_ICON_ROWS = 4;  -- ~7*4 = 28 icons before the "+N" overflow
 local ICON_BLOCK_H  = MAX_ICON_ROWS * (ICON_SIZE + ICON_GAP);
 
------------------------------------
--- Ashita party lookup. Returns mj, ml, sj, sl, or nil if the name isn't
--- in any alliance slot from this client's perspective.
------------------------------------
-local function lookup_jobs(name)
-    local party = AshitaCore:GetDataManager():GetParty();
-    if party == nil then return nil; end
-    for slot = 0, 17 do
-        if party:GetMemberName(slot) == name then
-            return party:GetMemberMainJob(slot),
-                   party:GetMemberMainJobLevel(slot),
-                   party:GetMemberSubJob(slot),
-                   party:GetMemberSubJobLvl(slot);
-        end
-    end
-    return nil;
-end
-
--- THF main-job ID. SATA eligibility still gated on job (needs both SA + TA),
--- not on role config - matches the prior implementation.
-local JOB_THF = 6;
-local function is_sata_eligible(name)
-    local mj, ml, sj, sl = lookup_jobs(name);
-    if mj == nil then return false; end
-    if mj == JOB_THF and (ml or 0) >= 30 then return true; end
-    if sj == JOB_THF and (sl or 0) >= 30 then return true; end
-    return false;
-end
-
--- PLD main-job ID. Add-control dropdown is PLD-only because Flash is a
--- PLD-unique spell (level 25). We accept main-PLD/lv25+ here; sub-PLD also
--- learns Flash at sub-25 (so main >= 50) but that's a rarer config and we
--- keep V1 simple - sub-PLD path can be added later by extending this check.
-local JOB_PLD = 7;
-local function is_pld_flash_eligible(name)
-    local mj, ml = lookup_jobs(name);
-    if mj == nil then return false; end
-    if mj == JOB_PLD and (ml or 0) >= 25 then return true; end
-    return false;
-end
-
--- SMN main-job check. Avatar dropdown only appears for main-SMN; sub-SMN
--- has very limited summon access and the role_smn server-side dispatch
--- keys on main-job SMN anyway.
-local JOB_SMN = 15;
-local function is_smn_main(name)
-    local mj = lookup_jobs(name);
-    return mj == JOB_SMN;
-end
-
--- THF main-job check. The RA cadence combo only appears for main-job THF
--- because the role_melee should_ra branch keys on is_job(bot, 'THF')
--- which is main-job. Sub THF doesn't drive the utility-RA logic.
--- (JOB_THF = 6 already declared above for is_sata_eligible.)
-local function is_thf_main(name)
-    local mj = lookup_jobs(name);
-    if mj == nil then return false; end
-    return mj == JOB_THF;
-end
-
------------------------------------
--- Per-bot ImGui combobox state. ComboBox needs a backing ImVar to store the
--- selected 0-based index. Vars are created lazily and cached by (bot name,
--- combo tag) so adding/removing bots between renders doesn't churn vars.
------------------------------------
-local combo_vars       = {};   -- ['<name>_<tag>'] = ImVar
-local sata_modes       = {};   -- ['<name>'] = 'combined' / 'split' / 'saonly'
--- Per-bot THF utility-RA cadence (seconds). 0 = Off. Default 15 matches
--- the server-side bots.lua initializer; user changes are mirrored here
--- and re-sent over the wire.
-local thf_ra_delays    = {};
-local heal_scopes      = {};   -- ['<name>'] = 'party' / 'allianceAssist' / 'allianceMain'
-local add_control_modes = {};  -- ['<name>'] = 'provoke' / 'flash' / 'both'  (PLD add-control)
-local smn_avatars       = {};  -- ['<name>'] = current avatar spell ID (296 default)
-local smn_known_summons = {};  -- ['<name>'] = { spellId, ... } filtered to learned
-local casual_nuke_rotations = {}; -- ['<name>'] = 1..6 spells, 0 = All (role_nuke/rdm)
-local casual_nuke_mb_modes  = {}; -- ['<name>'] = 'include' / 'exclude'
-
--- SMN avatar dropdown labels — keyed by summon spell ID. Plain ASCII per
--- ASCII-only-in-chat rule (the dropdown is local UI so the rule is
--- belt-and-braces here, but the labels never need anything special).
-local SUMMON_LABEL = {
-    [288] = 'Fire Spirit',
-    [289] = 'Ice Spirit',
-    [290] = 'Air Spirit',
-    [291] = 'Earth Spirit',
-    [292] = 'Thunder Spirit',
-    [293] = 'Water Spirit',
-    [294] = 'Light Spirit',
-    [295] = 'Dark Spirit',
-    [296] = 'Carbuncle',
-    [297] = 'Fenrir',
-    [298] = 'Ifrit',
-    [299] = 'Titan',
-    [300] = 'Leviathan',
-    [301] = 'Garuda',
-    [302] = 'Shiva',
-    [303] = 'Ramuh',
-    [304] = 'Diabolos',
-};
-
--- Seed the per-bot mirrors from the HTTP bot-state snapshot. Called by
--- autobots_ui.apply_server_snapshot with the bots[] array (each row has
--- name + role + sataMode + healScope + addControlMode + thfRaDelay).
--- Defensive type-checks so a malformed entry can't corrupt the UI.
-function status_tab.apply_bot_state(bots_arr)
-    if type(bots_arr) ~= 'table' then return; end
-    for _, row in ipairs(bots_arr) do
-        local name = (type(row.name) == 'string') and row.name or nil;
-        if name and name ~= '' then
-            if type(row.sataMode)       == 'string' then sata_modes[name]        = row.sataMode;       end
-            if type(row.healScope)      == 'string' then heal_scopes[name]       = row.healScope;      end
-            if type(row.addControlMode) == 'string' then add_control_modes[name] = row.addControlMode; end
-            if type(row.thfRaDelay)     == 'number' then thf_ra_delays[name]     = row.thfRaDelay;     end
-            if type(row.smnAvatarSpellId) == 'number' then smn_avatars[name]     = row.smnAvatarSpellId; end
-            if type(row.knownSummons)   == 'table'  then smn_known_summons[name] = row.knownSummons;   end
-            if type(row.casualNukeRotation) == 'number' then casual_nuke_rotations[name] = row.casualNukeRotation; end
-            if type(row.casualNukeMbMode)   == 'string' then casual_nuke_mb_modes[name]  = row.casualNukeMbMode;   end
-        end
-    end
-end
-
-local function get_combo_var(name, tag)
-    local key = name .. '_' .. tag;
-    local v   = combo_vars[key];
-    if v == nil then
-        v = imgui.CreateVar(ImGuiVar_INT32);
-        combo_vars[key] = v;
-    end
-    return v;
-end
-
-local SATA_OPTIONS = { 'combined', 'split',     'saonly' };
-local SATA_LABELS  = { 'Combined', 'Split',     'SA Only' };
-local HEAL_OPTIONS = { 'party',    'allianceAssist', 'allianceMain' };
-local HEAL_LABELS  = { 'Party',    'Alliance Assist', 'Alliance Main' };
--- PLD add-control. Wire-byte = (index - 1). Labels are the dropdown display
--- strings (title-cased + ampersand spelled out for the "both" case).
-local ADD_CTRL_OPTIONS = { 'provoke', 'flash', 'both'          };
-local ADD_CTRL_LABELS  = { 'Provoke', 'Flash', 'Provoke & Flash' };
--- THF utility-RA cadence in seconds. 0 = Off (sentinel — server skips RA
--- entirely when delay <= 0). Values match the discrete picker mentioned
--- in the conversation; tune by editing this table on both sides if more
--- granularity is wanted later.
-local THF_RA_OPTIONS = { 0,     5,    10,    15,    20,    30    };
-local THF_RA_LABELS  = { 'Off', '5s', '10s', '15s', '20s', '30s' };
--- Casual-nuke rotation: how many spells cycle before repeating. 0 = All (cycle
--- through everything castable). role_nuke / role_rdm cards.
-local NUKE_ROT_OPTIONS = { 1,   2,   3,   4,   5,   6,   0     };
-local NUKE_ROT_LABELS  = { '1', '2', '3', '4', '5', '6', 'All' };
--- Casual-nuke MB-spell mode. Include = SC-MB elements usable in casual rotation;
--- Exclude = reserve them for magic bursts.
-local NUKE_MB_OPTIONS = { 'include', 'exclude' };
-local NUKE_MB_LABELS  = { 'Include', 'Exclude' };
-
-local function index_of(tbl, val)
-    for i, v in ipairs(tbl) do
-        if v == val then return i; end
-    end
-    return 1;
-end
+-- (The per-bot control machinery that used to live here — job gates
+--  lookup_jobs / is_sata_eligible / is_pld_flash_eligible / is_smn_main /
+--  is_thf_main, the per-name state mirrors, apply_bot_state ingest, the
+--  option constants, get_combo_var, index_of, and the eight
+--  render_*_combo_centered helpers — all moved to role_ai_tab.lua when the
+--  per-bot AI settings got their own tab. Status is now a view-only monitor
+--  and consumes only the 0x191 PARTY_STATUS feed.)
 
 -- Pull the width component out of imgui.CalcTextSize's variable return shape.
 -- Different Ashita imgui versions hand back number, {x=..,y=..}, or {w,h}.
@@ -392,245 +238,32 @@ local function render_icons(effects)
     if pad > 0 then imgui.Dummy(0, pad); end
 end
 
------------------------------------
--- Centered role toggles. Each renders a single horizontal "Label  [Combo]"
--- or "Label  [< >]" group, centered in the card's content region.
--- ROW_H is the approximate vertical footprint used by the parent to vertical-
--- center the block.
------------------------------------
-local TOGGLE_ROW_H = 22;
-local COMBO_W      = 120;
-local LABEL_GAP    = 6;
-
--- Frame padding for combos (matches imgui dark-theme default). Used to
--- offset the label Y so it visually centers against the combo's frame
--- baseline. AlignTextToFramePadding turned out to be unreliable on the
--- first item of a fresh line in Ashita's binding - we got the "label
--- sits high" effect on every combo's first frame. Explicit Y offset is
--- binding-independent and works for all three combos.
-local LABEL_Y_OFFSET = 3;
-
-local function render_sata_combo_centered(name)
-    local current = sata_modes[name] or 'combined';
-    local var     = get_combo_var(name, 'sata');
-    imgui.SetVarValue(var, index_of(SATA_OPTIONS, current) - 1);
-
-    local label_w = calc_text_w('SATA');
-    center_cursor_x(label_w + LABEL_GAP + COMBO_W);
-    local row_y = imgui.GetCursorPosY();
-    imgui.SetCursorPosY(row_y + LABEL_Y_OFFSET);
-    imgui.Text('SATA');
-    imgui.SameLine(0, LABEL_GAP);
-    imgui.SetCursorPosY(row_y);
-    imgui.PushItemWidth(COMBO_W);
-    imgui.Combo('##sata_' .. name, var, table.concat(SATA_LABELS, '\0') .. '\0');
-    imgui.PopItemWidth();
-
-    local newIdx = imgui.GetVarValue(var) + 1;
-    local newVal = SATA_OPTIONS[newIdx];
-    if newVal ~= nil and newVal ~= current then
-        sata_modes[name] = newVal;
-        autoutil.send_bot_set_sata_mode(name, newIdx - 1);
+-- Main/sub job + level string for the card, e.g. "WAR60/NIN30" (or "WAR60"
+-- with no sub). Pulled from the live Ashita party (free, fast). Returns nil
+-- when the char isn't in an alliance slot or has no resolved main job.
+local function member_jobs_str(name)
+    if name == nil or name == '' then return nil; end
+    local party = AshitaCore:GetDataManager():GetParty();
+    if party == nil then return nil; end
+    for slot = 0, 17 do
+        if party:GetMemberName(slot) == name then
+            local mj = party:GetMemberMainJob(slot) or 0;
+            if mj == 0 then return nil; end
+            local ml = party:GetMemberMainJobLevel(slot) or 0;
+            local sj = party:GetMemberSubJob(slot) or 0;
+            local sl = party:GetMemberSubJobLvl(slot) or 0;
+            local s = string.format('%s %d', autoutil.jobs[mj] or '?', ml);
+            if sj > 0 then
+                s = s .. string.format(' / %s %d', autoutil.jobs[sj] or '?', sl);
+            end
+            return s;
+        end
     end
+    return nil;
 end
 
-local function render_casual_nuke_rotation_centered(name)
-    local current = casual_nuke_rotations[name] or 3;
-    local var     = get_combo_var(name, 'nukerot');
-    imgui.SetVarValue(var, index_of(NUKE_ROT_OPTIONS, current) - 1);
-
-    local label_w = calc_text_w('Nuke Rotation');
-    center_cursor_x(label_w + LABEL_GAP + COMBO_W);
-    local row_y = imgui.GetCursorPosY();
-    imgui.SetCursorPosY(row_y + LABEL_Y_OFFSET);
-    imgui.Text('Nuke Rotation');
-    imgui.SameLine(0, LABEL_GAP);
-    imgui.SetCursorPosY(row_y);
-    imgui.PushItemWidth(COMBO_W);
-    imgui.Combo('##nukerot_' .. name, var, table.concat(NUKE_ROT_LABELS, '\0') .. '\0');
-    imgui.PopItemWidth();
-
-    local newIdx = imgui.GetVarValue(var) + 1;
-    local newVal = NUKE_ROT_OPTIONS[newIdx];
-    if newVal ~= nil and newVal ~= current then
-        casual_nuke_rotations[name] = newVal;
-        -- Wire byte = the number; 0 = All.
-        autoutil.send_bot_set_casual_nuke_rotation(name, newVal);
-    end
-end
-
-local function render_casual_nuke_mb_centered(name)
-    local current = casual_nuke_mb_modes[name] or 'include';
-    local var     = get_combo_var(name, 'nukemb');
-    imgui.SetVarValue(var, index_of(NUKE_MB_OPTIONS, current) - 1);
-
-    local label_w = calc_text_w('MB Spells');
-    center_cursor_x(label_w + LABEL_GAP + COMBO_W);
-    local row_y = imgui.GetCursorPosY();
-    imgui.SetCursorPosY(row_y + LABEL_Y_OFFSET);
-    imgui.Text('MB Spells');
-    imgui.SameLine(0, LABEL_GAP);
-    imgui.SetCursorPosY(row_y);
-    imgui.PushItemWidth(COMBO_W);
-    imgui.Combo('##nukemb_' .. name, var, table.concat(NUKE_MB_LABELS, '\0') .. '\0');
-    imgui.PopItemWidth();
-
-    local newIdx = imgui.GetVarValue(var) + 1;
-    local newVal = NUKE_MB_OPTIONS[newIdx];
-    if newVal ~= nil and newVal ~= current then
-        casual_nuke_mb_modes[name] = newVal;
-        -- Wire byte: 0 = exclude, 1 = include.
-        autoutil.send_bot_set_casual_nuke_mb_mode(name, (newVal == 'include') and 1 or 0);
-    end
-end
-
-local function render_heal_combo_centered(name)
-    local current = heal_scopes[name] or 'party';
-    local var     = get_combo_var(name, 'heal');
-    imgui.SetVarValue(var, index_of(HEAL_OPTIONS, current) - 1);
-
-    local label_w = calc_text_w('Heal');
-    center_cursor_x(label_w + LABEL_GAP + COMBO_W);
-    local row_y = imgui.GetCursorPosY();
-    imgui.SetCursorPosY(row_y + LABEL_Y_OFFSET);
-    imgui.Text('Heal');
-    imgui.SameLine(0, LABEL_GAP);
-    imgui.SetCursorPosY(row_y);
-    imgui.PushItemWidth(COMBO_W);
-    imgui.Combo('##heal_' .. name, var, table.concat(HEAL_LABELS, '\0') .. '\0');
-    imgui.PopItemWidth();
-
-    local newIdx = imgui.GetVarValue(var) + 1;
-    local newVal = HEAL_OPTIONS[newIdx];
-    if newVal ~= nil and newVal ~= current then
-        heal_scopes[name] = newVal;
-        autoutil.send_bot_set_heal_scope(name, newIdx - 1);
-    end
-end
-
-local function render_add_control_combo_centered(name)
-    local current = add_control_modes[name] or 'provoke';
-    local var     = get_combo_var(name, 'addctl');
-    imgui.SetVarValue(var, index_of(ADD_CTRL_OPTIONS, current) - 1);
-
-    -- Label was previously "Add Control"; renamed to just "Adds" - the
-    -- column header for this dropdown is short enough that the combo body
-    -- (Provoke / Flash / Provoke & Flash) already conveys the semantics.
-    -- "Provoke & Flash" is still the longest option so combo stays at 130.
-    local label   = 'Adds';
-    local combo_w = 130;
-    local label_w = calc_text_w(label);
-    center_cursor_x(label_w + LABEL_GAP + combo_w);
-    local row_y = imgui.GetCursorPosY();
-    imgui.SetCursorPosY(row_y + LABEL_Y_OFFSET);
-    imgui.Text(label);
-    imgui.SameLine(0, LABEL_GAP);
-    imgui.SetCursorPosY(row_y);
-    imgui.PushItemWidth(combo_w);
-    imgui.Combo('##addctl_' .. name, var, table.concat(ADD_CTRL_LABELS, '\0') .. '\0');
-    imgui.PopItemWidth();
-
-    local newIdx = imgui.GetVarValue(var) + 1;
-    local newVal = ADD_CTRL_OPTIONS[newIdx];
-    if newVal ~= nil and newVal ~= current then
-        add_control_modes[name] = newVal;
-        autoutil.send_bot_set_add_control(name, newIdx - 1);
-    end
-end
-
--- THF utility-RA cadence combo. Renders under SATA on main-job THF cards.
--- Picker values come from THF_RA_OPTIONS (seconds); the index 0 entry is
--- the "Off" sentinel that maps to 0 on the wire and makes role_melee's
--- should_ra return false unconditionally.
-local function render_thf_ra_combo_centered(name)
-    local current = thf_ra_delays[name] or 15;
-    local var     = get_combo_var(name, 'thfra');
-    local idx     = index_of(THF_RA_OPTIONS, current);
-    imgui.SetVarValue(var, idx - 1);
-
-    local label   = 'RA';
-    local combo_w = 80;
-    local label_w = calc_text_w(label);
-    center_cursor_x(label_w + LABEL_GAP + combo_w);
-    local row_y = imgui.GetCursorPosY();
-    imgui.SetCursorPosY(row_y + LABEL_Y_OFFSET);
-    imgui.Text(label);
-    imgui.SameLine(0, LABEL_GAP);
-    imgui.SetCursorPosY(row_y);
-    imgui.PushItemWidth(combo_w);
-    imgui.Combo('##thfra_' .. name, var, table.concat(THF_RA_LABELS, '\0') .. '\0');
-    imgui.PopItemWidth();
-
-    local newIdx = imgui.GetVarValue(var) + 1;
-    local newVal = THF_RA_OPTIONS[newIdx];
-    if newVal ~= nil and newVal ~= current then
-        thf_ra_delays[name] = newVal;
-        autoutil.send_bot_set_thf_ra_delay(name, newVal);
-    end
-end
-
--- SMN avatar dropdown (#220). Options derived from the bot's known
--- summon spells in the snapshot (knownSummons). Carbuncle is the
--- default — surfaced as the first list entry if learned. Sends
--- SET_SMN_AVATAR (0x24) on change.
-local function render_smn_avatar_combo_centered(name)
-    local known = smn_known_summons[name] or {};
-    if #known == 0 then return; end
-    local current = smn_avatars[name] or 296;  -- Carbuncle fallback
-    local var     = get_combo_var(name, 'smnavatar');
-    local labels  = {};
-    for _, spellId in ipairs(known) do
-        table.insert(labels, SUMMON_LABEL[spellId] or ('Summon ' .. tostring(spellId)));
-    end
-    -- Find current index in known list
-    local idx = 1;
-    for i, spellId in ipairs(known) do
-        if spellId == current then idx = i; break; end
-    end
-    imgui.SetVarValue(var, idx - 1);
-
-    local label   = 'Avatar';
-    local combo_w = 110;
-    local label_w = calc_text_w(label);
-    center_cursor_x(label_w + LABEL_GAP + combo_w);
-    local row_y = imgui.GetCursorPosY();
-    imgui.SetCursorPosY(row_y + LABEL_Y_OFFSET);
-    imgui.Text(label);
-    imgui.SameLine(0, LABEL_GAP);
-    imgui.SetCursorPosY(row_y);
-    imgui.PushItemWidth(combo_w);
-    imgui.Combo('##smnavatar_' .. name, var, table.concat(labels, '\0') .. '\0');
-    imgui.PopItemWidth();
-
-    local newIdx = imgui.GetVarValue(var) + 1;
-    local newVal = known[newIdx];
-    if newVal ~= nil and newVal ~= current then
-        smn_avatars[name] = newVal;
-        autoutil.send_smn_avatar(name, newVal);
-    end
-end
-
-local function render_tank_nudge_centered(name)
-    -- Three fixed-width buttons on one row: Fwd / Back / To Me. Short labels
-    -- so all three fit comfortably in the card's 210px interior. The card
-    -- itself identifies the bot so abbreviated verbs are unambiguous.
-    -- Fwd/Back: ai_move.tank_nudge (0=forward toward target, 1=backward away).
-    -- To Me:    ai_move.tank_walk_to_me (snap bot to primary's current xyz).
-    local BTN_W = 60;
-    local GAP   = 4;
-    center_cursor_x(BTN_W * 3 + GAP * 2);
-    if imgui.Button('Fwd##tnudge_fwd_' .. name, BTN_W, 0) then
-        autoutil.send_bot_tank_nudge(name, 0);
-    end
-    imgui.SameLine(0, GAP);
-    if imgui.Button('Back##tnudge_back_' .. name, BTN_W, 0) then
-        autoutil.send_bot_tank_nudge(name, 1);
-    end
-    imgui.SameLine(0, GAP);
-    if imgui.Button('To Me##twalk_' .. name, BTN_W, 0) then
-        autoutil.send_bot_tank_walk_to_me(name);
-    end
-end
+-- Horizontal padding on the status-icon strip so it doesn't hug the card edges.
+local ICON_PAD_X = 12;
 
 -----------------------------------
 -- One card. Owns a fixed-size BeginChild frame so the grid stays aligned
@@ -645,9 +278,22 @@ local function render_card(row, idx)
     -- 1) Centered name. Ashita v3 imgui doesn't expose font scaling, so the
     --    "slightly bigger" feel comes from a brighter foreground color plus
     --    the surrounding whitespace giving the line visual weight.
-    imgui.Dummy(0, 2);
+    -- Name + jobs render a little larger via SetWindowFontScale where the
+    -- binding exposes it (guarded — ADKv3's imgui is ashita.gui and the func
+    -- set is binary-provided; no-op if absent). Widths are measured at base
+    -- scale then multiplied so the centering stays correct at the larger size.
+    -- Kept modest: the bitmap font gets rough when scaled up much past this.
+    local BIG       = 1.1;
+    local can_scale = (imgui.SetWindowFontScale ~= nil);
+
+    imgui.Dummy(0, 4);
     local display_name = (name ~= '') and name or '(loading)';
-    center_cursor_x(calc_text_w(display_name));
+    local nw = calc_text_w(display_name);
+    local js = member_jobs_str(name);
+    local jw = (js ~= nil) and calc_text_w(js) or 0;
+
+    if can_scale then imgui.SetWindowFontScale(BIG); end
+    center_cursor_x(can_scale and nw * BIG or nw);
     if is_primary then
         -- Primary gets a faint gold-ish tint so it visually anchors the grid.
         imgui.TextColored(1.0, 0.95, 0.6, 1.0, display_name);
@@ -655,7 +301,18 @@ local function render_card(row, idx)
         imgui.TextColored(1.0, 1.0, 1.0, 1.0, display_name);
     end
 
-    -- 2) Centered EXP row. Show denominator as "MAX" at level cap (req=0).
+    imgui.Dummy(0, 4);
+
+    -- 2) Centered jobs row: "WAR60/NIN30" (main + sub with levels), same size.
+    if js ~= nil then
+        center_cursor_x(can_scale and jw * BIG or jw);
+        imgui.TextColored(0.80, 0.88, 1.0, 1.0, js);
+    end
+    if can_scale then imgui.SetWindowFontScale(1.0); end
+
+    imgui.Dummy(0, 4);
+
+    -- 3) Centered EXP row. Show denominator as "MAX" at level cap (req=0).
     -- Brightened from TextDisabled to a bright neutral so the EXP line
     -- reads as foreground content rather than washing into the card chrome.
     do
@@ -667,94 +324,17 @@ local function render_card(row, idx)
         imgui.TextColored(0.90, 0.90, 0.90, 1.0, s);
     end
 
-    imgui.Dummy(0, 4);
+    imgui.Dummy(0, 6);
 
-    -- 3) Status icon strip (reserves 2 rows of vertical space).
+    -- 4) Status icon strip (reserves 2 rows of vertical space). Indented on
+    --    both sides so the icons don't hug the card edges.
+    imgui.Indent(ICON_PAD_X);
     render_icons(row and row.effects);
+    imgui.Unindent(ICON_PAD_X);
 
-    imgui.Dummy(0, 4);
-
-    -- 4) Mild divider. ImGui's default Separator is a single 1px line - "mild"
-    --    enough for the card's interior.
-    imgui.Separator();
-
-    -- 5) Centered role toggles. Vertically center the block in the remaining
-    --    space below the divider. Primary is INCLUDED - they get the same
-    --    role-gated toggles as any headless because the AI runs the same
-    --    role tick on them and the server-side setters accept the primary
-    --    by name (set_bot_sata_mode / set_bot_heal_scope /
-    --    set_add_control_mode / tank_nudge all special-case `m == primary`).
-    --    For bots whose role config has no relevant toggle the block is
-    --    empty and we skip the centering math entirely.
-    local toggle_renderers = {};
-    -- Heal-scope dropdown applies to anyone whose role tick reads
-    -- state.healScope: role_heal (alliance Cure / -na fallback) and
-    -- role_rdm (alliance Cure_P1 + status fallback, see role_rdm.tick).
-    -- A future role_smn that picks up the toggle would just add 'smn'
-    -- here. Each bot is in exactly one role bucket, so the OR-of-roles
-    -- can't double-render the combo for a single card.
-    if autoutil.bot_has_role and (autoutil.bot_has_role(name, 'heal')
-                               or autoutil.bot_has_role(name, 'rdm')) then
-        table.insert(toggle_renderers, render_heal_combo_centered);
-    end
-    if is_sata_eligible(name) then
-        table.insert(toggle_renderers, render_sata_combo_centered);
-    end
-    -- Casual-nuke controls. role_nuke and role_rdm both run the casual-nuke
-    -- path, so both cards get the rotation-size + MB-spell dropdowns.
-    if autoutil.bot_has_role and (autoutil.bot_has_role(name, 'nuke')
-                               or autoutil.bot_has_role(name, 'rdm')) then
-        table.insert(toggle_renderers, render_casual_nuke_rotation_centered);
-        table.insert(toggle_renderers, render_casual_nuke_mb_centered);
-    end
-    -- THF utility-RA cadence. Main-job THF only — the role_melee branch
-    -- that uses thfRaDelay keys on is_job(bot, 'THF') which checks main
-    -- job, so surfacing it for sub-THF would be a no-op control.
-    if is_thf_main(name) then
-        table.insert(toggle_renderers, render_thf_ra_combo_centered);
-    end
-    if is_smn_main(name) then
-        table.insert(toggle_renderers, render_smn_avatar_combo_centered);
-    end
-    if autoutil.bot_has_role and autoutil.bot_has_role(name, 'tank') then
-        table.insert(toggle_renderers, render_tank_nudge_centered);
-        -- Add Control dropdown is tank-role + PLD-job gated. The PLD
-        -- check covers Flash eligibility; a WAR/NIN/RUN tank gets the
-        -- nudge buttons but not the Provoke/Flash toggle since they
-        -- can't cast Flash.
-        if is_pld_flash_eligible(name) then
-            table.insert(toggle_renderers, render_add_control_combo_centered);
-        end
-    end
-
-    if #toggle_renderers > 0 then
-        local TOGGLE_SPACING = 4;
-        local block_h = #toggle_renderers * TOGGLE_ROW_H
-                      + math.max(0, #toggle_renderers - 1) * TOGGLE_SPACING;
-        local cur_y     = imgui.GetCursorPosY();
-        -- BeginChild's reported inner height isn't directly available here;
-        -- approximate "remaining" as CARD_H minus current cursor Y minus a
-        -- small bottom padding allowance for the child frame's border.
-        local remaining = CARD_H - cur_y - 8;
-        local top_pad   = math.max(0, (remaining - block_h) / 2);
-        if top_pad > 0 then imgui.Dummy(0, top_pad); end
-        for i, fn in ipairs(toggle_renderers) do
-            -- Each combo renderer pushes ItemWidth and (less obviously) is
-            -- the user-interaction source for the Status tab — opening /
-            -- closing a Combo here was traced to global style-stack leaks
-            -- (whole UI went dim across all addons). pcall the call so any
-            -- error inside one renderer can't strand a half-rendered card
-            -- or a leaked push. The outer pcall at the for-loop level
-            -- catches the same class of errors, but having it here too
-            -- means the rest of the toggle stack still renders for the
-            -- current card.
-            local ok, err = pcall(fn, name);
-            if not ok then
-                autoutil.log('AutoBots', 'status_tab toggle error: ' .. tostring(err));
-            end
-            if i < #toggle_renderers then imgui.Dummy(0, TOGGLE_SPACING); end
-        end
-    end
+    -- View-only: the per-bot role toggles that used to render below a mild
+    -- divider here moved to the Role AI tab. Status is now name + exp + status
+    -- icons only, so the card ends after the icon strip.
 
     imgui.EndChild();
 end
@@ -779,23 +359,10 @@ function status_tab.render()
         return;
     end
 
-    -- Stale-data dim: if every row with a packet origin is older than STALE_MS
-    -- dim the whole panel. The synthetic primary placeholder uses ms_now() at
-    -- collect time and would otherwise read as always-fresh; only consider
-    -- rows that came from a 0x191 push for the freshness test.
-    local now      = ms_now();
-    local anyFresh = false;
-    for _, r in ipairs(rows) do
-        if r and r.updatedMs and (now - r.updatedMs <= STALE_MS) then
-            anyFresh = true; break;
-        end
-    end
-
-    -- Wrap the body in pcall so a runtime error inside render_card() can't
-    -- strand a PushStyleVar without its matching Pop. ImGui's style stack
-    -- doesn't unwind on Lua error, and a leaked Alpha push contaminates
-    -- every downstream addon's render in the same frame.
-    if not anyFresh then imgui.PushStyleVar(ImGuiStyleVar_Alpha, 0.5); end
+    -- (Stale-data dim removed: the panel used to drop to 0.5 alpha whenever no
+    -- row had a fresh 0x191 push within STALE_MS, then brighten on the next
+    -- push — which read as an occasional dim/brighten flicker. User prefers it
+    -- always at full brightness.)
     local ok, err = pcall(function()
         local totalSlots = GRID_COLS * GRID_ROWS;
         for slot = 1, totalSlots do
@@ -810,7 +377,6 @@ function status_tab.render()
             end
         end
     end);
-    if not anyFresh then imgui.PopStyleVar(); end
     if not ok then
         autoutil.log('AutoBots', 'status_tab error: ' .. tostring(err));
     end

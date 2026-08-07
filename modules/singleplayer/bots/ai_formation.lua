@@ -120,6 +120,13 @@ local ai_formation = xi.singleplayer.bots.ai_formation
 --            constraint by the CORE_PARTY_RADIUS filter — those roles
 --            manage their own health.
 --
+--   Casual — a loose surround, no fixed slots. Tank walks to the NEAREST spot
+--            on the melee ring; melees disperse around the ring (a distinct
+--            quadrant each) so they surround rather than clump; mages each walk
+--            to the CLOSEST point on a ~8y ring (CASUAL_MAGE_RADIUS). Everyone
+--            follows the mob (recomputed per tick). No tank-hate discipline —
+--            for relaxed fights where "bodies around the mob" is enough.
+--
 -- Walking:
 --   assist — fall through to caller's pre-formation follow logic (legacy).
 --   camp   — pin at the camp anchor (set when entering camp); declump
@@ -127,8 +134,14 @@ local ai_formation = xi.singleplayer.bots.ai_formation
 --            may chase mobs during combat (mob comes to them).
 --   column — single-file behind the front bot, 0.5y spacing, no declump.
 --   rows   — structured rank-and-file by role, 0.5y intra-row spacing.
-ai_formation.BATTLE_FORMATIONS  = { 'off', 'spread', 'tight', 'AoE' }
+ai_formation.BATTLE_FORMATIONS  = { 'off', 'spread', 'tight', 'AoE', 'Casual' }
 ai_formation.WALKING_FORMATIONS = { 'off', 'legacy', 'camp', 'column', 'rows' }
+
+-- Casual formation: mages walk to the closest point on this mob-centered ring
+-- (~8y — a comfortable cast distance, well inside Cure/nuke range), and the
+-- tank + melees surround at melee range. No fixed slots — everyone picks the
+-- nearest reachable spot on their ring and follows the mob.
+ai_formation.CASUAL_MAGE_RADIUS = 8.0
 
 -- AoE mage-anchor MAX radius. Starting radius the sampler tries first —
 -- max distance from mob while still (usually) inside cast range. Party-scope
@@ -171,14 +184,6 @@ ai_formation.AOE_LOS_WEIGHT        = 0.4
 ai_formation.AOE_LOS_TOPK          = 8      -- only raycast the K best-aligned candidates
 ai_formation.AOE_ANCHOR_TTL_MS     = 2500   -- reuse the cached candidate list this long
 ai_formation.AOE_ANCHOR_REDO_DRIFT = 3.0    -- ...unless the mob moves more than this (yalms)
-
--- BRDSpread mage-corner offset. Mages cluster ~12y on a FRONT-side corner:
--- perpendicular (90°/270°) rotated this many degrees TOWARD the front tank
--- (180°). 0 = pure perpendicular (= spread); 90 = directly behind the tank.
--- 45 splits the difference: cone-safer than behind-tank, easier for a future
--- BRD to cover tank+mages than pure perpendicular. Baked into the corner
--- quadrant centers at load (see QUADRANT_CENTER_DEG), so it's a config const.
-ai_formation.BRDSPREAD_MAGE_OFFSET_DEG = 45
 
 -- Camp leash: how far assist may stray from the camp anchor even during
 -- combat. Mobs outside this radius are not chased; assist holds at the
@@ -427,11 +432,6 @@ local Q_FRONT  = 'front'
 local Q_SIDE_A = 'sideA'
 local Q_SIDE_B = 'sideB'
 local Q_BACK   = 'back'
--- Front-side corners for BRDSpread mages: perpendicular rotated toward front
--- by BRDSPREAD_MAGE_OFFSET_DEG (Side A → 90+off, Side B → 270-off).
-local Q_FRONT_A = 'frontA'
-local Q_FRONT_B = 'frontB'
-
 ai_formation.Q_FRONT  = Q_FRONT
 ai_formation.Q_SIDE_A = Q_SIDE_A
 ai_formation.Q_SIDE_B = Q_SIDE_B
@@ -442,8 +442,6 @@ local QUADRANT_CENTER_DEG = {
     [Q_SIDE_A]  = 90,
     [Q_SIDE_B]  = 270,
     [Q_BACK]    = 0,
-    [Q_FRONT_A] = 90  + (ai_formation.BRDSPREAD_MAGE_OFFSET_DEG or 45),  -- 135 default
-    [Q_FRONT_B] = 270 - (ai_formation.BRDSPREAD_MAGE_OFFSET_DEG or 45),  -- 225 default
 }
 
 -- Melee/tank slot priority within a 90° quadrant. Each entry is an angular
@@ -669,6 +667,44 @@ end
 -- Returns {} when the formation system is bypassed (battleFormation = 'off',
 -- no frontBot resolvable, or coincident axis).
 -----------------------------------
+-----------------------------------
+-- Nearest-point-on-ring candidates for the 'Casual' formation. Ordered so the
+-- point on a mob-centered ring of `radius` CLOSEST to the bot's current
+-- position comes first, then fans out around the ring (+/-10deg, +/-20deg, ...)
+-- as fallbacks if the nearest spot is unwalkable. Per-bot (keyed on the bot's
+-- own position) so bots naturally separate, and it recomputes each tick so the
+-- ring follows the mob. Used by Casual's (secondary) tanks on the melee ring
+-- and mages on the ~8y ring.
+-----------------------------------
+local function ring_from_self(bot, mob, radius, my_y)
+    local bx, bz = bot:getXPos(), bot:getZPos()
+    local mx, mz = mob:getXPos(), mob:getZPos()
+    local dx, dz = bx - mx, bz - mz
+    local len    = math.sqrt(dx * dx + dz * dz)
+    local ux, uz
+    if len < 0.01 then
+        ux, uz = 1.0, 0.0   -- degenerate: bot on top of mob, pick any bearing
+    else
+        ux, uz = dx / len, dz / len
+    end
+    local out   = {}
+    local STEP  = math.rad(10)
+    -- 0, +1, -1, +2, -2, ... up to +/-180deg: nearest spot first, then the rest
+    -- of the ring as fallbacks.
+    local order = { 0 }
+    for k = 1, 18 do
+        table.insert(order, k)
+        table.insert(order, -k)
+    end
+    for _, k in ipairs(order) do
+        local a      = k * STEP
+        local ca, sa = math.cos(a), math.sin(a)
+        local rx, rz = ux * ca - uz * sa, ux * sa + uz * ca
+        table.insert(out, { x = mx + radius * rx, y = my_y, z = mz + radius * rz, label = 'casual:' .. k })
+    end
+    return out
+end
+
 function ai_formation.candidates_for(bot, role, mob, engaged)
     if not engaged then return {} end
     if mob == nil or bot == nil then return {} end
@@ -756,6 +792,13 @@ function ai_formation.candidates_for(bot, role, mob, engaged)
     end
 
     if role == R.Tank then
+        if formationName == 'Casual' then
+            -- Casual: no front-holding hate discipline. The tank just walks to
+            -- the nearest spot on the melee ring and follows the mob. (The
+            -- engaged front bot already returned {} above and holds where it
+            -- engaged, which is itself a melee-ring spot.)
+            return ring_from_self(bot, mob, meleeRadius, my)
+        end
         -- All tanks live in Front, sharing hate. Distinct slot per tank so
         -- the mob barely turns when hate ping-pongs between them — adjacent
         -- Front slots are 11.25° apart, well inside the mob's facing dead
@@ -797,8 +840,20 @@ function ai_formation.candidates_for(bot, role, mob, engaged)
     if role == R.Melee then
         local roleSlot = ai_formation.slot_in_role(bot, alliance, R.Melee)
         if not isRealTank then roleSlot = roleSlot + 1 end
-        if formationName == 'spread' or formationName == 'BRDSpread' then
-            -- Spread / BRDSpread: melees stack BEHIND the mob (Q_BACK), one
+        if formationName == 'Casual' then
+            -- Casual: disperse melees around the whole ring. Assign each a
+            -- distinct primary quadrant by role-slot (cycling Front/SideA/
+            -- SideB/Back), a deeper sub-slot for the 5th+ melee, then fall
+            -- through the other quadrants; engine declump keeps same-quadrant
+            -- melees apart. Net: a loose surround, not a clump on one arc.
+            local quads    = { Q_FRONT, Q_SIDE_A, Q_SIDE_B, Q_BACK }
+            local primaryQ = quads[(roleSlot % 4) + 1]
+            add_melee_quadrant(primaryQ, math.floor(roleSlot / 4) + 1)
+            for _, q in ipairs(quads) do
+                if q ~= primaryQ then add_melee_quadrant(q, 1) end
+            end
+        elseif formationName == 'spread' then
+            -- Spread: melees stack BEHIND the mob (Q_BACK), one
             -- distinct slot each so they fan across the rear arc; fall through
             -- to the flanks then front if the rear slots are unwalkable.
             -- (tight/AoE flank the sides instead — see the else branch.)
@@ -834,6 +889,12 @@ function ai_formation.candidates_for(bot, role, mob, engaged)
     end
 
     if is_mage_role(role) then
+        if formationName == 'Casual' then
+            -- Casual: each mage walks to the closest point on the ~8y ring and
+            -- follows the mob. No fixed spot, no tank dependency, no LoS
+            -- sampling -- just the nearest reachable piece of the ring per mage.
+            return ring_from_self(bot, mob, ai_formation.CASUAL_MAGE_RADIUS, my)
+        end
         -- AoE mode dispatches to the ring-sampler; unrelated to the
         -- quadrant-disk math used by 'spread' and 'tight'.
         --
@@ -878,17 +939,6 @@ function ai_formation.candidates_for(bot, role, mob, engaged)
             add_mage_quadrant(otherSide, 12, mageSlot)
             add_mage_quadrant(Q_BACK,    12, mageSlot)
             add_mage_quadrant(Q_FRONT,   12, mageSlot)
-        elseif effectiveFormation == 'BRDSpread' then
-            -- BRDSpread: mages cluster ~12y on a FRONT-side corner (perpendicular
-            -- rotated toward the tank by BRDSPREAD_MAGE_OFFSET_DEG). Pick whichever
-            -- corner scores better (open sight to the party); fall through to the
-            -- other corner, then behind/front, if unwalkable.
-            local bestCorner  = ai_formation.better_mage_corner(bot, mob, ax, az, perp_x, perp_z)
-            local otherCorner = (bestCorner == Q_FRONT_A) and Q_FRONT_B or Q_FRONT_A
-            add_mage_quadrant(bestCorner,  12, mageSlot)
-            add_mage_quadrant(otherCorner, 12, mageSlot)
-            add_mage_quadrant(Q_BACK,      12, mageSlot)
-            add_mage_quadrant(Q_FRONT,     12, mageSlot)
         else
             -- tight: mages cluster ~5y directly BEHIND the mob (Q_BACK).
             local canonicalDistance = (effectiveFormation == 'tight') and 5 or 12
@@ -904,8 +954,8 @@ function ai_formation.candidates_for(bot, role, mob, engaged)
 end
 
 -----------------------------------
--- Shared navmesh-openness primitives. Used by the AoE anchor, the spread /
--- BRDSpread flank pickers, and the camp split-axis picker — they all answer
+-- Shared navmesh-openness primitives. Used by the AoE anchor, the spread
+-- flank picker, and the camp split-axis picker — they all answer
 -- the same question: "from candidate spot X, how much of the party can I see
 -- without a wall in the way?"
 -----------------------------------
@@ -1114,25 +1164,6 @@ function ai_formation.better_mage_flank(bot, mob, ax, az, perp_x, perp_z)
         mx - perp_x * D, mz - perp_z * D,     -- Side B (-perp)
         'spreadFlankCache')
     return (pick == 'B') and Q_SIDE_B or Q_SIDE_A
-end
-
------------------------------------
--- BRDSpread mage-corner picker: front-side corners (Q_FRONT_A = 90+off,
--- Q_FRONT_B = 270-off) at 12y. Candidate centers use the SAME angle-in-axis
--- math as mage_slot_in_disk so the scored spot is where the disk actually
--- lands. Returns the more open corner quadrant.
------------------------------------
-function ai_formation.better_mage_corner(bot, mob, ax, az, perp_x, perp_z)
-    local D = 12
-    local mx, mz = mob:getXPos(), mob:getZPos()
-    local aRad = math.rad(QUADRANT_CENTER_DEG[Q_FRONT_A])
-    local bRad = math.rad(QUADRANT_CENTER_DEG[Q_FRONT_B])
-    local aCx = mx + (math.cos(aRad) * ax + math.sin(aRad) * perp_x) * D
-    local aCz = mz + (math.cos(aRad) * az + math.sin(aRad) * perp_z) * D
-    local bCx = mx + (math.cos(bRad) * ax + math.sin(bRad) * perp_x) * D
-    local bCz = mz + (math.cos(bRad) * az + math.sin(bRad) * perp_z) * D
-    local pick = better_anchor_side(bot, mob, aCx, aCz, bCx, bCz, 'brdSpreadCornerCache')
-    return (pick == 'B') and Q_FRONT_B or Q_FRONT_A
 end
 
 -----------------------------------

@@ -518,14 +518,9 @@ local function draw_status_profile(col_w, prof)
     -- Stats grid. Format mirrors the client UI: "STR  12  +4".
     autoutil.section_head('Stats');
     imgui.Dummy(0, 2);
-    -- HP / MP first, each on its own row, above the primary stats.
-    imgui.TextColored(0.85, 0.85, 0.85, 1.0,
-        string.format('HP  %d / %d', prof.hp_cur or 0, prof.hp_max or 0));
-    imgui.TextColored(0.85, 0.85, 0.85, 1.0,
-        string.format('MP  %d / %d', prof.mp_cur or 0, prof.mp_max or 0));
-    imgui.Dummy(0, 4);
-    -- Two sub-columns within the left column: primary attributes on the left,
-    -- combat stats (Atk/Def/Acc/Eva) to their right, top-aligned.
+    -- Two sub-columns within the left column: primary attributes (STR/DEX/...)
+    -- on the left; HP/MP then combat stats (Atk/Def/Acc/Eva) stacked in the
+    -- right sub-column, top-aligned.
     imgui.BeginGroup();
     for _, k in ipairs(STAT_KEYS) do
         local base  = (prof.stat_base or {})[k]  or 0;
@@ -534,11 +529,20 @@ local function draw_status_profile(col_w, prof)
         imgui.Text(string.format('%-4s %3d  %s%d', k, base, sign, bonus));
     end
     imgui.EndGroup();
-    -- Combat column starts at the horizontal middle of the left column, for a
+    -- Right column starts at the horizontal middle of the left column, for a
     -- clear gap between the two stat groups.
     imgui.SameLine(0, 0);
     imgui.SetCursorPosX(math.floor(col_w / 2));
     imgui.BeginGroup();
+    -- HP / MP at the top of the right column, above the combat stats.
+    imgui.TextColored(0.85, 0.85, 0.85, 1.0,
+        string.format('HP  %d / %d', prof.hp_cur or 0, prof.hp_max or 0));
+    imgui.TextColored(0.85, 0.85, 0.85, 1.0,
+        string.format('MP  %d / %d', prof.mp_cur or 0, prof.mp_max or 0));
+    -- Blank spacer row between HP/MP and the combat stats. Also makes the right
+    -- column 7 rows tall to match the left (STR..CHR), so the two sub-columns
+    -- bottom-align instead of leaving the gap dangling at the bottom.
+    imgui.Text('');
     -- Labels are all 3 chars, so '%-4s' left-aligns them and the values line up.
     local combat_rows = {
         { 'Atk', prof.atk }, { 'Def', prof.def },
@@ -586,7 +590,10 @@ local function draw_status_profile(col_w, prof)
                     imgui.SameLine(0, 0);
                     imgui.SetCursorPosX(rowX + skill_col_w);
                 end
-                local row = string.format('%-10s %d', sk[2] .. ':', s.value);
+                -- %-11s fits the longest label ("Enfeebling:" = 11 chars); %3d
+                -- right-aligns the value (skills cap ~3 digits) so the numbers
+                -- line up at the units instead of a ragged left-align.
+                local row = string.format('%-11s %3d', sk[2] .. ':', s.value);
                 if s.value == 0 then
                     imgui.TextDisabled(row);                     -- unraised = grey
                 elseif s.capped then

@@ -37,6 +37,35 @@ The server now listens on `localhost`. Leave it running while you play; `docker 
 
    *(A preconfigured Ashita profile with the server address and addon list already set is provided in the release bundle — drop it in rather than editing by hand.)*
 
+### Client config — `user_config.lua`
+
+The addon suite (autobots / automog / autoequip) talks to the map server over a
+small HTTP config service, separate from the FFXI game connection. One file at
+the **addons root** controls it:
+
+- **`addons/user_config.lua`** — sits right next to the `autobots/`, `automog/`,
+  `autoequip/`, and `libs/` folders (deliberately kept at the top level so it's
+  easy to find). It's the one client-side file to edit on a fresh install:
+  - **`HOST`** — the IP where the map server is reachable *from the client
+    machine* — usually the same address you set as the server address above
+    (`127.0.0.1` on the same machine, the VM gateway in a VM, the server's LAN
+    IP on another box).
+  - **`PORT`** — must match the server's `CONFIG_HTTP_PORT` in
+    `settings/singleplayer.lua` (default `51220`).
+
+  Sanity check from the client machine (should print `ok`):
+  ```
+  curl http://HOST:PORT/healthz
+  ```
+
+  If the addons can't reach the server (empty config lists, "config fetch
+  failed" logs), `user_config.lua` is the first place to check. More client-side
+  settings may be added to this file over time, so it's the single spot for
+  per-install client options.
+
+  *(The preconfigured Ashita profile / release bundle will ship this preset for
+  local single-player, same as the server address — `<placeholder>`.)*
+
 ## 3. First launch
 
 Launch the game through Ashita and connect to the private server. On the login screen you create your account and first character right there — the same flow as any private server — then log in and you're in Vana'diel.

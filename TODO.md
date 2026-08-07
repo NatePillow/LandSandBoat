@@ -1,29 +1,34 @@
 
+# Tentative Roadmap
+
+Subject to change for any or no reason. 
+
+* Alpha
+    * 0.1.0 -- Long-term framework
+    * 0.2.0 -- NIN, SMN, BRD finalized
+    * 0.3.0 -- Installation and usage
+    * 0.4.0 -- All major 1-75 content
+    * 0.5.0 -- Sky / kings
+    * 0.6.0 -- Dynamis
+    * 0.7.0 -- Sea
+* Beta
+    * 0.8.0 -- TBD
+    * 0.9.0 -- TBD
+* 1.0.0 
+
 # Priority Items
 
 * The necessity of multiple clients is absolutely untenable.
-    * Move addon lua code server-side. There's no reason this needs to be client-side within this project, even if that is where it would naturally fit in the community tooling.
-    * Swap out packet calls and ashitav3 calls for a BE equivalent; couple service classes
-    * How can we activate/login characters without a client? How large of a BE component would that need to be?
-        * Alliance characters need to have their sessions tied to the player session.
-        * The BE can't blast out s2c packets for alliance characters.
-    * How can we get the primary character access to other inventories, or to manually control movement via some kind of UI?
-    * This needs to be a component that sits at edge right underneath the packet layer, executing the same methods triggered by the c2s packets.
-    * It also needs to send s2c packets to the player session as needed.
-    * Maybe the content that drives the system can be loaded via the module folder.
-    * Maybe the same place the server ident is fired would serve as the right way to run loops.
+    * Done, all a single client now
 * The necessity of a complicated client setup is also untenable.
-    * Probably a default config of some sort for less savvy end-users. Install ashita and then drop *something* in.
-    * It needs to be thin, real functionality needs to get moved to the BE.
+    * Drop addons in, update one config file
+    * Could be streamlined?
 * BE installation is also a roadblock.
-    * How could this mod get packaged up with LSB in a way that's easy for end-users?
-    * Wouldn't expect the average end-user to handle LSB setup as is, and then adding more complicated steps on top of that for this mod isn't going work.
+    * WIP, see: singleplayer/docs/INSTALL_PLANNING.md
 
 ---
 
 # Docket
-
-Open tasks tracked across the singleplayer fork. Status reflects current work-in-progress state, not retail-parity goals.
 
 - **#173 — Multi-engagement mode (per-party mobs)** *(partial — paused pending puller playtest)*
   Allow each party within an alliance to engage its own mob simultaneously, instead of the whole alliance funneling onto the assist's single target. Foundational for multi-pull and add-handling at scale.
@@ -72,33 +77,21 @@ Open tasks tracked across the singleplayer fork. Status reflects current work-in
 
 # Open Items
 
-* Documentation
-    * Installation and usage
-* Server-side replacement for ffxiahbot
-    * How can this be done surgically to avoid conflicts with the upstream repo?
-    * Would be great if, for sell_single=0 items, you could buy back only the stock you sold to it, and it would remain on sale indefinitely
-    * Should be able to buy and sell instantly
-* Addons
-    * Combat support:
-        * Finished: WAR, MNK, WHM, BLM, RDM, THF, PLD, DRK, RNG, SAM, DRG, NIN, SMN, BRD
-        * Planned: COR, DNC
-        * No support planned: BST
-        * TBD: PUP, SCH, BLU, RUN, GEO
-    * Several areas of additional support for economic/utility addons:
-        * Access all vendors from the current zone
-        * Sorting/organizing across all containers
-        * Updating gear swap logic
-        * autowarp should be expanded to include static warp points for the most remote regions to augment homepoints/survival guides
-* Dynamis, Sky, Sea, Kings
-    * TBD
+* AI
+    * Finished: WAR, MNK, WHM, BLM, RDM, THF, PLD, DRK, RNG, SAM, DRG, 
+    * In testing: NIN, SMN, BRD
+    * Planned: COR, DNC
+    * No support planned: BST
+    * TBD: PUP, SCH, BLU, RUN, GEO
+* Additional support for economic/utility addons:
+    * Access all vendors from the current zone?
 * Mounts
     * How to get additional mounts?
     * Buy them in automog UI?
+    * Beastman and Kindred seals?
 * BCNM - drop rates TODO
     * Uncapped
 * ENM - drop rates TODO
     * 50
     * 60
     * 75
-* Trusts
-    * Need to find a way to move custom gambit code to module

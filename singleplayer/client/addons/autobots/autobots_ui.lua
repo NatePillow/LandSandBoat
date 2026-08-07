@@ -6,6 +6,7 @@ local food_tab      = require('food_tab');
 local alliance_tab  = require('alliance_tab');
 local status_tab    = require('status_tab');
 local autoskill_tab = require('autoskill_tab');
+local item_ai_tab   = require('item_ai_tab');
 local role_ai_tab   = require('role_ai_tab');
 local create_tab    = require('create_tab');
 local autobots_ui = {};
@@ -106,10 +107,7 @@ local walkingFormation       = 'off';
 --            a 36-sample ring around the mob at ~17y, biased toward the
 --            direction of primary. For AoE-heavy fights where mage
 --            survival trumps DPS uptime.
--- 'BRDSpread' = tank front, melees behind the mob, mages on a front-side
---            corner (~12y) so they cluster with the tank's side. A Bard-
---            friendly shape; song-coverage payoff lands with task #278.
-local BATTLE_FORMATIONS  = { 'off', 'legacy', 'spread', 'tight', 'AoE', 'BRDSpread' };
+local BATTLE_FORMATIONS  = { 'off', 'legacy', 'spread', 'tight', 'AoE', 'Casual' };
 -- 'off'    = no movement when idle (frozen at current spot)
 -- 'legacy' = pre-formation assist-trailing behavior (was 'assist')
 -- 'camp' / 'column' / 'rows' = formation system shapes
@@ -577,26 +575,22 @@ function autobots_ui.apply_server_snapshot(snap)
         autobots_ui.camp_anchor = { x = snap.campAnchor.x, z = snap.campAnchor.z };
     end
 
-    -- Role-AI policy. Format from ai_item.role_ai_snapshot() matches what
-    -- role_ai_tab.apply_snapshot already consumes (integer-keyed role idx,
-    -- integer mode values, statusFlags map).
+    -- Per-role item-usage policy. Format from ai_item.role_ai_snapshot()
+    -- matches what item_ai_tab.apply_snapshot consumes (integer-keyed role
+    -- idx, integer mode values, statusFlags map).
     if type(snap.rolePolicy) == 'table'
-       and role_ai_tab and role_ai_tab.apply_snapshot then
-        role_ai_tab.apply_snapshot(snap.rolePolicy);
+       and item_ai_tab and item_ai_tab.apply_snapshot then
+        item_ai_tab.apply_snapshot(snap.rolePolicy);
     end
 
     -- Per-bot rows. Array of { name, role, mainJob, subJob, sataMode,
-    -- healScope, healMode, addControlMode, thfRaDelay }. status_tab owns
-    -- the per-name mirrors for sata/heal/addctl/thfRa; it seeds itself.
+    -- healScope, healMode, addControlMode, thfRaDelay, casualNuke*,
+    -- songRoster, smnAvatarSpellId, knownSongs/Summons }. role_ai_tab owns
+    -- ALL the per-name mirrors now (the per-bot AI settings + BRD roster);
+    -- Status is view-only and no longer consumes bots[].
     if type(snap.bots) == 'table'
-       and status_tab and status_tab.apply_bot_state then
-        status_tab.apply_bot_state(snap.bots);
-        -- Role AI tab consumes the same bots[] array for the per-BRD
-        -- song-roster section (#252) — picks out BRD rows and stashes
-        -- their songRoster + knownSongs.
-        if role_ai_tab and role_ai_tab.apply_bot_state then
-            role_ai_tab.apply_bot_state(snap.bots);
-        end
+       and role_ai_tab and role_ai_tab.apply_bot_state then
+        role_ai_tab.apply_bot_state(snap.bots);
     end
 end
 
@@ -735,9 +729,9 @@ end
 -- Internal identifiers (the values sent to server) stay lowercase, but labels
 -- render Title Case so the UI reads as proper menu items.
 -- Display-name overrides for formation values whose identifier doesn't
--- title-case into a nice label (e.g. 'BRDSpread' -> 'BRD Spread').
+-- title-case into a nice label. (None currently — hook kept for future
+-- multi-word formation names.)
 local FORMATION_LABELS = {
-    BRDSpread = 'BRD Spread',
 };
 
 local function title_case(s)
@@ -2303,6 +2297,8 @@ ashita.register_event('render', function()
         quick    = 660,
         controls = 660,
         ai       = 660,
+        itemai   = 660,  -- per-role item-usage policy (two 304 columns)
+        roleai   = 660,  -- per-bot AI settings, role-sectioned (two 304 columns)
         skill    = 660,
         create   = 660,
     };
@@ -2347,7 +2343,8 @@ ashita.register_event('render', function()
     tab_button('Controls', 'controls');    imgui.SameLine();
     tab_button('Skill Ups', 'skill');      imgui.SameLine();
     tab_button('Alliance AI', 'ai');       imgui.SameLine();
-    tab_button('Item AI', 'roleai');       imgui.SameLine();
+    tab_button('Item AI', 'itemai');       imgui.SameLine();
+    tab_button('Role AI', 'roleai');       imgui.SameLine();
     tab_button('Status', 'status');
     sep();
 
@@ -2358,13 +2355,20 @@ ashita.register_event('render', function()
     if active_tab == 'setup'    then active_tab = 'controls'; end
     if active_tab == 'instance' then active_tab = 'controls'; end
     if active_tab ~= 'quick' and active_tab ~= 'controls' and active_tab ~= 'ai'
-       and active_tab ~= 'roleai' and active_tab ~= 'status' and active_tab ~= 'skill'
-       and active_tab ~= 'create' then
+       and active_tab ~= 'itemai' and active_tab ~= 'roleai' and active_tab ~= 'status'
+       and active_tab ~= 'skill' and active_tab ~= 'create' then
         active_tab = 'controls';
     end
 
     if active_tab == 'status' then
         status_tab.render();
+        imgui.End();
+        autoutil.pop_solid_window_bg();
+        return;
+    end
+
+    if active_tab == 'itemai' then
+        item_ai_tab.render();
         imgui.End();
         autoutil.pop_solid_window_bg();
         return;
